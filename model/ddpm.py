@@ -8,6 +8,7 @@
 import torch
 import logging
 import coloredlogs
+
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
@@ -15,6 +16,10 @@ coloredlogs.install(level="INFO")
 
 
 class Diffusion:
+    """
+    扩散模型
+    """
+
     def __init__(self, noise_steps=1000, beta_start=1e-4, beta_end=0.02, img_size=256, device="cpu"):
         """
         扩散模型ddpm复现
@@ -50,21 +55,23 @@ class Diffusion:
     def noise_images(self, x, time):
         """
         给图片增加噪声
-        :param x:
-        :param time:
-        :return:
+        :param x: 输入图像信息
+        :param time: 时间
+        :return: sqrt_alpha_hat * x + sqrt_one_minus_alpha_hat * Ɛ, t时刻形状与x张量相同的张量
         """
         sqrt_alpha_hat = torch.sqrt(self.alpha_hat[time])[:, None, None, None]
         sqrt_one_minus_alpha_hat = torch.sqrt(1 - self.alpha_hat[time])[:, None, None, None]
+        # 生成一个形状与x张量相同的张量，其中的元素是从标准正态分布（均值为0，方差为1）中随机抽样得到的
         Ɛ = torch.randn_like(x)
         return sqrt_alpha_hat * x + sqrt_one_minus_alpha_hat * Ɛ, Ɛ
 
     def sample_time_steps(self, n):
         """
         采样时间步长
-        :param n:
-        :return:
+        :param n: 图像尺寸
+        :return: 形状为(n,)的整数张量
         """
+        # 生成一个具有指定形状(n,)的整数张量，其中每个元素都在low和high之间（包含 low，不包含 high）随机选择
         return torch.randint(low=1, high=self.noise_steps, size=(n,))
 
     def sample(self, model, n, labels=None, cfg_scale=None):
@@ -73,8 +80,8 @@ class Diffusion:
         :param model: 模型
         :param n: 采样图片个数
         :param labels: 标签
-        :param cfg_scale:
-        :return:
+        :param cfg_scale: 插值权重
+        :return: 采样图片
         """
         logger.info(f"Sampling {n} new images....")
         model.eval()

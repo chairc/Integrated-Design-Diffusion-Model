@@ -56,10 +56,10 @@ class UNet(nn.Module):
 
     def pos_encoding(self, time, channels):
         """
-
+        位置编码
         :param time: 时间
         :param channels: 通道
-        :return:
+        :return: pos_enc
         """
         inv_freq = 1.0 / (10000 ** (torch.arange(0, channels, 2, device=self.device).float() / channels))
         pos_enc_a = torch.sin(time.repeat(1, channels // 2) * inv_freq)
@@ -69,11 +69,11 @@ class UNet(nn.Module):
 
     def forward(self, x, time, y=None):
         """
-
+        前向传播
         :param x: 输入
         :param time: 时间
         :param y: 标签
-        :return:
+        :return: output
         """
         time = time.unsqueeze(-1).type(torch.float)
         time = self.pos_encoding(time, self.time_channel)

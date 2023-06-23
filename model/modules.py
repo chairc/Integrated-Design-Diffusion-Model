@@ -17,7 +17,7 @@ class EMA:
 
     def __init__(self, beta):
         """
-
+        初始化EMA
         :param beta: β
         """
         super().__init__()
@@ -26,10 +26,10 @@ class EMA:
 
     def update_model_average(self, ema_model, current_model):
         """
-
+        更新模型均值
         :param ema_model: EMA模型
         :param current_model: 当前模型
-        :return:
+        :return: None
         """
         for current_params, ema_params in zip(current_model.parameters(), ema_model.parameters()):
             old_weight, up_weight = ema_params, current_params.data
@@ -37,10 +37,10 @@ class EMA:
 
     def update_average(self, old_weight, new_weight):
         """
-
+        更新均值
         :param old_weight: 旧权重
         :param new_weight: 新权重
-        :return:
+        :return: new_weight或old_weight * self.beta + (1 - self.beta) * new_weight
         """
         if old_weight is None:
             return new_weight
@@ -48,11 +48,11 @@ class EMA:
 
     def step_ema(self, ema_model, model, step_start_ema=2000):
         """
-
+        EMA步长
         :param ema_model: EMA模型
         :param model: 原模型
         :param step_start_ema: 开始 EMA步长
-        :return:
+        :return: None
         """
         if self.step < step_start_ema:
             self.reset_parameters(ema_model, model)
@@ -63,10 +63,10 @@ class EMA:
 
     def reset_parameters(self, ema_model, model):
         """
-
+        重置参数
         :param ema_model: EMA模型
         :param model: 原模型
-        :return:
+        :return: None
         """
         ema_model.load_state_dict(model.state_dict())
 
@@ -78,7 +78,7 @@ class SelfAttention(nn.Module):
 
     def __init__(self, channels, size):
         """
-
+        初始化自注意力块
         :param channels: 通道
         :param size: 尺寸
         """
@@ -97,9 +97,9 @@ class SelfAttention(nn.Module):
 
     def forward(self, x):
         """
-
+        前向传播
         :param x: 输入
-        :return:
+        :return: attention_value
         """
         # 首先进行形状变换，再用swapaxes对新张量的第1和2维度进行交换
         x = x.view(-1, self.channels, self.size * self.size).swapaxes(1, 2)
@@ -113,12 +113,12 @@ class SelfAttention(nn.Module):
 
 class DoubleConv(nn.Module):
     """
-
+    双卷积
     """
 
     def __init__(self, in_channels, out_channels, mid_channels=None, residual=False):
         """
-
+        初始化双卷积
         :param in_channels: 输入通道
         :param out_channels: 输出通道
         :param mid_channels: 中间通道
@@ -138,9 +138,9 @@ class DoubleConv(nn.Module):
 
     def forward(self, x):
         """
-
+        前向传播
         :param x: 输入
-        :return:
+        :return: 残差结果或非残差结果
         """
         if self.residual:
             return F.gelu(x + self.double_conv(x))
@@ -155,7 +155,7 @@ class DownBlock(nn.Module):
 
     def __init__(self, in_channels, out_channels, emb_channels=256):
         """
-
+        初始化下采样块
         :param in_channels: 输入通道
         :param out_channels: 输出通道
         :param emb_channels: 嵌入通道
@@ -177,10 +177,10 @@ class DownBlock(nn.Module):
 
     def forward(self, x, time):
         """
-
+        前向传播
         :param x: 输入
         :param time: 时间
-        :return:
+        :return: x + emb
         """
         x = self.maxpool_conv(x)
         emb = self.emb_layer(time)[:, :, None, None].repeat(1, 1, x.shape[-2], x.shape[-1])
@@ -194,7 +194,7 @@ class UpBlock(nn.Module):
 
     def __init__(self, in_channels, out_channels, emb_channels=256):
         """
-
+        初始化上采样块
         :param in_channels: 输入通道
         :param out_channels: 输出通道
         :param emb_channels: 嵌入通道
@@ -217,11 +217,11 @@ class UpBlock(nn.Module):
 
     def forward(self, x, skip_x, time):
         """
-
+        前向传播
         :param x: 输入
         :param skip_x: 需要合并的输入
         :param time: 时间
-        :return:
+        :return: x + emb
         """
         x = self.up(x)
         x = torch.cat([skip_x, x], dim=1)
