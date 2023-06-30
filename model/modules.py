@@ -87,9 +87,9 @@ class SelfAttention(nn.Module):
         self.size = size
         # pytorch1.8中不支持batch_first，若要支持升级为1.9及以上，或使用一下代码进行转置
         self.mha = nn.MultiheadAttention(embed_dim=channels, num_heads=4, batch_first=True)
-        self.ln = nn.LayerNorm([channels])
+        self.ln = nn.LayerNorm(normalized_shape=[channels])
         self.ff_self = nn.Sequential(
-            nn.LayerNorm([channels]),
+            nn.LayerNorm(normalized_shape=[channels]),
             nn.Linear(in_features=channels, out_features=channels),
             nn.GELU(),
             nn.Linear(in_features=channels, out_features=channels),
@@ -163,16 +163,13 @@ class DownBlock(nn.Module):
         super().__init__()
         self.maxpool_conv = nn.Sequential(
             nn.MaxPool2d(2),
-            DoubleConv(in_channels, in_channels, residual=True),
-            DoubleConv(in_channels, out_channels),
+            DoubleConv(in_channels=in_channels, out_channels=in_channels, residual=True),
+            DoubleConv(in_channels=in_channels, out_channels=out_channels),
         )
 
         self.emb_layer = nn.Sequential(
             nn.SiLU(),
-            nn.Linear(
-                emb_channels,
-                out_channels
-            ),
+            nn.Linear(in_features=emb_channels, out_features=out_channels),
         )
 
     def forward(self, x, time):
@@ -209,10 +206,7 @@ class UpBlock(nn.Module):
 
         self.emb_layer = nn.Sequential(
             nn.SiLU(),
-            nn.Linear(
-                emb_channels,
-                out_channels
-            ),
+            nn.Linear(in_features=emb_channels, out_features=out_channels),
         )
 
     def forward(self, x, skip_x, time):

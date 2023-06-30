@@ -83,7 +83,7 @@ class Diffusion:
         :param cfg_scale: 插值权重
         :return: 采样图片
         """
-        logger.info(f"Sampling {n} new images....")
+        logger.info(msg=f"Sampling {n} new images....")
         model.eval()
         with torch.no_grad():
             # 输入格式为[n, 3, img_size, img_size]
