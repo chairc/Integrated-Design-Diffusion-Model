@@ -16,7 +16,8 @@ class UNet(nn.Module):
     U型网络
     """
 
-    def __init__(self, in_channel=3, out_channel=3, channel=None, time_channel=256, num_classes=None, device="cpu"):
+    def __init__(self, in_channel=3, out_channel=3, channel=None, time_channel=256, num_classes=None, image_size=64,
+                 device="cpu"):
         """
         初始化UNet网络
         :param in_channel: 输入通道
@@ -24,6 +25,7 @@ class UNet(nn.Module):
         :param channel: 总通道列表
         :param time_channel: 时间通道
         :param num_classes: 类别数
+        :param image_size: 自适应图片大小
         :param device: 使用设备
         """
         super().__init__()
@@ -31,24 +33,25 @@ class UNet(nn.Module):
             channel = [64, 128, 256, 512]
         self.device = device
         self.time_channel = time_channel
+        self.image_size = image_size
         self.inc = DoubleConv(in_channels=in_channel, out_channels=channel[0])
         self.down1 = DownBlock(in_channels=channel[0], out_channels=channel[1])
-        self.sa1 = SelfAttention(channels=channel[1], size=32)
+        self.sa1 = SelfAttention(channels=channel[1], size=int(self.image_size / 2))
         self.down2 = DownBlock(in_channels=channel[1], out_channels=channel[2])
-        self.sa2 = SelfAttention(channels=channel[2], size=16)
+        self.sa2 = SelfAttention(channels=channel[2], size=int(self.image_size / 4))
         self.down3 = DownBlock(in_channels=channel[2], out_channels=channel[2])
-        self.sa3 = SelfAttention(channels=channel[2], size=8)
+        self.sa3 = SelfAttention(channels=channel[2], size=int(self.image_size / 8))
 
         self.bot1 = DoubleConv(in_channels=channel[2], out_channels=channel[3])
         self.bot2 = DoubleConv(in_channels=channel[3], out_channels=channel[3])
         self.bot3 = DoubleConv(in_channels=channel[3], out_channels=channel[2])
 
         self.up1 = UpBlock(in_channels=channel[3], out_channels=channel[1])
-        self.sa4 = SelfAttention(channels=channel[1], size=16)
+        self.sa4 = SelfAttention(channels=channel[1], size=int(self.image_size / 4))
         self.up2 = UpBlock(in_channels=channel[2], out_channels=channel[0])
-        self.sa5 = SelfAttention(channels=channel[0], size=32)
+        self.sa5 = SelfAttention(channels=channel[0], size=int(self.image_size / 2))
         self.up3 = UpBlock(in_channels=channel[1], out_channels=channel[0])
-        self.sa6 = SelfAttention(channels=channel[0], size=64)
+        self.sa6 = SelfAttention(channels=channel[0], size=int(self.image_size))
         self.outc = nn.Conv2d(in_channels=channel[0], out_channels=out_channel, kernel_size=1)
 
         if num_classes is not None:
@@ -105,11 +108,12 @@ class UNet(nn.Module):
 
 if __name__ == "__main__":
     # 无条件
-    # net = UNet(device="cpu")
+    net = UNet(device="cpu", image_size=128)
     # 有条件
-    net = UNet(num_classes=10, device="cpu")
+    # net = UNet(num_classes=10, device="cpu", image_size=128)
     print(sum([p.numel() for p in net.parameters()]))
-    x = torch.randn(3, 3, 64, 64)
+    x = torch.randn(1, 3, 128, 128)
     t = x.new_tensor([500] * x.shape[0]).long()
     y = x.new_tensor([1] * x.shape[0]).long()
-    print(net(x, t, y).shape)
+    print(net(x, t).shape)
+    # print(net(x, t, y).shape)
