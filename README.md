@@ -65,6 +65,11 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
    ```bash
    python train.py --resume True --start_epoch 10 --load_model_dir 'df' --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10
    ```
+   **Unconditional Resume Training Command**
+
+   ```bash
+   python train.py --resume True --start_epoch 10 --load_model_dir 'df'  --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64
+   ```
 
 
 **Parameter Explanation**
