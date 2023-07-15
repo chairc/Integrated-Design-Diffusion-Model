@@ -15,6 +15,8 @@ import numpy as np
 import torch
 
 from torch import nn as nn
+from torch import distributed as dist
+from torch import multiprocessing as mp
 from torch.utils.tensorboard import SummaryWriter
 from torch.cuda.amp import autocast, GradScaler
 from tqdm import tqdm
@@ -31,13 +33,13 @@ logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
 
 
-def train(args):
+def train(rank=None, args=None):
     """
     训练
     :param args: 输入参数
     :return: None
     """
-    logger.info(msg=f"Input params: {args}")
+    logger.info(msg=f"[{rank}]: Input params: {args}")
     # 运行名称
     run_name = args.run_name
     # 输入图像大小
@@ -46,14 +48,40 @@ def train(args):
     optim = args.optim
     # 学习率大小
     init_lr = args.lr
-    # 运行设备
-    device = device_initializer()
     # 类别个数
     num_classes = args.num_classes
     # classifier-free guidance插值权重，用户更好生成模型效果
     cfg_scale = args.cfg_scale
     # 是否开启条件训练
     conditional = args.conditional
+    # 初始化保存模型标识位，这里检测是否单卡训练还是多卡训练
+    save_models = False if rank is not None else True
+    # 是否开启分布式训练
+    if args.distributed and torch.cuda.device_count() > 1 and torch.cuda.is_available():
+        distributed = True
+        world_size = args.world_size
+        # 设置地址和端口
+        os.environ["MASTER_ADDR"] = "localhost"
+        os.environ["MASTER_PORT"] = "12345"
+        # 进程总数等于显卡数量
+        dist.init_process_group(backend="nccl" if torch.cuda.is_available() else "gloo", rank=rank,
+                                world_size=world_size)
+        # 设置设备ID
+        device = rank
+        torch.cuda.set_device(device=device)
+        # 可能出现随机性错误，使用可减少cudnn随机性错误
+        # torch.backends.cudnn.deterministic = True
+        # 同步
+        dist.barrier()
+        # 如果分布式训练是第一块显卡，则保存模型标识位为真
+        if dist.get_rank() == args.main_gpu:
+            save_models = True
+        logger.info(msg=f"[{device}]: Successfully Use distributed training.")
+    else:
+        distributed = False
+        # 运行设备
+        device = device_initializer()
+        logger.info(msg=f"[{device}]: Successfully Use normal training.")
     # 是否开启半精度训练
     fp16 = args.fp16
     # 保存模型周期
@@ -70,7 +98,7 @@ def train(args):
     results_vis_dir = results_logging[2]
     results_tb_dir = results_logging[3]
     # 数据集加载器
-    dataloader = get_dataset(args=args)
+    dataloader = get_dataset(args=args, distributed=distributed)
     # 恢复训练
     resume = args.resume
     # 模型
@@ -78,6 +106,9 @@ def train(args):
         model = UNet(device=device, image_size=image_size).to(device)
     else:
         model = UNet(num_classes=num_classes, device=device, image_size=image_size).to(device)
+    # 分布式训练
+    if distributed:
+        model = nn.parallel.DistributedDataParallel(module=model, device_ids=[device], find_unused_parameters=True)
     # 模型优化器
     if optim == "adam":
         optimizer = torch.optim.Adam(params=model.parameters(), lr=init_lr)
@@ -95,20 +126,20 @@ def train(args):
         model_weights_dict = {k: v for k, v in model_weights_dict.items() if np.shape(model_dict[k]) == np.shape(v)}
         model_dict.update(model_weights_dict)
         model.load_state_dict(state_dict=OrderedDict(model_dict))
-        logger.info(msg=f"Successfully load model model_{load_epoch}.pt")
+        logger.info(msg=f"[{device}]: Successfully load model model_{load_epoch}.pt")
         # 加载优化器参数
         optim_path = os.path.join(result_path, load_model_dir, f"optim_model_{load_epoch}.pt")
         optim_weights_dict = torch.load(f=optim_path, map_location=device)
         optimizer.load_state_dict(state_dict=optim_weights_dict)
-        logger.info(msg=f"Successfully load optimizer optim_model_{load_epoch}.pt")
+        logger.info(msg=f"[{device}]: Successfully load optimizer optim_model_{load_epoch}.pt")
     else:
         start_epoch = 0
     if fp16:
-        logger.info(msg="Fp16 training is opened.")
+        logger.info(msg=f"[{device}]: Fp16 training is opened.")
         # 用于缩放梯度，以防止溢出
         scaler = GradScaler()
     else:
-        logger.info(msg="Fp32 training.")
+        logger.info(msg=f"[{device}]: Fp32 training.")
         scaler = None
     # 损失函数
     mse = nn.MSELoss()
@@ -123,10 +154,10 @@ def train(args):
     # EMA模型
     ema_model = copy.deepcopy(model).eval().requires_grad_(False)
 
-    logger.info(msg="Start training.")
+    logger.info(msg=f"[{device}]: Start training.")
     # 开始迭代
     for epoch in range(start_epoch, args.epochs):
-        logger.info(msg=f"Start epoch {epoch}:")
+        logger.info(msg=f"[{device}]: Start epoch {epoch}:")
         pbar = tqdm(dataloader)
         # 初始化images和labels
         images, labels = None, None
@@ -187,47 +218,66 @@ def train(args):
 
             # TensorBoard记录日志
             pbar.set_postfix(MSE=loss.item())
-            tb_logger.add_scalar(tag="MSE", scalar_value=loss.item(), global_step=epoch * len_dataloader + i)
+            tb_logger.add_scalar(tag=f"[{device}]: MSE", scalar_value=loss.item(),
+                                 global_step=epoch * len_dataloader + i)
 
-        # 保存模型
-        save_name = f"model_{str(epoch).zfill(3)}"
-        if not conditional:
-            # 保存pt文件
-            torch.save(obj=model.state_dict(), f=os.path.join(results_dir, f"model_last.pt"))
-            torch.save(obj=optimizer.state_dict(), f=os.path.join(results_dir, f"optim_last.pt"))
-            # 开启可视化
-            if vis:
-                # images.shape[0]为当前这个批次的图像个数
-                sampled_images = diffusion.sample(model=model, n=images.shape[0])
-                save_images(images=sampled_images, path=os.path.join(results_vis_dir, f"{save_name}.jpg"))
-            # 周期保存pt文件
-            if save_model_interval and epoch > start_model_interval:
-                torch.save(obj=model.state_dict(), f=os.path.join(results_dir, f"{save_name}.pt"))
-                torch.save(obj=optimizer.state_dict(), f=os.path.join(results_dir, f"optim_{save_name}.pt"))
-                logger.info(msg=f"Save the {save_name}.pt, and optim_{save_name}.pt.")
-            logger.info(msg="Save the model.")
-        else:
-            # 保存文件
-            torch.save(obj=model.state_dict(), f=os.path.join(results_dir, f"model_last.pt"))
-            torch.save(obj=ema_model.state_dict(), f=os.path.join(results_dir, f"ema_model_last.pt"))
-            torch.save(obj=optimizer.state_dict(), f=os.path.join(results_dir, f"optim_last.pt"))
-            # 开启可视化
-            if vis:
-                labels = torch.arange(num_classes).long().to(device)
-                sampled_images = diffusion.sample(model=model, n=len(labels), labels=labels, cfg_scale=cfg_scale)
-                ema_sampled_images = diffusion.sample(model=ema_model, n=len(labels), labels=labels,
-                                                      cfg_scale=cfg_scale)
-                plot_images(images=sampled_images)
-                save_images(images=sampled_images, path=os.path.join(results_vis_dir, f"{save_name}.jpg"))
-                save_images(images=ema_sampled_images, path=os.path.join(results_vis_dir, f"{save_name}_ema.jpg"))
-            if save_model_interval and epoch > start_model_interval:
-                torch.save(obj=model.state_dict(), f=os.path.join(results_dir, f"{save_name}.pt"))
-                torch.save(obj=ema_model.state_dict(), f=os.path.join(results_dir, f"ema_{save_name}.pt"))
-                torch.save(obj=optimizer.state_dict(), f=os.path.join(results_dir, f"optim_{save_name}.pt"))
-                logger.info(msg=f"Save the {save_name}.pt, ema_{save_name}.pt, and optim_{save_name}.pt.")
-            logger.info(msg="Save the model.")
-        logger.info(msg=f"Finish epoch {epoch}:")
-    logger.info(msg="Finish training.")
+        # 分布式在训练过程中进行同步
+        if distributed:
+            dist.barrier()
+
+        # 主进程中保存和验证模型
+        if save_models:
+            # 保存模型
+            save_name = f"model_{str(epoch).zfill(3)}"
+            if not conditional:
+                # 保存pt文件
+                torch.save(obj=model.state_dict(), f=os.path.join(results_dir, f"model_last.pt"))
+                torch.save(obj=optimizer.state_dict(), f=os.path.join(results_dir, f"optim_last.pt"))
+                # 开启可视化
+                if vis:
+                    # images.shape[0]为当前这个批次的图像个数
+                    sampled_images = diffusion.sample(model=model, n=images.shape[0])
+                    save_images(images=sampled_images, path=os.path.join(results_vis_dir, f"{save_name}.jpg"))
+                # 周期保存pt文件
+                if save_model_interval and epoch > start_model_interval:
+                    torch.save(obj=model.state_dict(), f=os.path.join(results_dir, f"{save_name}.pt"))
+                    torch.save(obj=optimizer.state_dict(), f=os.path.join(results_dir, f"optim_{save_name}.pt"))
+                    logger.info(msg=f"Save the {save_name}.pt, and optim_{save_name}.pt.")
+                logger.info(msg="Save the model.")
+            else:
+                # 保存文件
+                torch.save(obj=model.state_dict(), f=os.path.join(results_dir, f"model_last.pt"))
+                torch.save(obj=ema_model.state_dict(), f=os.path.join(results_dir, f"ema_model_last.pt"))
+                torch.save(obj=optimizer.state_dict(), f=os.path.join(results_dir, f"optim_last.pt"))
+                # 开启可视化
+                if vis:
+                    labels = torch.arange(num_classes).long().to(device)
+                    sampled_images = diffusion.sample(model=model, n=len(labels), labels=labels, cfg_scale=cfg_scale)
+                    ema_sampled_images = diffusion.sample(model=ema_model, n=len(labels), labels=labels,
+                                                          cfg_scale=cfg_scale)
+                    plot_images(images=sampled_images)
+                    save_images(images=sampled_images, path=os.path.join(results_vis_dir, f"{save_name}.jpg"))
+                    save_images(images=ema_sampled_images, path=os.path.join(results_vis_dir, f"{save_name}_ema.jpg"))
+                if save_model_interval and epoch > start_model_interval:
+                    torch.save(obj=model.state_dict(), f=os.path.join(results_dir, f"{save_name}.pt"))
+                    torch.save(obj=ema_model.state_dict(), f=os.path.join(results_dir, f"ema_{save_name}.pt"))
+                    torch.save(obj=optimizer.state_dict(), f=os.path.join(results_dir, f"optim_{save_name}.pt"))
+                    logger.info(msg=f"Save the {save_name}.pt, ema_{save_name}.pt, and optim_{save_name}.pt.")
+                logger.info(msg="Save the model.")
+        logger.info(msg=f"[{device}]: Finish epoch {epoch}:")
+    logger.info(msg=f"[{device}]: Finish training.")
+
+    # 清理分布式环境
+    if distributed:
+        dist.destroy_process_group()
+
+
+def main(args):
+    if args.distributed:
+        gpus = torch.cuda.device_count()
+        mp.spawn(train, args=(args,), nprocs=gpus)
+    else:
+        train(args=args)
 
 
 if __name__ == "__main__":
@@ -254,8 +304,6 @@ if __name__ == "__main__":
     # 开启半精度训练（酌情设置）
     # 有效减少显存使用，但无法保证训练精度和训练结果
     parser.add_argument("--fp16", type=bool, default=False)
-    # TODO: 开启分布式训练（酌情设置）
-    parser.add_argument("--distributed", type=bool, default=False)
     # 优化器选择，adam/adamw（酌情设置）
     parser.add_argument("--optim", type=str, default="adamw")
     # 学习率（酌情设置）
@@ -279,6 +327,15 @@ if __name__ == "__main__":
     parser.add_argument("--start_epoch", type=int, default=-1)
     parser.add_argument("--load_model_dir", type=str, default="")
 
+    # ======================================开启分布式训练分界线======================================
+    # 开启分布式训练（酌情设置）
+    parser.add_argument("--distributed", type=bool, default=True)
+    # 设置分布式中主显卡（必须设置）
+    # 默认为0
+    parser.add_argument('--main_gpu', type=int, default=0)
+    # 分布式训练的节点等级node rank（酌情设置）
+    parser.add_argument('--world_size', type=int, default=2)
+
     # ==========================开启条件生成分界线（若设置--conditional为True设置这里）==========================
     # 类别个数（必须设置）
     parser.add_argument("--num_classes", type=int, default=1)
@@ -286,4 +343,5 @@ if __name__ == "__main__":
     parser.add_argument("--cfg_scale", type=int, default=3)
 
     args = parser.parse_args()
-    train(args)
+
+    main(args)

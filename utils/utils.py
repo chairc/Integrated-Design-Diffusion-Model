@@ -15,7 +15,7 @@ import torchvision
 
 from PIL import Image
 from matplotlib import pyplot as plt
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, DistributedSampler
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
@@ -47,7 +47,7 @@ def save_images(images, path, **kwargs):
     im.save(fp=path)
 
 
-def get_dataset(args):
+def get_dataset(args, distributed=False):
     """
     获取数据集
 
@@ -63,7 +63,27 @@ def get_dataset(args):
     使用ImageFolder类可以方便地加载这种文件夹结构的图像数据集，并自动为每个图像分配相应的标签。
     可以通过传递dataset_path参数指定数据集所在的根目录，并通过其他可选参数进行图像预处理、标签转换等操作。
 
+    关于分布式训练
+    +------------------------+                     +-----------+
+    |DistributedSampler      |                     |DataLoader |
+    |                        |     2 indices       |           |
+    |    Some strategy       +-------------------> |           |
+    |                        |                     |           |
+    |-------------+----------|                     |           |
+                  ^                                |           |  4 data  +-------+
+                  |                                |       -------------->+ train |
+                1 | length                         |           |          +-------+
+                  |                                |           |
+    +-------------+----------+                     |           |
+    |DataSet                 |                     |           |
+    |        +---------+     |      3 Load         |           |
+    |        |  Data   +-------------------------> |           |
+    |        +---------+     |                     |           |
+    |                        |                     |           |
+    +------------------------+                     +-----------+
+
     :param args: 参数
+    :param distributed 是否分布式训练
     :return: dataloader
     """
     transforms = torchvision.transforms.Compose([
@@ -79,8 +99,14 @@ def get_dataset(args):
     ])
     # 加载当前路径下的文件夹数据，根据每个文件名下的数据集自动划分标签
     dataset = torchvision.datasets.ImageFolder(root=args.dataset_path, transform=transforms)
-    dataloader = DataLoader(dataset=dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers,
-                            pin_memory=True)
+    if distributed:
+        sampler = DistributedSampler(dataset)
+        dataloader = DataLoader(dataset=dataset, batch_size=args.batch_size, shuffle=False,
+                                num_workers=args.num_workers,
+                                pin_memory=True, sampler=sampler)
+    else:
+        dataloader = DataLoader(dataset=dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers,
+                                pin_memory=True)
     return dataloader
 
 

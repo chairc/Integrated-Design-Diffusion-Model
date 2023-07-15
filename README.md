@@ -38,7 +38,7 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 - [ ] 1. Implement cosine learning rate optimization.
 - [ ] 2. Use a more advanced U-Net network model.
 - [ ] 3. Generate larger-sized images.
-- [ ] 4. Implement multi-GPU distributed training.
+- [x] 4. Implement multi-GPU distributed training.
 - [ ] 5. Enable fast deployment on cloud servers.
 
 ### Training
