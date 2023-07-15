@@ -43,6 +43,8 @@
 
 ### 训练
 
+#### 普通训练
+
 1. 以`landscape`数据集为例，将数据集文件放入`datasets`文件夹中，该数据集的总路径如下`/your/path/datasets/landscape`，数据集图片路径如下`/your/path/datasets/landscape/*.jpg`
 
 2. 打开`train.py`文件，找到`--dataset_path`参数，将参数中的路径修改为数据集的总路径，例如`/your/path/datasets/landscape`
@@ -71,6 +73,29 @@
    python train.py --resume True --start_epoch 10 --load_model_dir 'df'  --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64
    ```
 
+#### 分布式训练
+
+1. 基本配置与普通训练相似，值得注意的是开启分布式训练需要将`--distributed`设置为`True`。为了防止随意设置分布式训练，我们为开启分布式训练设置了几个基本条件，例如`args.distributed`、`torch.cuda.device_count() > 1`和`torch.cuda.is_available()`。
+
+2. 设置必要的参数，例如`--main_gpu`和`--world_size`。`--main_gpu`通常设置为主要GPU，例如做验证、做测试或保存权重，我们仅在单卡中运行即可。而`world_size`的值会与实际使用的GPU数量或分布式节点数量相对应。
+
+3. 我们有两种参数设置方法，其一是直接对`train.py`文件`if __name__ == "__main__":`中的`parser`进行设置；其二是在控制台在`/your/path/Defect-Diffiusion-Model/tools`路径下输入以下命令：
+
+**有条件训练命令**
+
+   ```bash
+   python train.py --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --distributed True --main_gpu 0 --world_size 2
+   ```
+
+   **无条件训练命令**
+
+   ```bash
+   python train.py --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --distributed True --main_gpu 0 --world_size 2
+   ```
+
+3. 等待训练即可，中断恢复同基本训练一致。
+
+
 
 
 **参数讲解**
@@ -85,7 +110,6 @@
 | --image_size           |          | 输入图像大小                     |   int    | 输入图像大小，自适应输入输出尺寸                             |
 | --dataset_path         |          | 数据集路径                       |   str    | 有条件数据集，例如cifar10，每个类别一个文件夹，路径为主文件夹；无条件数据集，所有图放在一个文件夹，路径为图片文件夹 |
 | --fp16                 |          | 半精度训练                       |   bool   | 开启半精度训练，有效减少显存使用，但无法保证训练精度和训练结果 |
-| --distributed          |          | 分布式训练                       |   bool   | TODO                                                         |
 | --optim                |          | 优化器                           |   str    | 优化器选择，目前支持adam和adamw                              |
 | --lr                   |          | 学习率                           |   int    | 初始化学习率，目前仅支持线性学习率                           |
 | --result_path          |          | 保存路径                         |   str    | 保存路径                                                     |
@@ -95,6 +119,9 @@
 | --resume               |          | 中断恢复训练                     |   bool   | 恢复训练将设置为“True”。注意：设置异常中断的epoch编号若在--start_model_interval参数条件外，则不生效。例如开始保存模型时间为100，中断编号为50，由于我们没有保存模型，所以无法设置任意加载epoch点。每次训练我们都会保存xxx_last.pt文件，所以我们需要使用最后一次保存的模型进行中断训练 |
 | --start_epoch          |          | 中断迭代编号                     |   int    | 设置异常中断的epoch编号                                      |
 | --load_model_dir       |          | 加载模型所在文件夹               |   str    | 写入中断的epoch上一个加载模型的所在文件夹                    |
+| --distributed          |          | 分布式训练                       |   bool   | 开启分布式训练                                               |
+| --main_gpu             |          | 分布式训练主显卡                 |   int    | 设置分布式中主显卡                                           |
+| --world_size           |          | 分布式训练的节点等级             |   int    | 分布式训练的节点等级， world_size的值会与实际使用的GPU数量或分布式节点数量相对应 |
 | --num_classes          |    是    | 类别个数                         |   int    | 类别个数，用于区分类别                                       |
 | --cfg_scale            |    是    | classifier-free guidance插值权重 |   int    | classifier-free guidance插值权重，用户更好生成模型效果       |
 

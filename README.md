@@ -43,6 +43,8 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 
 ### Training
 
+#### Normal Training
+
 1. Take the `landscape` dataset as an example and place the dataset files in the `datasets` folder. The overall path of the dataset should be `/your/path/datasets/landscape`, and the image files should be located at `/your/path/datasets/landscape/*.jpg`.
 
 2. Open the `train.py` file and locate the `--dataset_path` parameter. Modify the path in the parameter to the overall dataset path, for example, `/your/path/datasets/landscape`.
@@ -70,7 +72,27 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
    ```bash
    python train.py --resume True --start_epoch 10 --load_model_dir 'df'  --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64
    ```
+#### Distributed Training
 
+1. The basic configuration is similar to regular training, but note that enabling distributed training requires setting `--distributed` to `True`. To prevent arbitrary use of distributed training, we have several conditions for enabling distributed training, such as `args.distributed`, `torch.cuda.device_count() > 1`, and `torch.cuda.is_available()`.
+
+2. Set the necessary parameters, such as `--main_gpu` and `--world_size`. `--main_gpu` is usually set to the main GPU, which is used for validation, testing, or saving weights, and it only needs to be run on a single GPU. The value of `world_size` corresponds to the actual number of GPUs or distributed nodes being used.
+
+3. There are two methods for setting the parameters. One is to directly modify the `parser` in the `train.py` file under the condition `if __name__ == "__main__":`. The other is to run the following command in the console under the path `/your/path/Defect-Diffiusion-Model/tools`:
+
+**Conditional Distributed Training Command**
+
+   ```bash
+   python train.py --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --distributed True --main_gpu 0 --world_size 2
+   ```
+
+   **Unconditional Distributed Training Command**
+
+   ```bash
+   python train.py --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --distributed True --main_gpu 0 --world_size 2
+   ```
+
+4. Wait for the training to complete. Interrupt recovery is the same as basic training.
 
 **Parameter Explanation**
 
@@ -84,7 +106,6 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 | --image_size           |             | Input image size                | int  | Input image size. Adaptive input and output sizes            |
 | --dataset_path         |             | Dataset path                    | str  | Path to the conditional dataset, such as CIFAR-10, with each class in a separate folder, or the path to the unconditional dataset with all images in one folder |
 | --fp16                 |             | Half precision training         | bool | Enable half precision training. It effectively reduces GPU memory usage but may affect training accuracy and results |
-| --distributed          |             | Distributed training            | bool | TODO                                                         |
 | --optim                |             | Optimizer                       | str  | Optimizer selection. Currently supports Adam and AdamW       |
 | --lr                   |             | Learning rate                   | int  | Initial learning rate. Currently only supports linear learning rate |
 | --result_path          |             | Save path                       | str  | Path to save the training results                            |
@@ -94,6 +115,9 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 | --resume               |             | Resume interrupted training     | bool | Set to "True" to resume interrupted training. Note: If the epoch number of interruption is outside the condition of --start_model_interval, it will not take effect. For example, if the start saving model time is 100 and the interruption number is 50, we cannot set any loading epoch points because we did not save the model. We save the xxx_last.pt file every training, so we need to use the last saved model for interrupted training |
 | --start_epoch          |             | Epoch number of interruption    | int  | Epoch number where the training was interrupted              |
 | --load_model_dir       |             | Folder name of the loaded model | str  | Folder name of the previously loaded model                   |
+| --distributed         |          | Distributed training          | bool  | Enable distributed training                                 |
+| --main_gpu            |          | Main GPU for distributed      | int   | Set the main GPU for distributed training                   |
+| --world_size          |          | Number of distributed nodes    | int   | Number of distributed nodes, corresponds to the actual number of GPUs or distributed nodes being used |
 | --num_classes          |      ✓      | Number of classes               | int  | Number of classes used for classification                    |
 | --cfg_scale            |      ✓      | Classifier-free guidance weight | int  | Classifier-free guidance interpolation weight for better model generation effects |
 
