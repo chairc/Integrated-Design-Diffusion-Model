@@ -55,7 +55,7 @@ def train(rank=None, args=None):
     # 是否开启条件训练
     conditional = args.conditional
     # 初始化保存模型标识位，这里检测是否单卡训练还是多卡训练
-    save_models = False if rank is not None else True
+    save_models = True
     # 是否开启分布式训练
     if args.distributed and torch.cuda.device_count() > 1 and torch.cuda.is_available():
         distributed = True
@@ -74,8 +74,8 @@ def train(rank=None, args=None):
         # 同步
         dist.barrier()
         # 如果分布式训练是第一块显卡，则保存模型标识位为真
-        if dist.get_rank() == args.main_gpu:
-            save_models = True
+        if dist.get_rank() != args.main_gpu:
+            save_models = False
         logger.info(msg=f"[{device}]: Successfully Use distributed training.")
     else:
         distributed = False
