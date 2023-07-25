@@ -117,21 +117,38 @@ def train(rank=None, args=None):
     # 恢复训练
     if resume:
         load_model_dir = args.load_model_dir
-        model_dict = model.state_dict()
         start_epoch = args.start_epoch
         # 加载上一个模型
         load_epoch = str(start_epoch - 1).zfill(3)
         model_path = os.path.join(result_path, load_model_dir, f"model_{load_epoch}.pt")
-        model_weights_dict = torch.load(f=model_path, map_location=device)
-        model_weights_dict = {k: v for k, v in model_weights_dict.items() if np.shape(model_dict[k]) == np.shape(v)}
-        model_dict.update(model_weights_dict)
-        model.load_state_dict(state_dict=OrderedDict(model_dict))
-        logger.info(msg=f"[{device}]: Successfully load model model_{load_epoch}.pt")
-        # 加载优化器参数
         optim_path = os.path.join(result_path, load_model_dir, f"optim_model_{load_epoch}.pt")
-        optim_weights_dict = torch.load(f=optim_path, map_location=device)
-        optimizer.load_state_dict(state_dict=optim_weights_dict)
-        logger.info(msg=f"[{device}]: Successfully load optimizer optim_model_{load_epoch}.pt")
+        # 分布式恢复训练
+        if distributed:
+            # 使用主显卡
+            if dist.get_rank() == args.main_gpu:
+                model_weights_dict = torch.load(f=model_path)
+                model.load_state_dict(state_dict=model_weights_dict)
+                optim_weights_dict = torch.load(f=optim_path)
+                optimizer.load_state_dict(state_dict=optim_weights_dict)
+                logger.info(
+                    msg=f"[{device}]: Successfully load model model_{load_epoch}.pt and optim_model_{load_epoch}.pt")
+            else:
+                NotImplementedError(
+                    "Distributed computing loading model error, please check the main GPU configuration")
+            # 广播参数
+            dist.broadcast_object_list(object_list=[model, optimizer], src=args.main_gpu)
+        # 普通恢复训练
+        else:
+            model_dict = model.state_dict()
+            model_weights_dict = torch.load(f=model_path, map_location=device)
+            model_weights_dict = {k: v for k, v in model_weights_dict.items() if np.shape(model_dict[k]) == np.shape(v)}
+            model_dict.update(model_weights_dict)
+            model.load_state_dict(state_dict=OrderedDict(model_dict))
+            logger.info(msg=f"[{device}]: Successfully load model model_{load_epoch}.pt")
+            # 加载优化器参数
+            optim_weights_dict = torch.load(f=optim_path, map_location=device)
+            optimizer.load_state_dict(state_dict=optim_weights_dict)
+            logger.info(msg=f"[{device}]: Successfully load optimizer optim_model_{load_epoch}.pt")
     else:
         start_epoch = 0
     if fp16:
