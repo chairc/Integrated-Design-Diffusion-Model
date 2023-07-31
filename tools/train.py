@@ -26,7 +26,7 @@ sys.path.append(os.path.dirname(sys.path[0]))
 from model.ddpm import Diffusion
 from model.modules import EMA
 from model.network import UNet
-from utils.initializer import device_initializer
+from utils.initializer import device_initializer, seed_initializer
 from utils.utils import plot_images, save_images, get_dataset, setup_logging
 
 logger = logging.getLogger(__name__)
@@ -40,6 +40,8 @@ def train(rank=None, args=None):
     :return: None
     """
     logger.info(msg=f"[{rank}]: Input params: {args}")
+    # 初始化种子
+    seed_initializer(seed_id=args.seed)
     # 运行名称
     run_name = args.run_name
     # 输入图像大小
@@ -282,6 +284,8 @@ def main(args):
 if __name__ == "__main__":
     # 训练模型参数
     parser = argparse.ArgumentParser()
+    # 设置初始化种子（必须设置）
+    parser.add_argument("--seed", type=int, default=0)
     # 开启条件训练（必须设置）
     # 若开启可修改自定义配置，详情参考最下面分界线
     parser.add_argument("--conditional", type=bool, default=False)

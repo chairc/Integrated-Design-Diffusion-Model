@@ -5,6 +5,8 @@
     @Author : chairc
     @Site   : https://github.com/chairc
 """
+import random
+import numpy as np
 import torch
 import logging
 import coloredlogs
@@ -38,3 +40,18 @@ def device_initializer():
         logger.warning(msg="The device is using cpu.")
         device = torch.device(device="cpu")
     return device
+
+
+def seed_initializer(seed_id=0):
+    """
+    初始化种子
+    :param seed_id: 种子id
+    :return:
+    """
+    torch.manual_seed(seed_id)
+    torch.cuda.manual_seed_all(seed_id)
+    random.seed(seed_id)
+    np.random.seed(seed_id)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    logger.info(msg=f"The seed is initialized, and the seed ID is {seed_id}.")
