@@ -14,9 +14,13 @@ import logging
 import coloredlogs
 
 from torchvision.utils import save_image
+from matplotlib import pyplot as plt
 
 from model.ddpm import Diffusion
+from model.network import UNet
 from utils.utils import get_dataset, delete_files
+from utils.initializer import device_initializer
+from utils.lr_scheduler import set_cosine_lr
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
@@ -86,6 +90,25 @@ class TestModule(unittest.TestCase):
         # 保存噪声图片
         save_image(tensor=noised_image.add(1).mul(0.5), fp=os.path.join(save_path, "noise.jpg"))
         logger.info(msg="Finish noising noising_test.")
+
+    def test_lr(self):
+        image_size = 64
+        device = device_initializer()
+        net = UNet(num_classes=10, device=device, image_size=image_size)
+        optimizer = torch.optim.AdamW(net.parameters(), lr=3e-4)
+        lr_max = 3e-4
+        lr_min = 3e-6
+        max_epoch = 300
+        lrs = []
+        for epoch in range(max_epoch):
+            set_cosine_lr(optimizer=optimizer, current_epoch=epoch, max_epoch=max_epoch, lr_min=lr_min,
+                          lr_max=lr_max, warmup=True)
+            logger.info(msg=f"{epoch}: {optimizer.param_groups[0]['lr']}")
+            lrs.append(optimizer.param_groups[0]["lr"])
+            optimizer.step()
+
+        plt.plot(lrs)
+        plt.show()
 
 
 if __name__ == "__main__":

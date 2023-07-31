@@ -27,6 +27,7 @@ from model.ddpm import Diffusion
 from model.modules import EMA
 from model.network import UNet
 from utils.initializer import device_initializer, seed_initializer
+from utils.lr_scheduler import set_cosine_lr
 from utils.utils import plot_images, save_images, get_dataset, setup_logging
 
 logger = logging.getLogger(__name__)
@@ -50,6 +51,8 @@ def train(rank=None, args=None):
     optim = args.optim
     # 学习率大小
     init_lr = args.lr
+    # 学习率方法
+    lr_func = args.lr_func
     # 类别个数
     num_classes = args.num_classes
     # classifier-free guidance插值权重，用户更好生成模型效果
@@ -159,6 +162,16 @@ def train(rank=None, args=None):
     # 开始迭代
     for epoch in range(start_epoch, args.epochs):
         logger.info(msg=f"[{device}]: Start epoch {epoch}:")
+        # 设置学习率
+        if lr_func == "cosine":
+            current_lr = set_cosine_lr(optimizer=optimizer, current_epoch=epoch, max_epoch=args.epochs,
+                                       lr_min=init_lr * 0.01, lr_max=init_lr, warmup=False)
+        elif lr_func == "warmup_cosine":
+            current_lr = set_cosine_lr(optimizer=optimizer, current_epoch=epoch, max_epoch=args.epochs,
+                                       lr_min=init_lr * 0.01, lr_max=init_lr, warmup=True)
+        else:
+            current_lr = init_lr
+        logger.info(msg=f"[{device}]: This epoch learning rate is {current_lr}")
         pbar = tqdm(dataloader)
         # 初始化images和labels
         images, labels = None, None
@@ -311,6 +324,9 @@ if __name__ == "__main__":
     parser.add_argument("--optim", type=str, default="adamw")
     # 学习率（酌情设置）
     parser.add_argument("--lr", type=int, default=3e-4)
+    # 学习率方法（酌情设置）
+    # 不设置时为空，可设置cosine，warmup_cosine
+    parser.add_argument("--lr_func", type=str, default="")
     # 保存路径（必须设置）
     parser.add_argument("--result_path", type=str, default="/your/path/Defect-Diffusion-Model/results")
     # 是否每次训练储存（建议设置）
