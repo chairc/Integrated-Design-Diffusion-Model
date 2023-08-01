@@ -351,9 +351,10 @@ if __name__ == "__main__":
     parser.add_argument("--distributed", type=bool, default=True)
     # 设置分布式中主显卡（必须设置）
     # 默认为0
-    parser.add_argument('--main_gpu', type=int, default=0)
-    # 分布式训练的节点等级node rank（酌情设置）
-    parser.add_argument('--world_size', type=int, default=2)
+    parser.add_argument("--main_gpu", type=int, default=0)
+    # 分布式训练的节点等级（酌情设置）
+    # world_size的值会与实际使用的GPU数量或分布式节点数量相对应
+    parser.add_argument("--world_size", type=int, default=2)
 
     # ==========================开启条件生成分界线（若设置--conditional为True设置这里）==========================
     # 类别个数（必须设置）
