@@ -14,6 +14,7 @@ import logging
 import coloredlogs
 
 from torchvision.utils import save_image
+from torchsummary import summary
 from matplotlib import pyplot as plt
 
 from model.ddpm import Diffusion
@@ -109,6 +110,21 @@ class TestModule(unittest.TestCase):
 
         plt.plot(lrs)
         plt.show()
+
+    def test_summary(self):
+        """
+        测试模型结构
+        :return: None
+        """
+        image_size = 64
+        device = device_initializer()
+        net = UNet(num_classes=10, device=device, image_size=image_size)
+        net = net.to(device)
+        x = torch.randn(1, 3, image_size, image_size).to(device)
+        t = x.new_tensor([500] * x.shape[0]).long().to(device)
+        y = x.new_tensor([1] * x.shape[0]).long().to(device)
+        print(net)
+        summary(model=net, input_data=[x, t, y])
 
 
 if __name__ == "__main__":
