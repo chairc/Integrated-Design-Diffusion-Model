@@ -20,14 +20,13 @@ from torch import multiprocessing as mp
 from torch.utils.tensorboard import SummaryWriter
 from torch.cuda.amp import autocast, GradScaler
 from tqdm import tqdm
-from collections import OrderedDict
 
 sys.path.append(os.path.dirname(sys.path[0]))
 from model.ddpm import Diffusion as DDPMDiffusion
 from model.ddim import Diffusion as DDIMDiffusion
 from model.modules import EMA
 from model.network import UNet
-from utils.initializer import device_initializer, seed_initializer
+from utils.initializer import device_initializer, seed_initializer, load_model_weight_initializer
 from utils.lr_scheduler import set_cosine_lr
 from utils.utils import plot_images, save_images, get_dataset, setup_logging
 
@@ -129,11 +128,7 @@ def train(rank=None, args=None):
         load_epoch = str(start_epoch - 1).zfill(3)
         model_path = os.path.join(result_path, load_model_dir, f"model_{load_epoch}.pt")
         optim_path = os.path.join(result_path, load_model_dir, f"optim_model_{load_epoch}.pt")
-        model_dict = model.state_dict()
-        model_weights_dict = torch.load(f=model_path, map_location=device)
-        model_weights_dict = {k: v for k, v in model_weights_dict.items() if np.shape(model_dict[k]) == np.shape(v)}
-        model_dict.update(model_weights_dict)
-        model.load_state_dict(state_dict=OrderedDict(model_dict))
+        load_model_weight_initializer(model=model, weight_path=model_path, device=device)
         logger.info(msg=f"[{device}]: Successfully load model model_{load_epoch}.pt")
         # 加载优化器参数
         optim_weights_dict = torch.load(f=optim_path, map_location=device)
@@ -313,7 +308,7 @@ if __name__ == "__main__":
     parser.add_argument("--conditional", type=bool, default=False)
     # 采样器类别（必须设置）
     # 不设置是为ddpm，可设置ddpm，ddim
-    parser.add_argument("--sample", type=str, default="ddim")
+    parser.add_argument("--sample", type=str, default="ddpm")
     # 初始化模型的文件名称（必须设置）
     parser.add_argument("--run_name", type=str, default="df")
     # 训练总迭代次数（必须设置）

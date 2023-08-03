@@ -14,9 +14,10 @@ import logging
 import coloredlogs
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from model.ddpm import Diffusion
+from model.ddpm import Diffusion as DDPMDiffusion
+from model.ddim import Diffusion as DDIMDiffusion
 from model.network import UNet
-from utils.initializer import device_initializer
+from utils.initializer import device_initializer, load_model_weight_initializer
 from utils.utils import plot_images, save_images
 
 logger = logging.getLogger(__name__)
@@ -27,6 +28,8 @@ def generate(args):
     logger.info(msg="Start generation.")
     # 是否启用条件生成
     conditional = args.conditional
+    # 采样器类别
+    sample = args.sample
     # 生成名称
     generate_name = args.generate_name
     # 图片大小
@@ -39,6 +42,14 @@ def generate(args):
     result_path = args.result_path
     # 设备初始化
     device = device_initializer()
+    # 初始化扩散模型
+    if sample == "ddpm":
+        diffusion = DDPMDiffusion(img_size=image_size, device=device)
+    elif sample == "ddim":
+        diffusion = DDIMDiffusion(img_size=image_size, device=device)
+    else:
+        diffusion = DDPMDiffusion(img_size=image_size, device=device)
+        logger.warning(msg=f"[{device}]: Setting sample error, we has been automatically set to ddpm.")
     # 模型初始化
     if conditional:
         # 类别个数
@@ -48,18 +59,12 @@ def generate(args):
         # classifier-free guidance插值权重
         cfg_scale = args.cfg_scale
         model = UNet(num_classes=num_classes, device=device, image_size=image_size).to(device)
-        # 加载权重路径
-        weight = torch.load(f=weight_path)
-        model.load_state_dict(state_dict=weight)
-        diffusion = Diffusion(img_size=image_size, device=device)
+        load_model_weight_initializer(model=model, weight_path=weight_path, device=device, is_train=False)
         y = torch.Tensor([class_name] * num_images).long().to(device)
         x = diffusion.sample(model=model, n=num_images, labels=y, cfg_scale=cfg_scale)
     else:
         model = UNet(device=device, image_size=image_size).to(device)
-        # 加载权重路径
-        weight = torch.load(f=weight_path)
-        model.load_state_dict(state_dict=weight)
-        diffusion = Diffusion(img_size=image_size, device=device)
+        load_model_weight_initializer(model=model, weight_path=weight_path, device=device, is_train=False)
         x = diffusion.sample(model=model, n=num_images)
     # 如果不存在路径信息则只展示；存在则保存到指定路径并展示
     if result_path == "" or result_path is None:
@@ -84,7 +89,10 @@ if __name__ == "__main__":
     # 保存路径
     parser.add_argument("--result_path", type=str, default="/your/path/Defect-Diffusion-Model/results/vis")
     # 开启条件生成，若使用False则不需要设置该参数之后的参数
-    parser.add_argument("--conditional", type=bool, default=False)
+    parser.add_argument("--conditional", type=bool, default=True)
+    # 采样器类别（必须设置）
+    # 不设置是为ddpm，可设置ddpm，ddim
+    parser.add_argument("--sample", type=str, default="ddpm")
 
     # ==========================开启条件生成分界线==========================
     # 类别个数
