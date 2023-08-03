@@ -11,13 +11,15 @@ import coloredlogs
 
 from tqdm import tqdm
 
+from .base import BaseDiffusion
+
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
 
 
-class Diffusion:
+class Diffusion(BaseDiffusion):
     """
-    扩散模型
+    DDPM扩散模型
     """
 
     def __init__(self, noise_steps=1000, beta_start=1e-4, beta_end=0.02, img_size=256, device="cpu"):
@@ -31,48 +33,8 @@ class Diffusion:
         :param img_size: 图像大小
         :param device: 设备类型
         """
-        # 噪声步长
-        self.noise_steps = noise_steps
-        self.beta_start = beta_start
-        self.beta_end = beta_end
-        self.img_size = img_size
-        self.device = device
 
-        self.beta = self.prepare_noise_schedule().to(device)
-        # 公式α = 1 - β
-        self.alpha = 1. - self.beta
-        # 这里做α累加和操作
-        self.alpha_hat = torch.cumprod(input=self.alpha, dim=0)
-
-    def prepare_noise_schedule(self):
-        """
-        准备噪声schedule，可以自定义，可使用openai的schedule
-        torch.linspace为指定的区间内生成一维张量，其中的值均匀分布
-        :return: schedule
-        """
-        return torch.linspace(start=self.beta_start, end=self.beta_end, steps=self.noise_steps)
-
-    def noise_images(self, x, time):
-        """
-        给图片增加噪声
-        :param x: 输入图像信息
-        :param time: 时间
-        :return: sqrt_alpha_hat * x + sqrt_one_minus_alpha_hat * Ɛ, t时刻形状与x张量相同的张量
-        """
-        sqrt_alpha_hat = torch.sqrt(self.alpha_hat[time])[:, None, None, None]
-        sqrt_one_minus_alpha_hat = torch.sqrt(1 - self.alpha_hat[time])[:, None, None, None]
-        # 生成一个形状与x张量相同的张量，其中的元素是从标准正态分布（均值为0，方差为1）中随机抽样得到的
-        Ɛ = torch.randn_like(x)
-        return sqrt_alpha_hat * x + sqrt_one_minus_alpha_hat * Ɛ, Ɛ
-
-    def sample_time_steps(self, n):
-        """
-        采样时间步长
-        :param n: 图像尺寸
-        :return: 形状为(n,)的整数张量
-        """
-        # 生成一个具有指定形状(n,)的整数张量，其中每个元素都在low和high之间（包含 low，不包含 high）随机选择
-        return torch.randint(low=1, high=self.noise_steps, size=(n,))
+        super().__init__(noise_steps, beta_start, beta_end, img_size, device)
 
     def sample(self, model, n, labels=None, cfg_scale=None):
         """
@@ -80,10 +42,11 @@ class Diffusion:
         :param model: 模型
         :param n: 采样图片个数
         :param labels: 标签
-        :param cfg_scale: 插值权重
+        :param cfg_scale: classifier-free guidance插值权重，用于提升生成质量，避免后验坍塌（posterior collapse）问题
+                            参考论文：《Classifier-Free Diffusion Guidance》
         :return: 采样图片
         """
-        logger.info(msg=f"Sampling {n} new images....")
+        logger.info(msg=f"DDPM Sampling {n} new images....")
         model.eval()
         with torch.no_grad():
             # 输入格式为[n, 3, img_size, img_size]
@@ -98,6 +61,7 @@ class Diffusion:
                     predicted_noise = model(x, t)
                 else:
                     predicted_noise = model(x, t, labels)
+                    # 用于提升生成，避免后验坍塌（posterior collapse）问题
                     if cfg_scale > 0:
                         # 无条件预测噪声
                         unconditional_predicted_noise = model(x, t, None)
