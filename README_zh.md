@@ -170,6 +170,60 @@
 
 
 
+### 结果
+
+我们在以下4个数据集做了训练，采样器为`DDPM`，图片尺寸均为`64*64`，分别是`cifar10`，`NEUDET`，`NRSD-MN`和`WOOD`。结果如下图所示：
+
+**cifar10**
+
+![cifar_244_ema](assets/cifar_244_ema.jpg)
+
+![cifar_294_ema](assets/cifar_294_ema.jpg)
+
+**NEUDET**
+
+![neudet_290_ema](assets/neudet_290_ema.jpg)
+
+![neudet_270_ema](assets/neudet_270_ema.jpg)
+
+![neudet_276_ema](assets/neudet_276_ema.jpg)
+
+![neudet_265_ema](assets/neudet_265_ema.jpg)
+
+![neudet_240_ema](assets/neudet_240_ema.jpg)
+
+![neudet_244_ema](assets/neudet_244_ema.jpg)
+
+![neudet_298_ema](assets/neudet_298_ema.jpg)
+
+**NRSD**
+
+![nrsd_180_ema](assets/nrsd_180_ema.jpg)
+
+![nrsd_188_ema](assets/nrsd_188_ema.jpg)
+
+![nrsd_194_ema](assets/nrsd_194_ema.jpg)
+
+![nrsd_203_ema](assets/nrsd_203_ema.jpg)
+
+![nrsd_210_ema](assets/nrsd_210_ema.jpg)
+
+![nrsd_217_ema](assets/nrsd_217_ema.jpg)
+
+![nrsd_218_ema](assets/nrsd_218_ema.jpg)
+
+![nrsd_248_ema](assets/nrsd_248_ema.jpg)
+
+![nrsd_276_ema](assets/nrsd_276_ema.jpg)
+
+![nrsd_285_ema](assets/nrsd_285_ema.jpg)
+
+![nrsd_298_ema](assets/nrsd_298_ema.jpg)
+
+**WOOD**
+
+![wood_495](assets/wood_495.jpg)
+
 ### 部署
 
 未完待续
