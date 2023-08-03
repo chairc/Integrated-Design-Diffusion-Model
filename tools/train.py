@@ -23,7 +23,8 @@ from tqdm import tqdm
 from collections import OrderedDict
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from model.ddpm import Diffusion
+from model.ddpm import Diffusion as DDPMDiffusion
+from model.ddim import Diffusion as DDIMDiffusion
 from model.modules import EMA
 from model.network import UNet
 from utils.initializer import device_initializer, seed_initializer
@@ -43,6 +44,8 @@ def train(rank=None, args=None):
     logger.info(msg=f"[{rank}]: Input params: {args}")
     # 初始化种子
     seed_initializer(seed_id=args.seed)
+    # 采样器类别
+    sample = args.sample
     # 运行名称
     run_name = args.run_name
     # 输入图像大小
@@ -148,7 +151,13 @@ def train(rank=None, args=None):
     # 损失函数
     mse = nn.MSELoss()
     # 初始化扩散模型
-    diffusion = Diffusion(img_size=image_size, device=device)
+    if sample == "ddpm":
+        diffusion = DDPMDiffusion(img_size=image_size, device=device)
+    elif sample == "ddim":
+        diffusion = DDIMDiffusion(img_size=image_size, device=device)
+    else:
+        diffusion = DDPMDiffusion(img_size=image_size, device=device)
+        logger.warning(msg=f"[{device}]: Setting sample error, we has been automatically set to ddpm.")
     # 日志记录器
     tb_logger = SummaryWriter(log_dir=results_tb_dir)
     # 数据加载器中数据集批次个数
@@ -302,6 +311,9 @@ if __name__ == "__main__":
     # 开启条件训练（必须设置）
     # 若开启可修改自定义配置，详情参考最下面分界线
     parser.add_argument("--conditional", type=bool, default=False)
+    # 采样器类别（必须设置）
+    # 不设置是为ddpm，可设置ddpm，ddim
+    parser.add_argument("--sample", type=str, default="ddim")
     # 初始化模型的文件名称（必须设置）
     parser.add_argument("--run_name", type=str, default="df")
     # 训练总迭代次数（必须设置）
