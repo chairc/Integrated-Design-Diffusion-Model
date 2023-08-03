@@ -13,6 +13,8 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 ```yaml
 ├── datasets
 ├── model
+│   ├── base.py
+│   ├── ddim.py
 │   ├── ddpm.py
 │   ├── modules.py
 │   └── network.py
@@ -51,7 +53,7 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 
 2. Open the `train.py` file and locate the `--dataset_path` parameter. Modify the path in the parameter to the overall dataset path, for example, `/your/path/datasets/landscape`.
 
-3. Set the necessary parameters such as `--sample`, `--conditional`, `--run_name`, `--epochs`, `--batch_size`, `--image_size`, `--result_path`, etc. If no parameters are set, the default settings will be used. There are two ways to set the parameters: directly modify the `parser` in the `if __name__ == "__main__":` section of the `train.py` file (**WE RECOMMEND THIS WAY**), or run the following command in the terminal at the `/your/path/Defect-Diffusion-Model/tools` directory:
+3. Set the necessary parameters such as `--sample`, `--conditional`, `--run_name`, `--epochs`, `--batch_size`, `--image_size`, `--result_path`, etc. If no parameters are set, the default settings will be used. There are two ways to set the parameters: directly modify the `parser` in the `if __name__ == "__main__":` section of the `train.py` file (**WE RECOMMEND THIS WAY**), or run the following command in the terminal at the `/your/path/Defect-Diffusion-Model/tools` directory:  
    **Conditional Training Command**
 
    ```bash
@@ -63,7 +65,7 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
    python train.py --sample 'ddpm' --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --dataset_path '/your/dataset/path' --result_path '/your/save/path'
    ```
 4. Wait for the training to complete.
-5. If the training is interrupted due to any reason, you can resume it by setting `--resume` to `True` in the `train.py` file, specifying the epoch number where the interruption occurred, providing the folder name of the interrupted training (`run_name`), and running the file again. Alternatively, you can use the following command to resume the training:
+5. If the training is interrupted due to any reason, you can resume it by setting `--resume` to `True` in the `train.py` file, specifying the epoch number where the interruption occurred, providing the folder name of the interrupted training (`run_name`), and running the file again. Alternatively, you can use the following command to resume the training:  
    **Conditional Resume Training Command**
 
    ```bash
