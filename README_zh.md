@@ -29,17 +29,19 @@
 │   └── train.py
 ├── utils
 │   ├── initializer.py
+│   ├── lr_scheduler.py
 │   └── utils.py
 └── weight
 ```
 
 ### 接下来要做
 
-- [ ] 1. 新增cosine学习率优化
+- [x] 1. 新增cosine学习率优化（2023-07-31）
 - [ ] 2. 使用效果更优的U-Net网络模型
 - [ ] 3. 更大尺寸的生成图像
-- [x] 4. 多卡分布式训练
+- [x] 4. 多卡分布式训练（2023-07-15）
 - [ ] 5. 云服务器快速部署
+- [x] 6. 增加DDIM采样方法(2023-08-03)
 
 ### 训练
 
@@ -49,28 +51,28 @@
 
 2. 打开`train.py`文件，找到`--dataset_path`参数，将参数中的路径修改为数据集的总路径，例如`/your/path/datasets/landscape`
 
-3. 设置必要参数，例如`--conditional`，`--run_name`，`--epochs`，`--batch_size`，`--image_size`，`--result_path`等参数，若不设置参数则使用默认设置。我们有两种参数设置方法，其一是直接对`train.py`文件`if __name__ == "__main__":`中的`parser`进行设置；其二是在控制台在`/your/path/Defect-Diffiusion-Model/tools`路径下输入以下命令：
+3. 设置必要参数，例如`--sample`，`--conditional`，`--run_name`，`--epochs`，`--batch_size`，`--image_size`，`--result_path`等参数，若不设置参数则使用默认设置。我们有两种参数设置方法，其一是直接对`train.py`文件`if __name__ == "__main__":`中的`parser`进行设置（**我们推荐这种方式**）；其二是在控制台在`/your/path/Defect-Diffiusion-Model/tools`路径下输入以下命令：
    **有条件训练命令**
 
    ```bash
-   python train.py --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10
+   python train.py --sample 'ddpm' --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path '/your/dataset/path' --result_path '/your/save/path'
    ```
    **无条件训练命令**
 
    ```bash
-   python train.py --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64
+   python train.py --sample 'ddpm' --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --dataset_path '/your/dataset/path' --result_path '/your/save/path'
    ```
 4. 等待训练即可
 5. 若因异常原因中断训练，我们可以在`train.py`文件，首先将`--resume`设置为`True`，其次设置异常中断的迭代编号，再写入该次训练的所在文件夹（run_name），最后运行文件即可。也可以使用如下命令进行恢复：
    **有条件恢复训练命令**
 
    ```bash
-   python train.py --resume True --start_epoch 10 --load_model_dir 'df' --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10
+   python train.py --resume True --start_epoch 10 --load_model_dir 'df' --sample 'ddpm' --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path '/your/dataset/path' --result_path '/your/save/path'
    ```
    **无条件恢复训练命令**
 
    ```bash
-   python train.py --resume True --start_epoch 10 --load_model_dir 'df'  --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64
+   python train.py --resume True --start_epoch 10 --load_model_dir 'df' --sample 'ddpm' --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --dataset_path '/your/dataset/path' --result_path '/your/save/path'
    ```
 
 #### 分布式训练
@@ -84,13 +86,13 @@
 **有条件训练命令**
 
    ```bash
-   python train.py --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --distributed True --main_gpu 0 --world_size 2
+   python train.py --sample 'ddpm' --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path '/your/dataset/path' --result_path '/your/save/path' --distributed True --main_gpu 0 --world_size 2
    ```
 
    **无条件训练命令**
 
    ```bash
-   python train.py --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --distributed True --main_gpu 0 --world_size 2
+   python train.py --sample 'ddpm' --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --dataset_path '/your/dataset/path' --result_path '/your/save/path' --distributed True --main_gpu 0 --world_size 2
    ```
 
 3. 等待训练即可，中断恢复同基本训练一致。
@@ -102,7 +104,9 @@
 
 | **参数名称**           | 条件参数 | 参数使用方法                     | 参数类型 | 参数解释                                                     |
 | ---------------------- | :------: | -------------------------------- | :------: | ------------------------------------------------------------ |
+| --seed                 |          | 初始化种子                       |   int    | 设置初始化种子，可复现网络生成的图片                         |
 | --conditional          |          | 开启条件训练                     |   bool   | 若开启可修改自定义配置，例如修改类别、classifier-free guidance插值权重 |
+| --sample               |          | 采样方式                         |   str    | 设置采样器类别，当前支持ddpm，ddim                           |
 | --run_name             |          | 文件名称                         |   str    | 初始化模型的文件名称，用于设置保存信息                       |
 | --epochs               |          | 总迭代次数                       |   int    | 训练总迭代次数                                               |
 | --batch_size           |          | 训练批次                         |   int    | 训练批次大小                                                 |
@@ -112,6 +116,7 @@
 | --fp16                 |          | 半精度训练                       |   bool   | 开启半精度训练，有效减少显存使用，但无法保证训练精度和训练结果 |
 | --optim                |          | 优化器                           |   str    | 优化器选择，目前支持adam和adamw                              |
 | --lr                   |          | 学习率                           |   int    | 初始化学习率，目前仅支持线性学习率                           |
+| --lr_func              |          | 学习率方法                       |   str    | 设置学习率方法，当前支持linear、cosine和warmup_cosine        |
 | --result_path          |          | 保存路径                         |   str    | 保存路径                                                     |
 | --save_model_interval  |          | 是否每次训练储存                 |   bool   | 是否每次训练储存，根据可视化生成样本信息筛选模型             |
 | --start_model_interval |          | 设置开始每次训练存储编号         |   int    | 设置开始每次训练存储的epoch编号，该设置可节约磁盘空间，若不设置默认-1，若设置则从第epoch时开始保存每次训练pt文件，需要与--save_model_interval同时开启 |
@@ -174,3 +179,4 @@
 [@dome272](https://github.com/dome272/Diffusion-Models-pytorch)
 
 [@OpenAi](https://github.com/openai/improved-diffusion)
+

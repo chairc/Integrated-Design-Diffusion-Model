@@ -29,17 +29,19 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 │   └── train.py
 ├── utils
 │   ├── initializer.py
+│   ├── lr_scheduler.py
 │   └── utils.py
 └── weight
 ```
 
 ### Next Steps
 
-- [ ] 1. Implement cosine learning rate optimization.
+- [x] 1. Implement cosine learning rate optimization. (2023-07-31)
 - [ ] 2. Use a more advanced U-Net network model.
 - [ ] 3. Generate larger-sized images.
-- [x] 4. Implement multi-GPU distributed training.
+- [x] 4. Implement multi-GPU distributed training. (2023-07-15)
 - [ ] 5. Enable fast deployment on cloud servers.
+- [x] 6. Adding DDIM Sampling Method. (2023-08-03)
 
 ### Training
 
@@ -49,28 +51,28 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 
 2. Open the `train.py` file and locate the `--dataset_path` parameter. Modify the path in the parameter to the overall dataset path, for example, `/your/path/datasets/landscape`.
 
-3. Set the necessary parameters such as `--conditional`, `--run_name`, `--epochs`, `--batch_size`, `--image_size`, `--result_path`, etc. If no parameters are set, the default settings will be used. There are two ways to set the parameters: directly modify the `parser` in the `if __name__ == "__main__":` section of the `train.py` file, or run the following command in the terminal at the `/your/path/Defect-Diffusion-Model/tools` directory:
+3. Set the necessary parameters such as `--sample`, `--conditional`, `--run_name`, `--epochs`, `--batch_size`, `--image_size`, `--result_path`, etc. If no parameters are set, the default settings will be used. There are two ways to set the parameters: directly modify the `parser` in the `if __name__ == "__main__":` section of the `train.py` file (**WE RECOMMEND THIS WAY**), or run the following command in the terminal at the `/your/path/Defect-Diffusion-Model/tools` directory:
    **Conditional Training Command**
 
    ```bash
-   python train.py --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10
+   python train.py --sample 'ddpm' --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path '/your/dataset/path' --result_path '/your/save/path'
    ```
    **Unconditional Training Command**
 
    ```bash
-   python train.py --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64
+   python train.py --sample 'ddpm' --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --dataset_path '/your/dataset/path' --result_path '/your/save/path'
    ```
 4. Wait for the training to complete.
 5. If the training is interrupted due to any reason, you can resume it by setting `--resume` to `True` in the `train.py` file, specifying the epoch number where the interruption occurred, providing the folder name of the interrupted training (`run_name`), and running the file again. Alternatively, you can use the following command to resume the training:
    **Conditional Resume Training Command**
 
    ```bash
-   python train.py --resume True --start_epoch 10 --load_model_dir 'df' --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10
+   python train.py --resume True --start_epoch 10 --load_model_dir 'df' --sample 'ddpm' --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path '/your/dataset/path' --result_path '/your/save/path'
    ```
    **Unconditional Resume Training Command**
 
    ```bash
-   python train.py --resume True --start_epoch 10 --load_model_dir 'df'  --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64
+   python train.py --resume True --start_epoch 10 --load_model_dir 'df' --sample 'ddpm' --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --dataset_path '/your/dataset/path' --result_path '/your/save/path'
    ```
 #### Distributed Training
 
@@ -83,13 +85,13 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 **Conditional Distributed Training Command**
 
    ```bash
-   python train.py --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --distributed True --main_gpu 0 --world_size 2
+   python train.py --sample 'ddpm' --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path '/your/dataset/path' --result_path '/your/save/path' --distributed True --main_gpu 0 --world_size 2
    ```
 
    **Unconditional Distributed Training Command**
 
    ```bash
-   python train.py --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --distributed True --main_gpu 0 --world_size 2
+   python train.py --sample 'ddpm' --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --dataset_path '/your/dataset/path' --result_path '/your/save/path' --distributed True --main_gpu 0 --world_size 2
    ```
 
 4. Wait for the training to complete. Interrupt recovery is the same as basic training.
@@ -98,7 +100,9 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 
 | Parameter Name         | Conditional | Usage                           | Type | Description                                                  |
 | ---------------------- | :---------: | ------------------------------- | :--: | ------------------------------------------------------------ |
+| --seed |  | Initialize Seed | int | Set the seed for reproducible image generation from the network |
 | --conditional          |             | Enable conditional training     | bool | Enable to modify custom configurations, such as modifying the number of classes and classifier-free guidance interpolation weights |
+| --sample | | Sampling method | str | Set the sampling method type, currently supporting DDPM and DDIM. |
 | --run_name             |             | File name                       | str  | File name used to initialize the model and save information  |
 | --epochs               |             | Total number of epochs          | int  | Total number of training epochs                              |
 | --batch_size           |             | Training batch size             | int  | Size of each training batch                                  |
@@ -108,6 +112,7 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 | --fp16                 |             | Half precision training         | bool | Enable half precision training. It effectively reduces GPU memory usage but may affect training accuracy and results |
 | --optim                |             | Optimizer                       | str  | Optimizer selection. Currently supports Adam and AdamW       |
 | --lr                   |             | Learning rate                   | int  | Initial learning rate. Currently only supports linear learning rate |
+| --lr_func | | Learning rate schedule | str | Setting learning rate schedule, currently supporting linear, cosine, and warmup_cosine. |
 | --result_path          |             | Save path                       | str  | Path to save the training results                            |
 | --save_model_interval  |             | Save model after each training  | bool | Whether to save the model after each training iteration for model selection based on visualization |
 | --start_model_interval |             | Start epoch for saving models   | int  | Start epoch for saving models. This option saves disk space. If not set, the default is -1. If set, it starts saving models from the specified epoch. It needs to be used with --save_model_interval |
