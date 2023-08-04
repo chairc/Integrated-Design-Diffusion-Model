@@ -10,14 +10,14 @@ import math
 
 def set_cosine_lr(optimizer, current_epoch, max_epoch, lr_min=0, lr_max=0.1, warmup=True, num_warmup=5):
     """
-    设置优化器学习率
-    :param optimizer: 优化器
-    :param current_epoch: 当前迭代次数
-    :param max_epoch: 最大迭代次数
-    :param lr_min: 最小学习率
-    :param lr_max: 最大学习率
-    :param warmup: 预热
-    :param num_warmup: 预热个数
+    Set the optimizer learning rate
+    :param optimizer: Optimizer
+    :param current_epoch: Current epoch
+    :param max_epoch: Max epoch
+    :param lr_min: Min learning rate
+    :param lr_max: Max learning rate
+    :param warmup: Whether to warmup
+    :param num_warmup: Number of warmup
     :return: lr
 
     """

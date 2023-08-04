@@ -19,8 +19,8 @@ coloredlogs.install(level="INFO")
 
 def device_initializer():
     """
-    该函数在程序第一次运行时初始化运行设备信息
-    :return: cpu或cuda
+    This function initializes the running device information when the program runs for the first time
+    :return: cpu or cuda
     """
     logger.info(msg="Init program, it is checking the basic setting.")
     device_dict = {}
@@ -46,8 +46,8 @@ def device_initializer():
 
 def seed_initializer(seed_id=0):
     """
-    初始化种子
-    :param seed_id: 种子id
+    Initialize the seed
+    :param seed_id: The seed id
     :return: None
     """
     torch.manual_seed(seed_id)
@@ -61,16 +61,17 @@ def seed_initializer(seed_id=0):
 
 def load_model_weight_initializer(model, weight_path, device, is_train=True):
     """
-    初始化权重加载
-    :param model: 模型
-    :param weight_path: 权重路径
-    :param device: 设备类型
-    :param is_train: 是否为训练模式
+    Initialize weight loading
+    :param model: Model
+    :param weight_path: Weight model path
+    :param device: GPU or CPU
+    :param is_train: Whether to train mode
     :return: None
     """
     model_dict = model.state_dict()
     model_weights_dict = torch.load(f=weight_path, map_location=device)
-    # 检查键是否包含 'module.' 前缀。该方法为分布式中训练后的名称，检查权重并删除
+    # Check if key contains 'module.' prefix.
+    # This method is the name after training in the distribution, check the weight and delete
     if not is_train:
         new_model_weights_dict = {}
         for key, value in model_weights_dict.items():

@@ -23,9 +23,9 @@ coloredlogs.install(level="INFO")
 
 def plot_images(images, fig_size=(64, 64)):
     """
-    绘制图像
-    :param images: 图像
-    :param fig_size: 绘制大小
+    Draw images
+    :param images: Image
+    :param fig_size: Draw image size
     :return: None
     """
     plt.figure(figsize=fig_size)
@@ -35,10 +35,10 @@ def plot_images(images, fig_size=(64, 64)):
 
 def save_images(images, path, **kwargs):
     """
-    保存图像
-    :param images: 图像
-    :param path: 保存地址
-    :param kwargs: 其他参数
+    Save images
+    :param images: Image
+    :param path: Save path
+    :param kwargs: Other parameters
     :return: None
     """
     grid = torchvision.utils.make_grid(tensor=images, **kwargs)
@@ -49,19 +49,25 @@ def save_images(images, path, **kwargs):
 
 def get_dataset(args, distributed=False):
     """
-    获取数据集
+    Get dataset
 
-    自动划分标签 torchvision.datasets.ImageFolder(args.dataset_path, transform=transforms)
-    若数据集为：
+    Automatically divide labels torchvision.datasets.ImageFolder(args.dataset_path, transform=transforms)
+    If the dataset is as follow:
         dataset_path/class_1/image_1.jpg
         dataset_path/class_1/image_2.jpg
         ...
         dataset_path/class_2/image_1.jpg
         dataset_path/class_2/image_2.jpg
         ...
-    其中，dataset_path是数据集所在的根目录，class_1, class_2等是数据集中的不同类别，每个类别下包含若干张图像文件。
-    使用ImageFolder类可以方便地加载这种文件夹结构的图像数据集，并自动为每个图像分配相应的标签。
-    可以通过传递dataset_path参数指定数据集所在的根目录，并通过其他可选参数进行图像预处理、标签转换等操作。
+
+    'dataset_path' is the root directory of the dataset, 'class_1', 'class_2', etc. are different categories in
+    the dataset, and each category contains several image files.
+
+    Use the 'ImageFolder' class to conveniently load image datasets with this folder structure,
+    and automatically assign corresponding labels to each image.
+
+    You can specify the root directory where the dataset is located by passing the 'dataset_path' parameter,
+    and perform operations such as image preprocessing and label conversion through other optional parameters.
 
     关于分布式训练
     +------------------------+                     +-----------+
@@ -82,22 +88,23 @@ def get_dataset(args, distributed=False):
     |                        |                     |           |
     +------------------------+                     +-----------+
 
-    :param args: 参数
-    :param distributed 是否分布式训练
+    :param args: Parameters
+    :param distributed: Whether to distribute training
     :return: dataloader
     """
     transforms = torchvision.transforms.Compose([
-        # 重新设置大小
+        # Resize input size
         # torchvision.transforms.Resize(80), args.image_size + 1/4 * args.image_size
         torchvision.transforms.Resize(size=int(args.image_size + args.image_size / 4)),
-        # 随机调整裁剪
+        # Random adjustment cropping
         torchvision.transforms.RandomResizedCrop(size=args.image_size, scale=(0.8, 1.0)),
-        # 转为Tensor格式
+        # To Tensor Format
         torchvision.transforms.ToTensor(),
-        # 做标准化处理，均值标准差均为0.5
+        # For standardization, the mean and standard deviation are both 0.5
         torchvision.transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
     ])
-    # 加载当前路径下的文件夹数据，根据每个文件名下的数据集自动划分标签
+    # Load the folder data under the current path,
+    # and automatically divide the labels according to the dataset under each file name
     dataset = torchvision.datasets.ImageFolder(root=args.dataset_path, transform=transforms)
     if distributed:
         sampler = DistributedSampler(dataset)
@@ -112,30 +119,30 @@ def get_dataset(args, distributed=False):
 
 def setup_logging(save_path, run_name):
     """
-    设置日志存储位置
-    :param save_path: 保存路径
-    :param run_name: 保存名称
-    :return: 文件路径List
+    Set log saving path
+    :param save_path: Saving path
+    :param run_name: Saving name
+    :return: List of file paths
     """
     results_root_dir = save_path
     results_dir = os.path.join(save_path, run_name)
     results_vis_dir = os.path.join(save_path, run_name, "vis")
     results_tb_dir = os.path.join(save_path, run_name, "tensorboard")
-    # 结果主文件夹
+    # Root folder
     os.makedirs(name=results_root_dir, exist_ok=True)
-    # 结果保存文件夹
+    # Saving folder
     os.makedirs(name=results_dir, exist_ok=True)
-    # 可视化文件夹
+    # Visualization folder
     os.makedirs(name=results_vis_dir, exist_ok=True)
-    # 可视化数据文件夹
+    # Visualization folder for Tensorboard
     os.makedirs(name=results_tb_dir, exist_ok=True)
     return [results_root_dir, results_dir, results_vis_dir, results_tb_dir]
 
 
 def delete_files(path):
     """
-    清除文件
-    :param path: 路径
+    Clear files
+    :param path: Path
     :return: None
     """
     if os.path.exists(path=path):
