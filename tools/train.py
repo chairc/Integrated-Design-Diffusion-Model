@@ -36,101 +36,102 @@ coloredlogs.install(level="INFO")
 
 def train(rank=None, args=None):
     """
-    训练
-    :param args: 输入参数
+    Training
+    :param args: Input parameters
     :return: None
     """
     logger.info(msg=f"[{rank}]: Input params: {args}")
-    # 初始化种子
+    # Initialize the seed
     seed_initializer(seed_id=args.seed)
-    # 采样器类别
+    # Sample type
     sample = args.sample
-    # 运行名称
+    # Run name
     run_name = args.run_name
-    # 输入图像大小
+    # Input image size
     image_size = args.image_size
-    # 优化器选择
+    # Select optimizer
     optim = args.optim
-    # 学习率大小
+    # Learning rate
     init_lr = args.lr
-    # 学习率方法
+    # Learning rate function
     lr_func = args.lr_func
-    # 类别个数
+    # Number of classes
     num_classes = args.num_classes
-    # classifier-free guidance插值权重，用户更好生成模型效果
+    # classifier-free guidance interpolation weight, users can better generate model effect
     cfg_scale = args.cfg_scale
-    # 是否开启条件训练
+    # Whether to enable conditional training
     conditional = args.conditional
-    # 初始化保存模型标识位，这里检测是否单卡训练还是多卡训练
+    # Initialize and save the model identification bit
+    # Check here whether it is single-GPU training or multi-GPU training
     save_models = True
-    # 是否开启分布式训练
+    # Whether to enable distributed training
     if args.distributed and torch.cuda.device_count() > 1 and torch.cuda.is_available():
         distributed = True
         world_size = args.world_size
-        # 设置地址和端口
+        # Set address and port
         os.environ["MASTER_ADDR"] = "localhost"
         os.environ["MASTER_PORT"] = "12345"
-        # 进程总数等于显卡数量
+        # The total number of processes is equal to the number of graphics cards
         dist.init_process_group(backend="nccl" if torch.cuda.is_available() else "gloo", rank=rank,
                                 world_size=world_size)
-        # 设置设备ID
+        # Set device ID
         device = torch.device("cuda", rank)
-        # 可能出现随机性错误，使用可减少cudnn随机性错误
+        # There may be random errors, using this function can reduce random errors in cudnn
         # torch.backends.cudnn.deterministic = True
-        # 同步
+        # Synchronization during distributed training
         dist.barrier()
-        # 如果分布式训练是第一块显卡，则保存模型标识位为真
+        # If the distributed training is not the main GPU, the save model flag is False
         if dist.get_rank() != args.main_gpu:
             save_models = False
         logger.info(msg=f"[{device}]: Successfully Use distributed training.")
     else:
         distributed = False
-        # 运行设备
+        # Run device initializer
         device = device_initializer()
         logger.info(msg=f"[{device}]: Successfully Use normal training.")
-    # 是否开启半精度训练
+    # Whether to enable half-precision training
     fp16 = args.fp16
-    # 保存模型周期
+    # Save model interval
     save_model_interval = args.save_model_interval
-    # 开始保存模型周期
+    # Save model interval in the start epoch
     start_model_interval = args.start_model_interval
-    # 开启可视化数据
+    # Enable data visualization
     vis = args.vis
-    # 保存路径
+    # Saving path
     result_path = args.result_path
-    # 创建训练生成日志
+    # Create data logging path
     results_logging = setup_logging(save_path=result_path, run_name=run_name)
     results_dir = results_logging[1]
     results_vis_dir = results_logging[2]
     results_tb_dir = results_logging[3]
-    # 数据集加载器
+    # Dataloader
     dataloader = get_dataset(args=args, distributed=distributed)
-    # 恢复训练
+    # Resume training
     resume = args.resume
-    # 模型
+    # Model
     if not conditional:
         model = UNet(device=device, image_size=image_size).to(device)
     else:
         model = UNet(num_classes=num_classes, device=device, image_size=image_size).to(device)
-    # 分布式训练
+    # Distributed training
     if distributed:
         model = nn.parallel.DistributedDataParallel(module=model, device_ids=[device], find_unused_parameters=True)
-    # 模型优化器
+    # Model optimizer
     if optim == "adam":
         optimizer = torch.optim.Adam(params=model.parameters(), lr=init_lr)
     else:
         optimizer = torch.optim.AdamW(params=model.parameters(), lr=init_lr)
-    # 恢复训练
+    # Resume training
     if resume:
         load_model_dir = args.load_model_dir
         start_epoch = args.start_epoch
-        # 加载上一个模型
+        # Load the previous model
         load_epoch = str(start_epoch - 1).zfill(3)
         model_path = os.path.join(result_path, load_model_dir, f"model_{load_epoch}.pt")
         optim_path = os.path.join(result_path, load_model_dir, f"optim_model_{load_epoch}.pt")
         load_model_weight_initializer(model=model, weight_path=model_path, device=device)
         logger.info(msg=f"[{device}]: Successfully load model model_{load_epoch}.pt")
-        # 加载优化器参数
+        # Load the previous model optimizer
         optim_weights_dict = torch.load(f=optim_path, map_location=device)
         optimizer.load_state_dict(state_dict=optim_weights_dict)
         logger.info(msg=f"[{device}]: Successfully load optimizer optim_model_{load_epoch}.pt")
@@ -138,14 +139,14 @@ def train(rank=None, args=None):
         start_epoch = 0
     if fp16:
         logger.info(msg=f"[{device}]: Fp16 training is opened.")
-        # 用于缩放梯度，以防止溢出
+        # Used to scale gradients to prevent overflow
         scaler = GradScaler()
     else:
         logger.info(msg=f"[{device}]: Fp32 training.")
         scaler = None
-    # 损失函数
+    # Loss function
     mse = nn.MSELoss()
-    # 初始化扩散模型
+    # Initialize the diffusion model
     if sample == "ddpm":
         diffusion = DDPMDiffusion(img_size=image_size, device=device)
     elif sample == "ddim":
@@ -153,20 +154,20 @@ def train(rank=None, args=None):
     else:
         diffusion = DDPMDiffusion(img_size=image_size, device=device)
         logger.warning(msg=f"[{device}]: Setting sample error, we has been automatically set to ddpm.")
-    # 日志记录器
+    # Tensorboard
     tb_logger = SummaryWriter(log_dir=results_tb_dir)
-    # 数据加载器中数据集批次个数
+    # Number of dataset batches in the dataloader
     len_dataloader = len(dataloader)
-    # EMA指数移动平均对于单类别优势可能不如多类别
+    # Exponential Moving Average (EMA) may not be as dominant for single class as for multi class
     ema = EMA(beta=0.995)
-    # EMA模型
+    # EMA model
     ema_model = copy.deepcopy(model).eval().requires_grad_(False)
 
     logger.info(msg=f"[{device}]: Start training.")
-    # 开始迭代
+    # Start iterating
     for epoch in range(start_epoch, args.epochs):
         logger.info(msg=f"[{device}]: Start epoch {epoch}:")
-        # 设置学习率
+        # Set learning rate
         if lr_func == "cosine":
             current_lr = set_cosine_lr(optimizer=optimizer, current_epoch=epoch, max_epoch=args.epochs,
                                        lr_min=init_lr * 0.01, lr_max=init_lr, warmup=False)
@@ -177,97 +178,99 @@ def train(rank=None, args=None):
             current_lr = init_lr
         logger.info(msg=f"[{device}]: This epoch learning rate is {current_lr}")
         pbar = tqdm(dataloader)
-        # 初始化images和labels
+        # Initialize images and labels
         images, labels = None, None
         for i, (images, labels) in enumerate(pbar):
-            # 图片均为dataloader中resize后的图
+            # The images are all resized in dataloader
             images = images.to(device)
-            # 生成大小为images.shape[0] * images.shape[0]的随机采样时间步长的张量
+            # Generates a tensor of size images.shape[0] * images.shape[0] randomly sampled time steps
             time = diffusion.sample_time_steps(images.shape[0]).to(device)
-            # 添加噪声，返回为t时刻的x值和标准正态分布
+            # Add noise, return as x value at time t and standard normal distribution
             x_time, noise = diffusion.noise_images(x=images, time=time)
-            # 开启半精度训练
+            # Enable half-precision training
             if fp16:
-                # 使用半精度
+                # Half-precision training
                 with autocast():
-                    # 半精度无条件训练
+                    # Half-precision unconditional training
                     if not conditional:
-                        # 半精度无条件模型预测
+                        # Half-precision unconditional model prediction
                         predicted_noise = model(x_time, time)
-                    # 有条件训练，需要加入标签
+                    # Conditional training, need to add labels
                     else:
                         labels = labels.to(device)
-                        # 随机进行无标签困难训练，只使用时间步长不使用类别信息
+                        # Random unlabeled hard training, using only time steps and no class information
                         if np.random.random() < 0.1:
                             labels = None
-                        # 半精度有条件模型预测
+                        # Half-precision conditional model prediction
                         predicted_noise = model(x_time, time, labels)
-                    # 计算MSE损失，需要使用x在t时刻的标准正态分布和预测后的噪声进行损失计算
+                    # To calculate the MSE loss
+                    # You need to use the standard normal distribution of x at time t and the predicted noise
                     loss = mse(noise, predicted_noise)
-                # 优化器清零模型参数的梯度
+                # The optimizer clears the gradient of the model parameters
                 optimizer.zero_grad()
                 scaler.scale(loss).backward()
                 scaler.step(optimizer)
                 scaler.update()
-            # 使用全精度
+            # Use full-precision
             else:
-                # 全精度无条件训练
+                # Full-precision unconditional training
                 if not conditional:
-                    # 全精度无条件模型预测
+                    # Full-precision unconditional model prediction
                     predicted_noise = model(x_time, time)
-                # 全精度有条件训练，需要加入标签
+                # Conditional training, need to add labels
                 else:
                     labels = labels.to(device)
-                    # 随机进行无标签困难训练，只使用时间步长不使用类别信息
+                    # Random unlabeled hard training, using only time steps and no class information
                     if np.random.random() < 0.1:
                         labels = None
-                    # 全精度有条件模型预测
+                    # Full-precision conditional model prediction
                     predicted_noise = model(x_time, time, labels)
-                # 计算MSE损失，需要使用x在t时刻的标准正态分布和预测后的噪声进行损失计算
+                # To calculate the MSE loss
+                # You need to use the standard normal distribution of x at time t and the predicted noise
                 loss = mse(noise, predicted_noise)
-                # 优化器清零模型参数的梯度
+                # The optimizer clears the gradient of the model parameters
                 optimizer.zero_grad()
-                # 自动计算梯度
+                # Automatically calculate gradients
                 loss.backward()
-                # 优化器更新模型的参数
+                # The optimizer updates the parameters of the model
                 optimizer.step()
             # EMA
             ema.step_ema(ema_model=ema_model, model=model)
 
-            # TensorBoard记录日志
+            # TensorBoard logging
             pbar.set_postfix(MSE=loss.item())
             tb_logger.add_scalar(tag=f"[{device}]: MSE", scalar_value=loss.item(),
                                  global_step=epoch * len_dataloader + i)
 
-        # 分布式在训练过程中进行同步
+        # Synchronization during distributed training
         if distributed:
             dist.barrier()
 
-        # 主进程中保存和验证模型
+        # Saving and validating models in the main process
         if save_models:
-            # 保存模型
+            # Saving model
             save_name = f"model_{str(epoch).zfill(3)}"
             if not conditional:
-                # 保存pt文件
+                # Saving pt files
                 torch.save(obj=model.state_dict(), f=os.path.join(results_dir, f"model_last.pt"))
                 torch.save(obj=optimizer.state_dict(), f=os.path.join(results_dir, f"optim_last.pt"))
-                # 开启可视化
+                # Enable visualization
                 if vis:
-                    # images.shape[0]为当前这个批次的图像个数
+                    # images.shape[0] is the number of images in the current batch
                     sampled_images = diffusion.sample(model=model, n=images.shape[0])
                     save_images(images=sampled_images, path=os.path.join(results_vis_dir, f"{save_name}.jpg"))
-                # 周期保存pt文件
+                # Saving pt files in epoch interval
                 if save_model_interval and epoch > start_model_interval:
                     torch.save(obj=model.state_dict(), f=os.path.join(results_dir, f"{save_name}.pt"))
                     torch.save(obj=optimizer.state_dict(), f=os.path.join(results_dir, f"optim_{save_name}.pt"))
                     logger.info(msg=f"Save the {save_name}.pt, and optim_{save_name}.pt.")
                 logger.info(msg="Save the model.")
             else:
-                # 保存文件
+                # Saving pt files
                 torch.save(obj=model.state_dict(), f=os.path.join(results_dir, f"model_last.pt"))
                 torch.save(obj=ema_model.state_dict(), f=os.path.join(results_dir, f"ema_model_last.pt"))
                 torch.save(obj=optimizer.state_dict(), f=os.path.join(results_dir, f"optim_last.pt"))
-                # 开启可视化
+                # Enable visualization
                 if vis:
                     labels = torch.arange(num_classes).long().to(device)
                     sampled_images = diffusion.sample(model=model, n=len(labels), labels=labels, cfg_scale=cfg_scale)
@@ -285,7 +288,7 @@ def train(rank=None, args=None):
         logger.info(msg=f"[{device}]: Finish epoch {epoch}:")
     logger.info(msg=f"[{device}]: Finish training.")
 
-    # 清理分布式环境
+    # Clean up the distributed environment
     if distributed:
         dist.destroy_process_group()
 
@@ -299,74 +302,85 @@ def main(args):
 
 
 if __name__ == "__main__":
-    # 训练模型参数
+    # Training model parameters
+    # required: Must be set
+    # needed: Set as needed
+    # recommend: Recommend to set
     parser = argparse.ArgumentParser()
-    # 设置初始化种子（必须设置）
+    # Set the seed for initialization (required)
     parser.add_argument("--seed", type=int, default=0)
-    # 开启条件训练（必须设置）
-    # 若开启可修改自定义配置，详情参考最下面分界线
+    # Enable conditional training (required)
+    # If enabled, you can modify the custom configuration.
+    # For more details, please refer to the boundary line at the bottom.
     parser.add_argument("--conditional", type=bool, default=False)
-    # 采样器类别（必须设置）
-    # 不设置是为ddpm，可设置ddpm，ddim
+    # Set the sample type (required)
+    # If not set, the default is for 'ddpm'. You can set it to either 'ddpm' or 'ddim'.
+    # Option: ddpm/ddim
     parser.add_argument("--sample", type=str, default="ddpm")
-    # 初始化模型的文件名称（必须设置）
+    # File name for initializing the model (required)
     parser.add_argument("--run_name", type=str, default="df")
-    # 训练总迭代次数（必须设置）
-    parser.add_argument("--epochs", type=int, default=100)
-    # 训练批次大小（必须设置）
-    parser.add_argument("--batch_size", type=int, default=1)
-    # 用于数据加载的子进程数量（酌情设置）
-    # 大量占用CPU和内存，但可以加快训练速度
+    # Total epoch for training (required)
+    parser.add_argument("--epochs", type=int, default=3)
+    # Batch size for training (required)
+    parser.add_argument("--batch_size", type=int, default=2)
+    # Number of sub-processes used for data loading (needed)
+    # It may consume a significant amount of CPU and memory, but it can speed up the training process.
     parser.add_argument("--num_workers", type=int, default=0)
-    # 输入图像大小（必须设置）
+    # Input image size (required)
     parser.add_argument("--image_size", type=int, default=64)
-    # 数据集路径（必须设置）
-    # 有条件数据集，例如cifar10，每个类别一个文件夹，路径为主文件夹
-    # 无条件数据集，所有图放在一个文件夹，路径为图片文件夹
+    # Dataset path (required)
+    # Conditional dataset
+    # e.g: cifar10, Each category is stored in a separate folder, and the main folder represents the path.
+    # Unconditional dataset
+    # All images are placed in a single folder, and the path represents the image folder.
     parser.add_argument("--dataset_path", type=str, default="/your/path/Defect-Diffusion-Model/datasets/dir")
-    # 开启半精度训练（酌情设置）
-    # 有效减少显存使用，但无法保证训练精度和训练结果
+    # Enable half-precision training (needed)
+    # Effectively reducing GPU memory usage may lead to lower training accuracy and results.
     parser.add_argument("--fp16", type=bool, default=False)
-    # 优化器选择，adam/adamw（酌情设置）
+    # Set optimizer (needed)
+    # Option: adam/adamw
     parser.add_argument("--optim", type=str, default="adamw")
-    # 学习率（酌情设置）
+    # Learning rate (needed)
     parser.add_argument("--lr", type=int, default=3e-4)
-    # 学习率方法（酌情设置）
-    # 不设置时为空，可设置cosine，warmup_cosine
+    # Learning rate function (needed)
+    # Option: linear/cosine/warmup_cosine
     parser.add_argument("--lr_func", type=str, default="")
-    # 保存路径（必须设置）
+    # Saving path (required)
     parser.add_argument("--result_path", type=str, default="/your/path/Defect-Diffusion-Model/results")
-    # 是否每次训练储存（建议设置）
-    # 根据可视化生成样本信息筛选模型
+    # Whether to save weight each training (recommend)
     parser.add_argument("--save_model_interval", type=bool, default=True)
-    # 设置开始每次训练存储的epoch编号（酌情设置）
-    # 该设置可节约磁盘空间，若不设置默认-1，若设置则从第epoch时开始保存每次训练pt文件，需要与--save_model_interval同时开启
+    # Start epoch for saving models (needed)
+    # This option saves disk space. If not set, the default is '-1'. If set,
+    # it starts saving models from the specified epoch. It needs to be used with '--save_model_interval'
     parser.add_argument("--start_model_interval", type=int, default=-1)
-    # 打开可视化数据集信息，根据可视化生成样本信息筛选模型（建议设置）
+    # Enable visualization of dataset information for model selection based on visualization (recommend)
     parser.add_argument("--vis", type=bool, default=True)
-    # 训练异常中断（酌情设置）
-    # 1.恢复训练将设置为“True” 2.设置异常中断的epoch编号 3.写入中断的epoch上一个加载模型的所在文件夹
-    # 注意：设置异常中断的epoch编号若在--start_model_interval参数条件外，则不生效
-    # 例如开始保存模型时间为100，中断编号为50，由于我们没有保存模型，所以无法设置任意加载epoch点
-    # 每次训练我们都会保存xxx_last.pt文件，所以我们需要使用最后一次保存的模型进行中断训练
+    # Resume interrupted training (needed)
+    # 1. Set to 'True' to resume interrupted training.
+    # 2. Set the resume interrupted epoch number
+    # 3. Set the directory of the previous loaded model from the interrupted epoch.
+    # Note: If the epoch number of interruption is outside the condition of '--start_model_interval',
+    # it will not take effect. For example, if the start saving model time is 100 and the interruption number is 50,
+    # we cannot set any loading epoch points because we did not save the model.
+    # We save the 'xxx_last.pt' file every training, so we need to use the last saved model for interrupted training
     parser.add_argument("--resume", type=bool, default=False)
     parser.add_argument("--start_epoch", type=int, default=-1)
     parser.add_argument("--load_model_dir", type=str, default="")
 
-    # ======================================开启分布式训练分界线======================================
-    # 开启分布式训练（酌情设置）
+    # =================================Enable distributed training (if applicable)=================================
+    # Enable distributed training (needed)
     parser.add_argument("--distributed", type=bool, default=True)
-    # 设置分布式中主显卡（必须设置）
-    # 默认为0
+    # Set the main GPU (required)
+    # Default GPU is '0'
     parser.add_argument("--main_gpu", type=int, default=0)
-    # 分布式训练的节点等级（酌情设置）
-    # world_size的值会与实际使用的GPU数量或分布式节点数量相对应
+    # Number of distributed nodes (needed)
+    # The value of world size will correspond to the actual number of GPUs or distributed nodes being used
     parser.add_argument("--world_size", type=int, default=2)
 
-    # ==========================开启条件生成分界线（若设置--conditional为True设置这里）==========================
-    # 类别个数（必须设置）
+    # =====================Enable the conditional generation (if '--conditional' is set to 'True')=====================
+    # Number of classes (required)
     parser.add_argument("--num_classes", type=int, default=1)
-    # classifier-free guidance插值权重，用户更好生成模型效果（建议设置）
+    # classifier-free guidance interpolation weight, users can better generate model effect (recommend)
     parser.add_argument("--cfg_scale", type=int, default=3)
 
     args = parser.parse_args()
