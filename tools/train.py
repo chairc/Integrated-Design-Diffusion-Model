@@ -37,6 +37,7 @@ coloredlogs.install(level="INFO")
 def train(rank=None, args=None):
     """
     Training
+    :param rank: Device id
     :param args: Input parameters
     :return: None
     """
@@ -294,6 +295,11 @@ def train(rank=None, args=None):
 
 
 def main(args):
+    """
+    Main function
+    :param args: Input parameters
+    :return: None
+    """
     if args.distributed:
         gpus = torch.cuda.device_count()
         mp.spawn(train, args=(args,), nprocs=gpus)
