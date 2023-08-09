@@ -13,20 +13,20 @@ from model.modules import UpBlock, DownBlock, DoubleConv, SelfAttention
 
 class UNet(nn.Module):
     """
-    U型网络
+    UNet
     """
 
     def __init__(self, in_channel=3, out_channel=3, channel=None, time_channel=256, num_classes=None, image_size=64,
                  device="cpu"):
         """
-        初始化UNet网络
-        :param in_channel: 输入通道
-        :param out_channel: 输出通道
-        :param channel: 总通道列表
-        :param time_channel: 时间通道
-        :param num_classes: 类别数
-        :param image_size: 自适应图片大小
-        :param device: 使用设备
+        Initialize the UNet network
+        :param in_channel: Input channel
+        :param out_channel: Output channel
+        :param channel: The list of channel
+        :param time_channel: Time channel
+        :param num_classes: Number of classes
+        :param image_size: Adaptive image size
+        :param device: Device type
         """
         super().__init__()
         if channel is None:
@@ -59,9 +59,9 @@ class UNet(nn.Module):
 
     def pos_encoding(self, time, channels):
         """
-        位置编码
-        :param time: 时间
-        :param channels: 通道
+        Position encoding
+        :param time: Time
+        :param channels: Channels
         :return: pos_enc
         """
         inv_freq = 1.0 / (10000 ** (torch.arange(0, channels, 2, device=self.device).float() / channels))
@@ -72,10 +72,10 @@ class UNet(nn.Module):
 
     def forward(self, x, time, y=None):
         """
-        前向传播
-        :param x: 输入
-        :param time: 时间
-        :param y: 标签
+        Forward
+        :param x: Input
+        :param time: Time
+        :param y: Input label
         :return: output
         """
         time = time.unsqueeze(-1).type(torch.float)
@@ -107,9 +107,9 @@ class UNet(nn.Module):
 
 
 if __name__ == "__main__":
-    # 无条件
+    # Unconditional
     net = UNet(device="cpu", image_size=128)
-    # 有条件
+    # Conditional
     # net = UNet(num_classes=10, device="cpu", image_size=128)
     print(sum([p.numel() for p in net.parameters()]))
     x = torch.randn(1, 3, 128, 128)
