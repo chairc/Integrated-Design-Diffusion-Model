@@ -106,7 +106,7 @@ if __name__ == "__main__":
     # Option: ddpm/ddim
     parser.add_argument("--sample", type=str, default="ddpm")
 
-    # ==========================开启条件生成分界线==========================
+    # =====================Enable the conditional generation (if '--conditional' is set to 'True')=====================
     # Number of classes (required)
     parser.add_argument("--num_classes", type=int, default=10)
     # Class name (required)
