@@ -69,7 +69,7 @@ def get_dataset(args, distributed=False):
     You can specify the root directory where the dataset is located by passing the 'dataset_path' parameter,
     and perform operations such as image preprocessing and label conversion through other optional parameters.
 
-    关于分布式训练
+    About Distributed Training:
     +------------------------+                     +-----------+
     |DistributedSampler      |                     |DataLoader |
     |                        |     2 indices       |           |
