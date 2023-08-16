@@ -52,7 +52,7 @@ class Diffusion(BaseDiffusion):
             # Input dim: [n, 3, img_size, img_size]
             x = torch.randn((n, 3, self.img_size, self.img_size)).to(self.device)
             # 'reversed(range(1, self.noise_steps)' iterates over a sequence of integers in reverse
-            for i in tqdm(reversed(range(1, self.noise_steps)), position=0):
+            for i in tqdm(reversed(range(1, self.noise_steps)), position=0, total=self.noise_steps - 1):
                 # Time step, creating a tensor of size n
                 t = (torch.ones(n) * i).long().to(self.device)
                 # Whether the network has conditional input, such as multiple category input
