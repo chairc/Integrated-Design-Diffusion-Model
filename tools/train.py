@@ -98,6 +98,8 @@ def train(rank=None, args=None):
     start_model_interval = args.start_model_interval
     # Enable data visualization
     vis = args.vis
+    # Number of visualization images generated
+    num_vis = args.num_vis
     # Saving path
     result_path = args.result_path
     # Create data logging path
@@ -258,7 +260,8 @@ def train(rank=None, args=None):
                 # Enable visualization
                 if vis:
                     # images.shape[0] is the number of images in the current batch
-                    sampled_images = diffusion.sample(model=model, n=images.shape[0])
+                    n = num_vis if num_vis > 0 else images.shape[0]
+                    sampled_images = diffusion.sample(model=model, n=n)
                     save_images(images=sampled_images, path=os.path.join(results_vis_dir, f"{save_name}.jpg"))
                 # Saving pt files in epoch interval
                 if save_model_interval and epoch > start_model_interval:
@@ -274,8 +277,9 @@ def train(rank=None, args=None):
                 # Enable visualization
                 if vis:
                     labels = torch.arange(num_classes).long().to(device)
-                    sampled_images = diffusion.sample(model=model, n=len(labels), labels=labels, cfg_scale=cfg_scale)
-                    ema_sampled_images = diffusion.sample(model=ema_model, n=len(labels), labels=labels,
+                    n = num_vis if num_vis > 0 else len(labels)
+                    sampled_images = diffusion.sample(model=model, n=n, labels=labels, cfg_scale=cfg_scale)
+                    ema_sampled_images = diffusion.sample(model=ema_model, n=n, labels=labels,
                                                           cfg_scale=cfg_scale)
                     plot_images(images=sampled_images)
                     save_images(images=sampled_images, path=os.path.join(results_vis_dir, f"{save_name}.jpg"))
@@ -361,6 +365,9 @@ if __name__ == "__main__":
     parser.add_argument("--start_model_interval", type=int, default=-1)
     # Enable visualization of dataset information for model selection based on visualization (recommend)
     parser.add_argument("--vis", type=bool, default=True)
+    # Number of visualization images generated (recommend)
+    # If not filled, the default is the number of image classes (unconditional) or images.shape[0] (conditional)
+    parser.add_argument("--num_vis", type=int, default=-1)
     # Resume interrupted training (needed)
     # 1. Set to 'True' to resume interrupted training.
     # 2. Set the resume interrupted epoch number
