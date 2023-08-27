@@ -42,7 +42,7 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 - [ ] 2. Use a more advanced U-Net network model.
 - [ ] 3. Generate larger-sized images.
 - [x] 4. Implement multi-GPU distributed training. (2023-07-15)
-- [ ] 5. Enable fast deployment on cloud servers.
+- [x] 5. Enable fast deployment and API on cloud servers. (2023-08-28)
 - [x] 6. Adding DDIM Sampling Method. (2023-08-03)
 
 ### Training

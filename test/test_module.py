@@ -6,7 +6,9 @@
     @Site   : https://github.com/chairc
 """
 import argparse
+import json
 import os
+import socket
 
 import torch
 import unittest
@@ -124,6 +126,28 @@ class TestModule(unittest.TestCase):
         y = x.new_tensor([1] * x.shape[0]).long().to(device)
         print(net)
         summary(model=net, input_data=[x, t, y])
+
+    def test_send_message(self):
+        """
+        Test local send message to deploy.py
+        :return: None
+        """
+        test_json = {"conditional": True, "sample": "ddpm", "image_size": 64, "num_images": 2,
+                     "weight_path": "/your/test/model/path/test.pt",
+                     "result_path": "/your/results/deploy",
+                     "num_classes": 6, "class_name": 1, "cfg_scale": 3}
+        logger.info(msg=f"Test json: {test_json}")
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # host = "127.0.1.1"
+        # host = "192.168.16.1"
+        host = socket.gethostname()
+        client_socket.bind((host, 12346))
+        client_socket.connect((host, 12345))
+        msg = json.dumps(test_json)
+        client_socket.send(msg.encode("utf-8"))
+        client_socket.send("-iccv-over".encode("utf-8"))
+        client_socket.close()
+        logger.info(msg="Send message successfully!")
 
 
 if __name__ == "__main__":
