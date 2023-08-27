@@ -165,7 +165,7 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 
 ### Result
 
-We conducted training on the following four datasets using the `DDPM` sampler with an image size of `64*64`. The datasets are `cifar10`, `NEUDET`, `NRSD-MN`, and `WOOD`. The results are shown in the following figure:
+We conducted training on the following four datasets using the `DDPM` sampler with an image size of `64*64`. we also enabled `conditional`, using the `gelu` activation function, `linear` learning function and  setting learning rate to `3e-4`. The datasets are `cifar10`, `NEUDET`, `NRSD-MN`, and `WOOD` in `300` epochs. The results are shown in the following figure:
 
 **cifar10**
 
