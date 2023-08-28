@@ -17,7 +17,7 @@ class UNet(nn.Module):
     """
 
     def __init__(self, in_channel=3, out_channel=3, channel=None, time_channel=256, num_classes=None, image_size=64,
-                 device="cpu"):
+                 device="cpu", act="silu"):
         """
         Initialize the UNet network
         :param in_channel: Input channel
@@ -27,6 +27,7 @@ class UNet(nn.Module):
         :param num_classes: Number of classes
         :param image_size: Adaptive image size
         :param device: Device type
+        :param act: Activation function
         """
         super().__init__()
         if channel is None:
@@ -34,24 +35,24 @@ class UNet(nn.Module):
         self.device = device
         self.time_channel = time_channel
         self.image_size = image_size
-        self.inc = DoubleConv(in_channels=in_channel, out_channels=channel[0])
-        self.down1 = DownBlock(in_channels=channel[0], out_channels=channel[1])
-        self.sa1 = SelfAttention(channels=channel[1], size=int(self.image_size / 2))
-        self.down2 = DownBlock(in_channels=channel[1], out_channels=channel[2])
-        self.sa2 = SelfAttention(channels=channel[2], size=int(self.image_size / 4))
-        self.down3 = DownBlock(in_channels=channel[2], out_channels=channel[2])
-        self.sa3 = SelfAttention(channels=channel[2], size=int(self.image_size / 8))
+        self.inc = DoubleConv(in_channels=in_channel, out_channels=channel[0], act=act)
+        self.down1 = DownBlock(in_channels=channel[0], out_channels=channel[1], act=act)
+        self.sa1 = SelfAttention(channels=channel[1], size=int(self.image_size / 2), act=act)
+        self.down2 = DownBlock(in_channels=channel[1], out_channels=channel[2], act=act)
+        self.sa2 = SelfAttention(channels=channel[2], size=int(self.image_size / 4), act=act)
+        self.down3 = DownBlock(in_channels=channel[2], out_channels=channel[2], act=act)
+        self.sa3 = SelfAttention(channels=channel[2], size=int(self.image_size / 8), act=act)
 
-        self.bot1 = DoubleConv(in_channels=channel[2], out_channels=channel[3])
-        self.bot2 = DoubleConv(in_channels=channel[3], out_channels=channel[3])
-        self.bot3 = DoubleConv(in_channels=channel[3], out_channels=channel[2])
+        self.bot1 = DoubleConv(in_channels=channel[2], out_channels=channel[3], act=act)
+        self.bot2 = DoubleConv(in_channels=channel[3], out_channels=channel[3], act=act)
+        self.bot3 = DoubleConv(in_channels=channel[3], out_channels=channel[2], act=act)
 
-        self.up1 = UpBlock(in_channels=channel[3], out_channels=channel[1])
-        self.sa4 = SelfAttention(channels=channel[1], size=int(self.image_size / 4))
-        self.up2 = UpBlock(in_channels=channel[2], out_channels=channel[0])
-        self.sa5 = SelfAttention(channels=channel[0], size=int(self.image_size / 2))
-        self.up3 = UpBlock(in_channels=channel[1], out_channels=channel[0])
-        self.sa6 = SelfAttention(channels=channel[0], size=int(self.image_size))
+        self.up1 = UpBlock(in_channels=channel[3], out_channels=channel[1], act=act)
+        self.sa4 = SelfAttention(channels=channel[1], size=int(self.image_size / 4), act=act)
+        self.up2 = UpBlock(in_channels=channel[2], out_channels=channel[0], act=act)
+        self.sa5 = SelfAttention(channels=channel[0], size=int(self.image_size / 2), act=act)
+        self.up3 = UpBlock(in_channels=channel[1], out_channels=channel[0], act=act)
+        self.sa6 = SelfAttention(channels=channel[0], size=int(self.image_size), act=act)
         self.outc = nn.Conv2d(in_channels=channel[0], out_channels=out_channel, kernel_size=1)
 
         if num_classes is not None:

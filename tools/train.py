@@ -52,6 +52,8 @@ def train(rank=None, args=None):
     image_size = args.image_size
     # Select optimizer
     optim = args.optim
+    # Select activation function
+    act = args.act
     # Learning rate
     init_lr = args.lr
     # Learning rate function
@@ -113,9 +115,9 @@ def train(rank=None, args=None):
     resume = args.resume
     # Model
     if not conditional:
-        model = UNet(device=device, image_size=image_size).to(device)
+        model = UNet(device=device, image_size=image_size, act=act).to(device)
     else:
-        model = UNet(num_classes=num_classes, device=device, image_size=image_size).to(device)
+        model = UNet(num_classes=num_classes, device=device, image_size=image_size, act=act).to(device)
     # Distributed training
     if distributed:
         model = nn.parallel.DistributedDataParallel(module=model, device_ids=[device], find_unused_parameters=True)
@@ -350,6 +352,9 @@ if __name__ == "__main__":
     # Set optimizer (needed)
     # Option: adam/adamw
     parser.add_argument("--optim", type=str, default="adamw")
+    # Set activation function (needed)
+    # Option: gelu/silu/relu/relu6/lrelu
+    parser.add_argument("--act", type=str, default="gelu")
     # Learning rate (needed)
     parser.add_argument("--lr", type=int, default=3e-4)
     # Learning rate function (needed)

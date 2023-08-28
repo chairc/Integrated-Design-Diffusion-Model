@@ -5,9 +5,38 @@
     @Author : chairc
     @Site   : https://github.com/chairc
 """
+import logging
+import coloredlogs
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+logger = logging.getLogger(__name__)
+coloredlogs.install(level="INFO")
+
+
+def get_activation_function(name="silu", inplace=False):
+    """
+    Get activation function
+    :param name: Activation function name
+    :param inplace: can optionally do the operation in-place
+    :return Activation function
+    """
+    if name == "relu":
+        act = nn.ReLU(inplace=inplace)
+    elif name == "relu6":
+        act = nn.ReLU6(inplace=inplace)
+    elif name == "silu":
+        act = nn.SiLU(inplace=inplace)
+    elif name == "lrelu":
+        act = nn.LeakyReLU(0.1, inplace=inplace)
+    elif name == "gelu":
+        act = nn.GELU()
+    else:
+        logger.warning(msg=f"Unsupported activation function type: {name}")
+        act = nn.SiLU(inplace=inplace)
+    return act
 
 
 class EMA:
@@ -76,11 +105,12 @@ class SelfAttention(nn.Module):
     SelfAttention block
     """
 
-    def __init__(self, channels, size):
+    def __init__(self, channels, size, act="silu"):
         """
         Initialize the self-attention block
         :param channels: Channels
         :param size: Size
+        :param act: Activation function
         """
         super(SelfAttention, self).__init__()
         self.channels = channels
@@ -92,7 +122,7 @@ class SelfAttention(nn.Module):
         self.ff_self = nn.Sequential(
             nn.LayerNorm(normalized_shape=[channels]),
             nn.Linear(in_features=channels, out_features=channels),
-            nn.GELU(),
+            get_activation_function(name=act),
             nn.Linear(in_features=channels, out_features=channels),
         )
 
@@ -119,22 +149,24 @@ class DoubleConv(nn.Module):
     Double convolution
     """
 
-    def __init__(self, in_channels, out_channels, mid_channels=None, residual=False):
+    def __init__(self, in_channels, out_channels, mid_channels=None, residual=False, act="silu"):
         """
         Initialize the double convolution block
         :param in_channels: Input channels
         :param out_channels: Output channels
         :param mid_channels: Middle channels
         :param residual: Whether residual
+        :param act: Activation function
         """
         super().__init__()
         self.residual = residual
         if not mid_channels:
             mid_channels = out_channels
+        self.act = act
         self.double_conv = nn.Sequential(
             nn.Conv2d(in_channels=in_channels, out_channels=mid_channels, kernel_size=3, padding=1, bias=False),
             nn.GroupNorm(num_groups=1, num_channels=mid_channels),
-            nn.GELU(),
+            get_activation_function(name=self.act),
             nn.Conv2d(in_channels=mid_channels, out_channels=out_channels, kernel_size=3, padding=1, bias=False),
             nn.GroupNorm(num_groups=1, num_channels=out_channels),
         )
@@ -146,7 +178,20 @@ class DoubleConv(nn.Module):
         :return: Residual or non-residual results
         """
         if self.residual:
-            return F.gelu(x + self.double_conv(x))
+            out = x + self.double_conv(x)
+            if self.act == "relu":
+                return F.relu(out)
+            elif self.act == "relu6":
+                return F.relu6(out)
+            elif self.act == "silu":
+                return F.silu(out)
+            elif self.act == "lrelu":
+                return F.leaky_relu(out)
+            elif self.act == "gelu":
+                return F.gelu(out)
+            else:
+                logger.warning(msg=f"Unsupported activation function type: {self.act}")
+                return F.silu(out)
         else:
             return self.double_conv(x)
 
@@ -156,18 +201,19 @@ class DownBlock(nn.Module):
     Downsample block
     """
 
-    def __init__(self, in_channels, out_channels, emb_channels=256):
+    def __init__(self, in_channels, out_channels, emb_channels=256, act="silu"):
         """
         Initialize the downsample block
         :param in_channels: Input channels
         :param out_channels: Output channels
         :param emb_channels: Embed channels
+        :param act: Activation function
         """
         super().__init__()
         self.maxpool_conv = nn.Sequential(
             nn.MaxPool2d(2),
-            DoubleConv(in_channels=in_channels, out_channels=in_channels, residual=True),
-            DoubleConv(in_channels=in_channels, out_channels=out_channels),
+            DoubleConv(in_channels=in_channels, out_channels=in_channels, residual=True, act=act),
+            DoubleConv(in_channels=in_channels, out_channels=out_channels, act=act),
         )
 
         self.emb_layer = nn.Sequential(
@@ -192,19 +238,20 @@ class UpBlock(nn.Module):
     Upsample Block
     """
 
-    def __init__(self, in_channels, out_channels, emb_channels=256):
+    def __init__(self, in_channels, out_channels, emb_channels=256, act="silu"):
         """
         Initialize the upsample block
         :param in_channels: Input channels
         :param out_channels: Output channels
         :param emb_channels: Embed channels
+        :param act: Activation function
         """
         super().__init__()
 
         self.up = nn.Upsample(scale_factor=2, mode="bilinear", align_corners=True)
         self.conv = nn.Sequential(
-            DoubleConv(in_channels=in_channels, out_channels=in_channels, residual=True),
-            DoubleConv(in_channels=in_channels, out_channels=out_channels, mid_channels=in_channels // 2),
+            DoubleConv(in_channels=in_channels, out_channels=in_channels, residual=True, act=act),
+            DoubleConv(in_channels=in_channels, out_channels=out_channels, mid_channels=in_channels // 2, act=act),
         )
 
         self.emb_layer = nn.Sequential(

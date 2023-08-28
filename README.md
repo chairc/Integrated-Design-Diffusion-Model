@@ -113,6 +113,7 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 | --dataset_path         |             | Dataset path                    | str  | Path to the conditional dataset, such as CIFAR-10, with each class in a separate folder, or the path to the unconditional dataset with all images in one folder |
 | --fp16                 |             | Half precision training         | bool | Enable half precision training. It effectively reduces GPU memory usage but may affect training accuracy and results |
 | --optim                |             | Optimizer                       | str  | Optimizer selection. Currently supports Adam and AdamW       |
+| --act | | Activation function | str | Activation function selection. Currently supports gelu, silu, relu, relu6 and lrelu |
 | --lr                   |             | Learning rate                   | int  | Initial learning rate. Currently only supports linear learning rate |
 | --lr_func | | Learning rate schedule | str | Setting learning rate schedule, currently supporting linear, cosine, and warmup_cosine. |
 | --result_path          |             | Save path                       | str  | Path to save the training results                            |
