@@ -8,6 +8,7 @@
 import os
 import logging
 import shutil
+import time
 
 import coloredlogs
 import torch
@@ -153,3 +154,10 @@ def delete_files(path):
         logger.info(msg=f"Folder '{path}' deleted.")
     else:
         logger.warning(msg=f"Folder '{path}' does not exist.")
+
+
+def save_train_logging(arg, save_path):
+    with open(file=f"{save_path}/train.log", mode="a") as f:
+        current_time = time.strftime("%H:%M:%S", time.localtime())
+        f.write(f"{current_time}: {arg}\n")
+    f.close()

@@ -28,7 +28,7 @@ from model.modules import EMA
 from model.network import UNet
 from utils.initializer import device_initializer, seed_initializer, load_model_weight_initializer
 from utils.lr_scheduler import set_cosine_lr
-from utils.utils import plot_images, save_images, get_dataset, setup_logging
+from utils.utils import plot_images, save_images, get_dataset, setup_logging, save_train_logging
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
@@ -161,6 +161,8 @@ def train(rank=None, args=None):
         logger.warning(msg=f"[{device}]: Setting sample error, we has been automatically set to ddpm.")
     # Tensorboard
     tb_logger = SummaryWriter(log_dir=results_tb_dir)
+    # Train log
+    save_train_logging(args, results_dir)
     # Number of dataset batches in the dataloader
     len_dataloader = len(dataloader)
     # Exponential Moving Average (EMA) may not be as dominant for single class as for multi class
