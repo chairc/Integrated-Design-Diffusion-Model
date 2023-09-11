@@ -249,10 +249,6 @@ def train(rank=None, args=None):
             tb_logger.add_scalar(tag=f"[{device}]: MSE", scalar_value=loss.item(),
                                  global_step=epoch * len_dataloader + i)
 
-        # Synchronization during distributed training
-        if distributed:
-            dist.barrier()
-
         # Saving and validating models in the main process
         if save_models:
             # Saving model
@@ -295,6 +291,12 @@ def train(rank=None, args=None):
                     logger.info(msg=f"Save the {save_name}.pt, ema_{save_name}.pt, and optim_{save_name}.pt.")
                 logger.info(msg="Save the model.")
         logger.info(msg=f"[{device}]: Finish epoch {epoch}:")
+
+        # Synchronization during distributed training
+        if distributed:
+            logger.info(msg=f"[{device}]: Synchronization during distributed training.")
+            dist.barrier()
+
     logger.info(msg=f"[{device}]: Finish training.")
 
     # Clean up the distributed environment
