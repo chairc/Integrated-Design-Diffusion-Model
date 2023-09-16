@@ -31,6 +31,7 @@ def generate(args):
     :return: None
     """
     logger.info(msg="Start generation.")
+    logger.info(msg=f"Input params: {args}")
     # Enable conditional generation
     conditional = args.conditional
     # Sample type
@@ -39,6 +40,8 @@ def generate(args):
     generate_name = args.generate_name
     # Image size
     image_size = args.image_size
+    # Select activation function
+    act = args.act
     # Number of images
     num_images = args.num_images
     # Weight path
@@ -63,12 +66,12 @@ def generate(args):
         class_name = args.class_name
         # classifier-free guidance interpolation weight
         cfg_scale = args.cfg_scale
-        model = UNet(num_classes=num_classes, device=device, image_size=image_size).to(device)
+        model = UNet(num_classes=num_classes, device=device, image_size=image_size, act=act).to(device)
         load_model_weight_initializer(model=model, weight_path=weight_path, device=device, is_train=False)
         y = torch.Tensor([class_name] * num_images).long().to(device)
         x = diffusion.sample(model=model, n=num_images, labels=y, cfg_scale=cfg_scale)
     else:
-        model = UNet(device=device, image_size=image_size).to(device)
+        model = UNet(device=device, image_size=image_size, act=act).to(device)
         load_model_weight_initializer(model=model, weight_path=weight_path, device=device, is_train=False)
         x = diffusion.sample(model=model, n=num_images)
     # If there is no path information, it will only be displayed
@@ -105,6 +108,10 @@ if __name__ == "__main__":
     # If not set, the default is for 'ddpm'. You can set it to either 'ddpm' or 'ddim'.
     # Option: ddpm/ddim
     parser.add_argument("--sample", type=str, default="ddpm")
+    # Set activation function (needed)
+    # If you do not set the same activation function as the model, mosaic phenomenon will occur.
+    # Option: gelu/silu/relu/relu6/lrelu
+    parser.add_argument("--act", type=str, default="gelu")
 
     # =====================Enable the conditional generation (if '--conditional' is set to 'True')=====================
     # Number of classes (required)
