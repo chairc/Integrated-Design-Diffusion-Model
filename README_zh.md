@@ -12,6 +12,10 @@
 
 ```yaml
 ├── datasets
+│   └── dataset_demo
+│       ├── class_1
+│       ├── class_2
+│       └── class_3
 ├── model
 │   ├── base.py
 │   ├── ddim.py
@@ -22,11 +26,10 @@
 ├── test
 │   ├── noising_test
 │   │   ├── landscape
-│   │   │   └── noising_test.jpg
 │   │   └── noise
-│   │       └── noise.jpg
 │   └── test_module.py
 ├── tools
+│   ├── deploy.py
 │   ├── generate.py
 │   └── train.py
 ├── utils
@@ -43,7 +46,8 @@
 - [ ] 3. 更大尺寸的生成图像
 - [x] 4. 多卡分布式训练（2023-07-15）
 - [x] 5. 云服务器快速部署和接口（2023-08-28）
-- [x] 6. 增加DDIM采样方法(2023-08-03)
+- [x] 6. 增加DDIM采样方法（2023-08-03）
+- [x] 7. 支持其它图像生成（2023-09-16）
 
 ### 训练
 
@@ -168,6 +172,8 @@
 | --num_images    |          | 生成图片个数                     |   int    | 单次生成图片个数                                             |
 | --weight_path   |          | 权重路径                         |   str    | 模型权重路径，网络生成需要加载文件                           |
 | --result_path   |          | 保存路径                         |   str    | 保存路径                                                     |
+| --sample        |          | 采样方式                         |   str    | 设置采样器类别，当前支持ddpm，ddim                           |
+| --act           |          | 激活函数                         |   str    | 激活函数选择，目前支持gelu、silu、relu、relu6和lrelu。如果不选择，会产生马赛克现象 |
 | --num_classes   |    是    | 类别个数                         |   int    | 类别个数，用于区分类别                                       |
 | --class_name    |    是    | 类别名称                         |   int    | 类别序号，用于对指定类别生成                                 |
 | --cfg_scale     |    是    | classifier-free guidance插值权重 |   int    | classifier-free guidance插值权重，用户更好生成模型效果       |
@@ -227,6 +233,18 @@
 **WOOD**
 
 ![wood_495](assets/wood_495.jpg)
+
+**Animate face（整活生成）**
+
+![model_428_ema](assets/animate_face_428_ema.jpg)
+
+![model_488_ema](assets/animate_face_488_ema.jpg)
+
+![model_497_ema](assets/animate_face_497_ema.jpg)
+
+![model_499_ema](assets/animate_face_499_ema.jpg)
+
+![model_459_ema](assets/animate_face_459_ema.jpg)
 
 ### 部署
 

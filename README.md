@@ -12,6 +12,10 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 
 ```yaml
 ├── datasets
+│   └── dataset_demo
+│       ├── class_1
+│       ├── class_2
+│       └── class_3
 ├── model
 │   ├── base.py
 │   ├── ddim.py
@@ -22,11 +26,10 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 ├── test
 │   ├── noising_test
 │   │   ├── landscape
-│   │   │   └── noising_test.jpg
 │   │   └── noise
-│   │       └── noise.jpg
 │   └── test_module.py
 ├── tools
+│   ├── deploy.py
 │   ├── generate.py
 │   └── train.py
 ├── utils
@@ -44,6 +47,7 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 - [x] 4. Implement multi-GPU distributed training. (2023-07-15)
 - [x] 5. Enable fast deployment and API on cloud servers. (2023-08-28)
 - [x] 6. Adding DDIM Sampling Method. (2023-08-03)
+- [x] 7. Support other image generation. (2023-09-16)
 
 ### Training
 
@@ -160,6 +164,8 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 | --num_images    |             | Number of generated images      | int  | Number of images to generate                                 |
 | --weight_path   |             | Path to model weights           | str  | Path to the model weights file, required for network generation |
 | --result_path   |             | Save path                       | str  | Path to save the generated images                            |
+| --sample        |             | Sampling method                 | str  | Set the sampling method type, currently supporting DDPM and DDIM. |
+| --act           |             | Activation function             | str  | Activation function selection. Currently supports gelu, silu, relu, relu6 and lrelu. If you do not set the same activation function as the model, mosaic phenomenon will occur. |
 | --num_classes   |      ✓      | Number of classes               | int  | Number of classes for classification                         |
 | --class_name    |      ✓      | Class name                      | int  | Index of the class to generate images for                    |
 | --cfg_scale     |      ✓      | Classifier-free guidance weight | int  | Weight for classifier-free guidance interpolation, for better generation model performance |
@@ -217,6 +223,18 @@ We conducted training on the following four datasets using the `DDPM` sampler wi
 **WOOD**
 
 ![wood_495](assets/wood_495.jpg)
+
+**Animate face (~~JUST FOR FUN~~)**
+
+![model_428_ema](assets/animate_face_428_ema.jpg)
+
+![model_488_ema](assets/animate_face_488_ema.jpg)
+
+![model_497_ema](assets/animate_face_497_ema.jpg)
+
+![model_499_ema](assets/animate_face_499_ema.jpg)
+
+![model_459_ema](assets/animate_face_459_ema.jpg)
 
 ### Deployment
 
