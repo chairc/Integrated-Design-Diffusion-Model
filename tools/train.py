@@ -281,7 +281,8 @@ def train(rank=None, args=None):
                     sampled_images = diffusion.sample(model=model, n=n, labels=labels, cfg_scale=cfg_scale)
                     ema_sampled_images = diffusion.sample(model=ema_model, n=n, labels=labels,
                                                           cfg_scale=cfg_scale)
-                    plot_images(images=sampled_images)
+                    # This is a method to display the results of each model during training and can be commented out
+                    # plot_images(images=sampled_images)
                     save_images(images=sampled_images, path=os.path.join(results_vis_dir, f"{save_name}.jpg"))
                     save_images(images=ema_sampled_images, path=os.path.join(results_vis_dir, f"{save_name}_ema.jpg"))
                 if save_model_interval and epoch > start_model_interval:
