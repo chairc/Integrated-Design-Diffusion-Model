@@ -51,6 +51,59 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 
 ### Training
 
+#### Start Your First Training (Using cifar10 as an Example, Single GPU Mode)
+
+1. **Import the Dataset**
+
+   First, upload the dataset to the target folder `datasets`. After uploading, the folder structure (for example, under the `cifar10` folder, there are folders for each class; `class0` folder contains all images for class 0) should look like the following:
+
+   ```yaml
+    datasets
+    └── cifar10
+        ├── class0
+        ├── class1
+        ├── class2
+        ├── class3
+        ├── class4
+        ├── class5
+        ├── class6
+        ├── class7
+        ├── class8
+        └── class9
+   ```
+
+   At this point, your pre-training setup is complete.
+
+2. **Set Training Parameters**
+
+   Open the `train.py` file and modify the `parser` parameters inside the `if __name__ == "__main__":` block.
+
+   Set the `--conditional` parameter to `True` because it's a multi-class training, so this needs to be enabled. For single-class, you can either not enable it or enable it.
+
+   Set the `--run_name` parameter to the desired file name you want to create, for example, `cifar_exp1`.
+
+   Set the `--dataset_path` parameter to the file path on your local or remote server, such as `/your/local/or/remote/server/file/path/datasets/cifar10`.
+
+   Set the `--result_path` parameter to the file path on your local or remote server where you want to save the results.
+
+   Set the `--num_classes` parameter to `10` (this is the total number of your classes.
+
+   Set any other custom parameters as needed. If the error `CUDA out of memory` is shown in your terminal, turn down `--batch_size` and `num_workers`.
+
+   For detailed commands, refer to the **Training Parameters** section.
+
+3. **Wait for the Training Process**
+
+   After clicking `run`, the project will create a `cifar_exp1` folder in the `results` folder. This folder will contain training log files, model training files, model EMA (Exponential Moving Average) files, model optimizer files, all files saved during the last training iteration, and generated images after evaluation.
+
+4. **View the Results**
+
+   You can find the training results in the `results/cifar_exp1` folder.
+
+
+
+**↓↓↓↓↓↓↓↓↓↓The following is an explanation of various training methods and detailed training parameters↓↓↓↓↓↓↓↓↓↓**
+
 #### Normal Training
 
 1. Take the `landscape` dataset as an example and place the dataset files in the `datasets` folder. The overall path of the dataset should be `/your/path/datasets/landscape`, and the image files should be located at `/your/path/datasets/landscape/*.jpg`.

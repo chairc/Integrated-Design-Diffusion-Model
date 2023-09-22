@@ -51,6 +51,58 @@
 
 ### 训练
 
+#### 开始你的第一个训练（以cifar10为例，模式单卡）
+
+1. **导入数据集** 
+
+   首先，将数据集上传至目标文件夹`datasets`中。上传后文件夹格式（例如：cifar10文件夹下存放着所有类别；class0文件夹下存储着class0这个类别的所有图片）如下方列表所示：
+   ```yaml
+    datasets
+    └── cifar10
+        ├── class0
+        ├── class1
+        ├── class2
+        ├── class3
+        ├── class4
+        ├── class5
+        ├── class6
+        ├── class7
+        ├── class8
+        └── class9
+   ```
+
+   此时你的训练前准备已经完毕。
+
+2. **设置训练参数**
+
+   打开`train.py`文件，修改`if __name__ == "__main__":`中的`parser`参数；
+
+   设置`--conditional`参数为`True`，因为是多类别训练，所以需要开启，单类别可以不开启也可以开启；
+
+   设置`--run_name`参数为你想创建的文件名称，例如`cifar_exp1`；
+
+   设置`--dataset_path`参数为`/你的/本地/或/远程服务器/文件/地址/datasets/cifar10`；
+
+   设置`--result_path`参数为`/你的/本地/或/远程服务器/文件/地址/results`；
+
+   设置`--num_classes`参数为`10`，这是你的类别总数；
+
+   设置更多参数（自定义），如果报`CUDA out of memory`错误，将`--batch_size`、`--num_workers`调小；
+
+   详细命令可参考**训练参数**。
+
+3. **等待训练过程**
+
+   点击`run`运行后，项目会在`results`文件夹中生成`cifar_exp1`文件夹，该文件夹中会保存训练日志文件、模型训练文件、模型EMA文件、模型优化器文件、训练的所有最后一次保存的文件和评估后生成的图片。
+
+4. **查看结果**
+
+   找到`results/cifar_exp1`文件夹即可查看训练结果。
+
+
+
+**↓↓↓↓↓↓↓↓↓↓下方为多种训练方式、训练详细参数讲解↓↓↓↓↓↓↓↓↓↓**
+
 #### 普通训练
 
 1. 以`landscape`数据集为例，将数据集文件放入`datasets`文件夹中，该数据集的总路径如下`/your/path/datasets/landscape`，数据集图片路径如下`/your/path/datasets/landscape/*.jpg`
