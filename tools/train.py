@@ -391,7 +391,7 @@ if __name__ == "__main__":
 
     # =================================Enable distributed training (if applicable)=================================
     # Enable distributed training (needed)
-    parser.add_argument("--distributed", type=bool, default=True)
+    parser.add_argument("--distributed", type=bool, default=False)
     # Set the main GPU (required)
     # Default GPU is '0'
     parser.add_argument("--main_gpu", type=int, default=0)
