@@ -85,7 +85,7 @@
 
    设置`--result_path`参数为`/你的/本地/或/远程服务器/文件/地址/results`；
 
-   设置`--num_classes`参数为`10`，这是你的类别总数；
+   设置`--num_classes`参数为`10`，这是你的类别总数）；
 
    设置更多参数（自定义），如果报`CUDA out of memory`错误，将`--batch_size`、`--num_workers`调小；
 
@@ -105,7 +105,7 @@
 
 #### 普通训练
 
-1. 以`landscape`数据集为例，将数据集文件放入`datasets`文件夹中，该数据集的总路径如下`/your/path/datasets/landscape`，数据集图片路径如下`/your/path/datasets/landscape/*.jpg`
+1. 以`landscape`数据集为例，将数据集文件放入`datasets`文件夹中，该数据集的总路径如下`/your/path/datasets/landscape`，图片存放在`/your/path/datasets/landscape/images`，数据集图片路径如下`/your/path/datasets/landscape/images/*.jpg`
 
 2. 打开`train.py`文件，找到`--dataset_path`参数，将参数中的路径修改为数据集的总路径，例如`/your/path/datasets/landscape`
 
@@ -113,24 +113,24 @@
    **有条件训练命令**
 
    ```bash
-   python train.py --sample 'ddpm' --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path '/your/dataset/path' --result_path '/your/save/path'
+   python train.py --sample ddpm --conditional True --run_name df --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
    **无条件训练命令**
 
    ```bash
-   python train.py --sample 'ddpm' --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --dataset_path '/your/dataset/path' --result_path '/your/save/path'
+   python train.py --sample ddpm --conditional False --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
 4. 等待训练即可
 5. 若因异常原因中断训练，我们可以在`train.py`文件，首先将`--resume`设置为`True`，其次设置异常中断的迭代编号，再写入该次训练的所在文件夹（run_name），最后运行文件即可。也可以使用如下命令进行恢复：
    **有条件恢复训练命令**
 
    ```bash
-   python train.py --resume True --start_epoch 10 --load_model_dir 'df' --sample 'ddpm' --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path '/your/dataset/path' --result_path '/your/save/path'
+   python train.py --resume True --start_epoch 10 --load_model_dir df --sample ddpm --conditional True --run_name df --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
    **无条件恢复训练命令**
 
    ```bash
-   python train.py --resume True --start_epoch 10 --load_model_dir 'df' --sample 'ddpm' --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --dataset_path '/your/dataset/path' --result_path '/your/save/path'
+   python train.py --resume True --start_epoch 10 --load_model_dir df --sample ddpm --conditional False --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
 
 #### 分布式训练
@@ -144,13 +144,13 @@
    **有条件训练命令**
 
    ```bash
-   python train.py --sample 'ddpm' --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path '/your/dataset/path' --result_path '/your/save/path' --distributed True --main_gpu 0 --world_size 2
+   python train.py --sample ddpm --conditional True --run_name df --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path /your/dataset/path --result_path /your/save/path --distributed True --main_gpu 0 --world_size 2
    ```
 
    **无条件训练命令**
 
    ```bash
-   python train.py --sample 'ddpm' --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --dataset_path '/your/dataset/path' --result_path '/your/save/path' --distributed True --main_gpu 0 --world_size 2
+   python train.py --sample ddpm --conditional False --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path --distributed True --main_gpu 0 --world_size 2
    ```
 
 3. 等待训练即可，中断恢复同基本训练一致。
@@ -178,7 +178,7 @@
 | --fp16                 |          | 半精度训练                       |   bool   | 开启半精度训练，有效减少显存使用，但无法保证训练精度和训练结果 |
 | --optim                |          | 优化器                           |   str    | 优化器选择，目前支持adam和adamw                              |
 | --act                  |          | 激活函数                         |   str    | 激活函数选择，目前支持gelu、silu、relu、relu6和lrelu         |
-| --lr                   |          | 学习率                           |   int    | 初始化学习率，目前仅支持线性学习率                           |
+| --lr                   |          | 学习率                           |  float   | 初始化学习率，目前仅支持线性学习率                           |
 | --lr_func              |          | 学习率方法                       |   str    | 设置学习率方法，当前支持linear、cosine和warmup_cosine        |
 | --result_path          |          | 保存路径                         |   str    | 保存路径                                                     |
 | --save_model_interval  |          | 是否每次训练储存                 |   bool   | 是否每次训练储存，根据可视化生成样本信息筛选模型             |
@@ -205,13 +205,13 @@
    **有条件生成命令**
 
    ```bash
-   python generate.py --conditional True --generate_name 'df' --num_images 8 --num_classes 10 --class_name 0 --image_size 64 --weight_path '/your/path/weight/model.pt'
+   python generate.py --conditional True --generate_name df --num_images 8 --num_classes 10 --class_name 0 --image_size 64 --weight_path /your/path/weight/model.pt
    ```
 
    **无条件生成命令**
 
    ```bash
-   python generate.py --conditional False --generate_name 'df' --num_images 8 --image_size 64 --weight_path '/your/path/weight/model.pt'
+   python generate.py --conditional False --generate_name df --num_images 8 --image_size 64 --weight_path /your/path/weight/model.pt
    ```
 
 3. 等待生成即可

@@ -106,7 +106,7 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 
 #### Normal Training
 
-1. Take the `landscape` dataset as an example and place the dataset files in the `datasets` folder. The overall path of the dataset should be `/your/path/datasets/landscape`, and the image files should be located at `/your/path/datasets/landscape/*.jpg`.
+1. Take the `landscape` dataset as an example and place the dataset files in the `datasets` folder. The overall path of the dataset should be `/your/path/datasets/landscape`, the images path should be `/your/path/datasets/landscape/images`, and the image files should be located at `/your/path/datasets/landscape/images/*.jpg`.
 
 2. Open the `train.py` file and locate the `--dataset_path` parameter. Modify the path in the parameter to the overall dataset path, for example, `/your/path/datasets/landscape`.
 
@@ -114,24 +114,24 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
    **Conditional Training Command**
 
    ```bash
-   python train.py --sample 'ddpm' --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path '/your/dataset/path' --result_path '/your/save/path'
+   python train.py --sample ddpm --conditional True --run_name df --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
    **Unconditional Training Command**
 
    ```bash
-   python train.py --sample 'ddpm' --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --dataset_path '/your/dataset/path' --result_path '/your/save/path'
+   python train.py --sample ddpm --conditional False --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
 4. Wait for the training to complete.
 5. If the training is interrupted due to any reason, you can resume it by setting `--resume` to `True` in the `train.py` file, specifying the epoch number where the interruption occurred, providing the folder name of the interrupted training (`run_name`), and running the file again. Alternatively, you can use the following command to resume the training:  
    **Conditional Resume Training Command**
 
    ```bash
-   python train.py --resume True --start_epoch 10 --load_model_dir 'df' --sample 'ddpm' --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path '/your/dataset/path' --result_path '/your/save/path'
+   python train.py --resume True --start_epoch 10 --load_model_dir df --sample ddpm --conditional True --run_name df --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
    **Unconditional Resume Training Command**
 
    ```bash
-   python train.py --resume True --start_epoch 10 --load_model_dir 'df' --sample 'ddpm' --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --dataset_path '/your/dataset/path' --result_path '/your/save/path'
+   python train.py --resume True --start_epoch 10 --load_model_dir df --sample ddpm --conditional False --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
 #### Distributed Training
 
@@ -144,13 +144,13 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
    **Conditional Distributed Training Command**
 
    ```bash
-   python train.py --sample 'ddpm' --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path '/your/dataset/path' --result_path '/your/save/path' --distributed True --main_gpu 0 --world_size 2
+   python train.py --sample ddpm --conditional True --run_name df --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path /your/dataset/path --result_path /your/save/path --distributed True --main_gpu 0 --world_size 2
    ```
 
    **Unconditional Distributed Training Command**
 
    ```bash
-   python train.py --sample 'ddpm' --conditional False --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --dataset_path '/your/dataset/path' --result_path '/your/save/path' --distributed True --main_gpu 0 --world_size 2
+   python train.py --sample ddpm --conditional False --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path --distributed True --main_gpu 0 --world_size 2
    ```
 
 4. Wait for the training to complete. Interrupt recovery is the same as basic training.
@@ -175,7 +175,7 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 | --fp16                 |             | Half precision training         | bool | Enable half precision training. It effectively reduces GPU memory usage but may affect training accuracy and results |
 | --optim                |             | Optimizer                       | str  | Optimizer selection. Currently supports Adam and AdamW       |
 | --act | | Activation function | str | Activation function selection. Currently supports gelu, silu, relu, relu6 and lrelu |
-| --lr                   |             | Learning rate                   | int  | Initial learning rate. Currently only supports linear learning rate |
+| --lr                   |             | Learning rate                   | float | Initial learning rate. Currently only supports linear learning rate |
 | --lr_func | | Learning rate schedule | str | Setting learning rate schedule, currently supporting linear, cosine, and warmup_cosine. |
 | --result_path          |             | Save path                       | str  | Path to save the training results                            |
 | --save_model_interval  |             | Save model after each training  | bool | Whether to save the model after each training iteration for model selection based on visualization |
@@ -200,13 +200,13 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
    **Conditional Generation Command**
 
    ```bash
-   python generate.py --conditional True --generate_name 'df' --num_images 8 --num_classes 10 --class_name 0 --image_size 64 --weight_path '/your/path/weight/model.pt'
+   python generate.py --conditional True --generate_name df --num_images 8 --num_classes 10 --class_name 0 --image_size 64 --weight_path /your/path/weight/model.pt
    ```
 
    **Unconditional Generation Command**
 
    ```bash
-   python generate.py --conditional False --generate_name 'df' --num_images 8 --image_size 64 --weight_path '/your/path/weight/model.pt'
+   python generate.py --conditional False --generate_name df --num_images 8 --image_size 64 --weight_path /your/path/weight/model.pt
    ```
 
 3. Wait for the generation process to complete.
