@@ -360,7 +360,7 @@ if __name__ == "__main__":
     # Option: gelu/silu/relu/relu6/lrelu
     parser.add_argument("--act", type=str, default="gelu")
     # Learning rate (needed)
-    parser.add_argument("--lr", type=int, default=3e-4)
+    parser.add_argument("--lr", type=float, default=3e-4)
     # Learning rate function (needed)
     # Option: linear/cosine/warmup_cosine
     parser.add_argument("--lr_func", type=str, default="")
