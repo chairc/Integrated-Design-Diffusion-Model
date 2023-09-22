@@ -89,7 +89,7 @@
 
 3. 我们有两种参数设置方法，其一是直接对`train.py`文件`if __name__ == "__main__":`中的`parser`进行设置；其二是在控制台在`/your/path/Defect-Diffiusion-Model/tools`路径下输入以下命令：
 
-**有条件训练命令**
+   **有条件训练命令**
 
    ```bash
    python train.py --sample 'ddpm' --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path '/your/dataset/path' --result_path '/your/save/path' --distributed True --main_gpu 0 --world_size 2
@@ -103,7 +103,11 @@
 
 3. 等待训练即可，中断恢复同基本训练一致。
 
+![IDDM分布式训练过程](assets/IDDM_training.png)
 
+
+
+#### 训练参数
 
 
 **参数讲解**
@@ -160,7 +164,7 @@
 
 3. 等待生成即可
 
-
+#### 生成参数
 
 **参数讲解**
 
@@ -184,13 +188,13 @@
 
 我们在以下4个数据集做了训练，开启`conditional`，采样器为`DDPM`，图片尺寸均为`64*64`，激活函数为`gelu`，学习率为`3e-4`，采用`线性`学习方法，迭代次数为`300`，分别是`cifar10`，`NEUDET`，`NRSD-MN`和`WOOD`。结果如下图所示：
 
-**cifar10**
+#### cifar10
 
 ![cifar_244_ema](assets/cifar_244_ema.jpg)
 
 ![cifar_294_ema](assets/cifar_294_ema.jpg)
 
-**NEUDET**
+#### NEUDET
 
 ![neudet_290_ema](assets/neudet_290_ema.jpg)
 
@@ -206,7 +210,7 @@
 
 ![neudet_298_ema](assets/neudet_298_ema.jpg)
 
-**NRSD**
+#### NRSD
 
 ![nrsd_180_ema](assets/nrsd_180_ema.jpg)
 
@@ -230,11 +234,11 @@
 
 ![nrsd_298_ema](assets/nrsd_298_ema.jpg)
 
-**WOOD**
+#### WOOD
 
 ![wood_495](assets/wood_495.jpg)
 
-**Animate face（整活生成）**
+#### Animate face（整活生成）
 
 ![model_428_ema](assets/animate_face_428_ema.jpg)
 

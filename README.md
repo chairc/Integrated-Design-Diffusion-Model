@@ -88,7 +88,7 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 
 3. There are two methods for setting the parameters. One is to directly modify the `parser` in the `train.py` file under the condition `if __name__ == "__main__":`. The other is to run the following command in the console under the path `/your/path/Defect-Diffiusion-Model/tools`:
 
-**Conditional Distributed Training Command**
+   **Conditional Distributed Training Command**
 
    ```bash
    python train.py --sample 'ddpm' --conditional True --run_name 'df' --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path '/your/dataset/path' --result_path '/your/save/path' --distributed True --main_gpu 0 --world_size 2
@@ -101,6 +101,10 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
    ```
 
 4. Wait for the training to complete. Interrupt recovery is the same as basic training.
+
+![IDDM Distributed Training](assets/IDDM_training.png)
+
+#### Training Parameters
 
 **Parameter Explanation**
 
@@ -154,6 +158,8 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 
 3. Wait for the generation process to complete.
 
+#### Generation Parameters
+
 **Parameter Explanation**
 
 | Parameter Name  | Conditional | Usage                           | Type | Description                                                  |
@@ -174,13 +180,13 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 
 We conducted training on the following four datasets using the `DDPM` sampler with an image size of `64*64`. we also enabled `conditional`, using the `gelu` activation function, `linear` learning function and  setting learning rate to `3e-4`. The datasets are `cifar10`, `NEUDET`, `NRSD-MN`, and `WOOD` in `300` epochs. The results are shown in the following figure:
 
-**cifar10**
+#### cifar10
 
 ![cifar_244_ema](assets/cifar_244_ema.jpg)
 
 ![cifar_294_ema](assets/cifar_294_ema.jpg)
 
-**NEUDET**
+#### NEUDET
 
 ![neudet_290_ema](assets/neudet_290_ema.jpg)
 
@@ -196,7 +202,7 @@ We conducted training on the following four datasets using the `DDPM` sampler wi
 
 ![neudet_298_ema](assets/neudet_298_ema.jpg)
 
-**NRSD**
+#### NRSD
 
 ![nrsd_180_ema](assets/nrsd_180_ema.jpg)
 
@@ -220,11 +226,11 @@ We conducted training on the following four datasets using the `DDPM` sampler wi
 
 ![nrsd_298_ema](assets/nrsd_298_ema.jpg)
 
-**WOOD**
+#### WOOD
 
 ![wood_495](assets/wood_495.jpg)
 
-**Animate face (~~JUST FOR FUN~~)**
+#### Animate face (~~JUST FOR FUN~~)
 
 ![model_428_ema](assets/animate_face_428_ema.jpg)
 
