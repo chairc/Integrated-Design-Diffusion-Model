@@ -161,3 +161,9 @@ def save_train_logging(arg, save_path):
         current_time = time.strftime("%H:%M:%S", time.localtime())
         f.write(f"{current_time}: {arg}\n")
     f.close()
+
+
+def check_and_create_dir(path):
+    logger.warning(msg=f"Folder '{path}' does not exist.")
+    os.makedirs(name=path, exist_ok=True)
+    logger.info(msg=f"Successfully create folder '{path}'.")
