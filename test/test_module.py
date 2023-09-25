@@ -132,7 +132,7 @@ class TestModule(unittest.TestCase):
         Test local send message to deploy.py
         :return: None
         """
-        test_json = {"conditional": True, "sample": "ddpm", "image_size": 64, "num_images": 2,
+        test_json = {"conditional": True, "sample": "ddpm", "image_size": 64, "num_images": 2, "act": "gelu",
                      "weight_path": "/your/test/model/path/test.pt",
                      "result_path": "/your/results/deploy",
                      "num_classes": 6, "class_name": 1, "cfg_scale": 3}

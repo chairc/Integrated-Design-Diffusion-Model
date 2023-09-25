@@ -44,6 +44,8 @@ def generate(parse_json_data):
     image_size = parse_json_data["image_size"]
     # Number of images
     num_images = parse_json_data["num_images"] if parse_json_data["num_images"] >= 1 else 1
+    # Activation function
+    act = parse_json_data["act"]
     # Weight path
     weight_path = parse_json_data["weight_path"]
     # Saving path
@@ -66,11 +68,11 @@ def generate(parse_json_data):
         class_name = parse_json_data["class_name"]
         # classifier-free guidance interpolation weight
         cfg_scale = parse_json_data["cfg_scale"]
-        model = UNet(num_classes=num_classes, device=device, image_size=image_size).to(device)
+        model = UNet(num_classes=num_classes, device=device, image_size=image_size, act=act).to(device)
         load_model_weight_initializer(model=model, weight_path=weight_path, device=device, is_train=False)
         y = torch.Tensor([class_name]).long().to(device)
     else:
-        model = UNet(device=device, image_size=image_size).to(device)
+        model = UNet(device=device, image_size=image_size, act=act).to(device)
         load_model_weight_initializer(model=model, weight_path=weight_path, device=device, is_train=False)
         y = None
         cfg_scale = None
