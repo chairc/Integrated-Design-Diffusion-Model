@@ -219,14 +219,14 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 | --------------- | :---------: | ------------------------------- | :--: | ------------------------------------------------------------ |
 | --conditional   |             | Enable conditional generation   | bool | If enabled, allows custom configuration, such as modifying classes or classifier-free guidance interpolation weights |
 | --generate_name |             | File name                       | str  | File name to initialize the model for saving purposes        |
-| --image_size    |             | Input image size                | int  | Size of input images, adaptive input/output size             |
+| --image_size    |             | Input image size                | int  | Size of input images, adaptive input/output size. if class name is -1 and conditional is True, the model would output one image per class. |
 | --num_images    |             | Number of generated images      | int  | Number of images to generate                                 |
 | --weight_path   |             | Path to model weights           | str  | Path to the model weights file, required for network generation |
 | --result_path   |             | Save path                       | str  | Path to save the generated images                            |
 | --sample        |             | Sampling method                 | str  | Set the sampling method type, currently supporting DDPM and DDIM. |
 | --act           |             | Activation function             | str  | Activation function selection. Currently supports gelu, silu, relu, relu6 and lrelu. If you do not set the same activation function as the model, mosaic phenomenon will occur. |
 | --num_classes   |      ✓      | Number of classes               | int  | Number of classes for classification                         |
-| --class_name    |      ✓      | Class name                      | int  | Index of the class to generate images for                    |
+| --class_name    |      ✓      | Class name                      | int  | Index of the class to generate images. if class name is `-1`, the model would output one image per class. |
 | --cfg_scale     |      ✓      | Classifier-free guidance weight | int  | Weight for classifier-free guidance interpolation, for better generation model performance |
 
 ### Result
