@@ -18,7 +18,7 @@ from model.ddpm import Diffusion as DDPMDiffusion
 from model.ddim import Diffusion as DDIMDiffusion
 from model.network import UNet
 from utils.initializer import device_initializer, load_model_weight_initializer
-from utils.utils import plot_images, save_images
+from utils.utils import plot_images, save_images, check_and_create_dir
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
@@ -50,6 +50,8 @@ def generate(args):
     result_path = args.result_path
     # Run device initializer
     device = device_initializer()
+    # Check and create result path
+    check_and_create_dir(result_path)
     # Initialize the diffusion model
     if sample == "ddpm":
         diffusion = DDPMDiffusion(img_size=image_size, device=device)
