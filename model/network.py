@@ -35,24 +35,60 @@ class UNet(nn.Module):
         self.device = device
         self.time_channel = time_channel
         self.image_size = image_size
+        # channel: 3 -> 64
+        # size: size
         self.inc = DoubleConv(in_channels=in_channel, out_channels=channel[0], act=act)
+
+        # channel: 64 -> 128
+        # size: size / 2
         self.down1 = DownBlock(in_channels=channel[0], out_channels=channel[1], act=act)
+        # channel: 128
+        # size: size / 2
         self.sa1 = SelfAttention(channels=channel[1], size=int(self.image_size / 2), act=act)
+        # channel: 128 -> 256
+        # size: size / 4
         self.down2 = DownBlock(in_channels=channel[1], out_channels=channel[2], act=act)
+        # channel: 256
+        # size: size / 4
         self.sa2 = SelfAttention(channels=channel[2], size=int(self.image_size / 4), act=act)
+        # channel: 256 -> 256
+        # size: size / 8
         self.down3 = DownBlock(in_channels=channel[2], out_channels=channel[2], act=act)
+        # channel: 256
+        # size: size / 8
         self.sa3 = SelfAttention(channels=channel[2], size=int(self.image_size / 8), act=act)
 
+        # channel: 256 -> 512
+        # size: size / 8
         self.bot1 = DoubleConv(in_channels=channel[2], out_channels=channel[3], act=act)
+        # channel: 512 -> 512
+        # size: size / 8
         self.bot2 = DoubleConv(in_channels=channel[3], out_channels=channel[3], act=act)
+        # channel: 512 -> 256
+        # size: size / 8
         self.bot3 = DoubleConv(in_channels=channel[3], out_channels=channel[2], act=act)
 
+        # channel: 512 -> 128   in_channels: up1(512) = down3(256) + bot3(256)
+        # size: size / 4
         self.up1 = UpBlock(in_channels=channel[3], out_channels=channel[1], act=act)
+        # channel: 128
+        # size: size / 4
         self.sa4 = SelfAttention(channels=channel[1], size=int(self.image_size / 4), act=act)
+        # channel: 256 -> 64   in_channels: up2(256) = sa4(128) + sa1(128)
+        # size: size / 4
         self.up2 = UpBlock(in_channels=channel[2], out_channels=channel[0], act=act)
+        # channel: 128
+        # size: size / 2
         self.sa5 = SelfAttention(channels=channel[0], size=int(self.image_size / 2), act=act)
+        # channel: 128 -> 64   in_channels: up3(128) = sa5(64) + inc(64)
+        # size: size / 4
         self.up3 = UpBlock(in_channels=channel[1], out_channels=channel[0], act=act)
+        # channel: 128
+        # size: size
         self.sa6 = SelfAttention(channels=channel[0], size=int(self.image_size), act=act)
+
+        # channel: 64 -> 3
+        # size: size
         self.outc = nn.Conv2d(in_channels=channel[0], out_channels=out_channel, kernel_size=1)
 
         if num_classes is not None:
