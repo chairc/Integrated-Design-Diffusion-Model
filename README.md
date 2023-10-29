@@ -53,7 +53,7 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 
 #### Note
 
-The training environment for this readme is as follows: Ubuntu 18.04, Python 3.8, Pytorch 1.8.1, CUDA 11.1, and models are trained and tested with the NVIDIA RTX 3060 GPU with 6GB memory, NVIDIA RTX 2080Ti GPU with 11GB memory and NVIDIA RTX 6000 (×2) GPU with 24GB (total 48GB, distributed training) memory. **The above GPUs can all be trained normally**.
+The training GPU implements environment for this README is as follows: models are trained and tested with the NVIDIA RTX 3060 GPU with 6GB memory, NVIDIA RTX 2080Ti GPU with 11GB memory and NVIDIA RTX 6000 (×2) GPU with 24GB (total 48GB, distributed training) memory. **The above GPUs can all be trained normally**.
 
 #### Start Your First Training (Using cifar10 as an Example, Single GPU Mode)
 
