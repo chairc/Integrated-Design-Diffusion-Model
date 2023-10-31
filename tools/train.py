@@ -324,12 +324,14 @@ if __name__ == "__main__":
     # needed: Set as needed
     # recommend: Recommend to set
     parser = argparse.ArgumentParser()
+    # =================================Base settings=================================
     # Set the seed for initialization (required)
     parser.add_argument("--seed", type=int, default=0)
     # Enable conditional training (required)
     # If enabled, you can modify the custom configuration.
     # For more details, please refer to the boundary line at the bottom.
-    parser.add_argument("--conditional", type=bool, default=False)
+    # [Note] We recommend enabling it to 'True'.
+    parser.add_argument("--conditional", type=bool, default=True)
     # Set the sample type (required)
     # If not set, the default is for 'ddpm'. You can set it to either 'ddpm' or 'ddim'.
     # Option: ddpm/ddim
@@ -364,7 +366,7 @@ if __name__ == "__main__":
     parser.add_argument("--lr", type=float, default=3e-4)
     # Learning rate function (needed)
     # Option: linear/cosine/warmup_cosine
-    parser.add_argument("--lr_func", type=str, default="")
+    parser.add_argument("--lr_func", type=str, default="linear")
     # Saving path (required)
     parser.add_argument("--result_path", type=str, default="/your/path/Defect-Diffusion-Model/results")
     # Whether to save weight each training (recommend)
@@ -402,7 +404,8 @@ if __name__ == "__main__":
 
     # =====================Enable the conditional generation (if '--conditional' is set to 'True')=====================
     # Number of classes (required)
-    parser.add_argument("--num_classes", type=int, default=1)
+    # [Note] The classes settings are consistent with the loaded datasets settings.
+    parser.add_argument("--num_classes", type=int, default=10)
     # classifier-free guidance interpolation weight, users can better generate model effect (recommend)
     parser.add_argument("--cfg_scale", type=int, default=3)
 

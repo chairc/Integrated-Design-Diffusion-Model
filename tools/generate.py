@@ -96,6 +96,12 @@ if __name__ == "__main__":
     # needed: Set as needed
     # recommend: Recommend to set
     parser = argparse.ArgumentParser()
+    # =================================Base settings=================================
+    # Enable conditional generation (required)
+    # If enabled, you can modify the custom configuration.
+    # For more details, please refer to the boundary line at the bottom.
+    # [Note] The conditional settings are consistent with the loaded model training settings.
+    parser.add_argument("--conditional", type=bool, default=True)
     # Generation name (required)
     parser.add_argument("--generate_name", type=str, default="df")
     # Input image size (required)
@@ -107,24 +113,23 @@ if __name__ == "__main__":
     parser.add_argument("--weight_path", type=str, default="/your/path/Defect-Diffusion-Model/weight/model.pt")
     # Saving path (required)
     parser.add_argument("--result_path", type=str, default="/your/path/Defect-Diffusion-Model/results/vis")
-    # Enable conditional generation (required)
-    # If enabled, you can modify the custom configuration.
-    # For more details, please refer to the boundary line at the bottom.
-    parser.add_argument("--conditional", type=bool, default=True)
     # Set the sample type (required)
     # If not set, the default is for 'ddpm'. You can set it to either 'ddpm' or 'ddim'.
     # Option: ddpm/ddim
     parser.add_argument("--sample", type=str, default="ddpm")
     # Set activation function (needed)
-    # If you do not set the same activation function as the model, mosaic phenomenon will occur.
+    # [Note] The activation function settings are consistent with the loaded model training settings.
+    # [Note] If you do not set the same activation function as the model, mosaic phenomenon will occur.
     # Option: gelu/silu/relu/relu6/lrelu
     parser.add_argument("--act", type=str, default="gelu")
 
     # =====================Enable the conditional generation (if '--conditional' is set to 'True')=====================
     # Number of classes (required)
+    # [Note] The classes settings are consistent with the loaded model training settings.
     parser.add_argument("--num_classes", type=int, default=10)
     # Class name (required)
     # if class name is `-1`, the model would output one image per class.
+    # [Note] The setting range should be [0, num_classes - 1].
     parser.add_argument("--class_name", type=int, default=0)
     # classifier-free guidance interpolation weight, users can better generate model effect (recommend)
     parser.add_argument("--cfg_scale", type=int, default=3)
