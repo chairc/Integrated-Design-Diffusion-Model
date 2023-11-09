@@ -17,11 +17,11 @@
 │       ├── class_2
 │       └── class_3
 ├── model
-│   └── modules
-│       └── module.py
-│   └── networks
-│       ├── base.py
-│       └── network.py
+│   ├── modules
+│   │   └── module.py
+│   ├── networks
+│   │   ├── base.py
+│   │   └── network.py
 │   └── samples
 │       ├── base.py
 │       ├── ddim.py

@@ -17,11 +17,11 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 │       ├── class_2
 │       └── class_3
 ├── model
-│   └── modules
-│       └── module.py
-│   └── networks
-│       ├── base.py
-│       └── network.py
+│   ├── modules
+│   │   └── module.py
+│   ├── networks
+│   │   ├── base.py
+│   │   └── network.py
 │   └── samples
 │       ├── base.py
 │       ├── ddim.py
