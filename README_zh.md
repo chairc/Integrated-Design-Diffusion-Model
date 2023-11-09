@@ -17,33 +17,37 @@
 │       ├── class_2
 │       └── class_3
 ├── model
-│   ├── base.py
-│   ├── ddim.py
-│   ├── ddpm.py
-│   ├── modules.py
-│   └── network.py
+│   ├── modules
+│   │   └── module.py
+│   ├── networks
+│   │   ├── base.py
+│   │   └── network.py
+│   └── samples
+│       ├── base.py
+│       ├── ddim.py
+│       └── ddpm.py
 ├── results
 ├── test
-│   ├── noising_test
-│   │   ├── landscape
-│   │   └── noise
-│   └── test_module.py
+│   ├── noising_test
+│   │   ├── landscape
+│   │   └── noise
+│   └── test_module.py
 ├── tools
-│   ├── deploy.py
-│   ├── generate.py
-│   └── train.py
+│   ├── deploy.py
+│   ├── generate.py
+│   └── train.py
 ├── utils
-│   ├── initializer.py
-│   ├── lr_scheduler.py
-│   └── utils.py
+│   ├── initializer.py
+│   ├── lr_scheduler.py
+│   └── utils.py
 └── weight
 ```
 
 ### 接下来要做
 
 - [x] 1. 新增cosine学习率优化（2023-07-31）
-- [ ] 2. 使用效果更优的U-Net网络模型
-- [ ] 3. 更大尺寸的生成图像
+- [x] 2. 使用效果更优的U-Net网络模型（2023-11-09）
+- [x] 3. 更大尺寸的生成图像（2023-11-09）
 - [x] 4. 多卡分布式训练（2023-07-15）
 - [x] 5. 云服务器快速部署和接口（2023-08-28）
 - [x] 6. 增加DDIM采样方法（2023-08-03）
@@ -89,9 +93,11 @@
 
    设置`--result_path`参数为`/你的/本地/或/远程服务器/文件/地址/results`；
 
-   设置`--num_classes`参数为`10`，这是你的类别总数）；
+   设置`--num_classes`参数为`10`，这是你的类别总数；
 
    设置更多参数（自定义），如果报`CUDA out of memory`错误，将`--batch_size`、`--num_workers`调小；
+
+   在自定义参数中，你可以设置不同的`--sample`例如`ddpm`或`ddim`，设置不同的训练网络`--network`例如`unet`或`cspdarkunet`。当然激活函数`--act`，优化器`--optim`，半精度训练`--fp16`，学习率方法`--lr_func`等参数也都是可以自定义设置的。
 
    详细命令可参考**训练参数**。
 
@@ -173,6 +179,7 @@
 | --seed                 |          | 初始化种子                       |   int    | 设置初始化种子，可复现网络生成的图片                         |
 | --conditional          |          | 开启条件训练                     |   bool   | 若开启可修改自定义配置，例如修改类别、classifier-free guidance插值权重 |
 | --sample               |          | 采样方式                         |   str    | 设置采样器类别，当前支持ddpm，ddim                           |
+| --network              |          | 训练网络                         |   str    | 设置训练网络，当前支持UNet，CSPDarkUNet                      |
 | --run_name             |          | 文件名称                         |   str    | 初始化模型的文件名称，用于设置保存信息                       |
 | --epochs               |          | 总迭代次数                       |   int    | 训练总迭代次数                                               |
 | --batch_size           |          | 训练批次                         |   int    | 训练批次大小                                                 |
@@ -233,6 +240,7 @@
 | --weight_path   |          | 权重路径                         |   str    | 模型权重路径，网络生成需要加载文件                           |
 | --result_path   |          | 保存路径                         |   str    | 保存路径                                                     |
 | --sample        |          | 采样方式                         |   str    | 设置采样器类别，当前支持ddpm，ddim                           |
+| --network       |          | 训练网络                         |   str    | 设置训练网络，当前支持UNet，CSPDarkUNet                      |
 | --act           |          | 激活函数                         |   str    | 激活函数选择，目前支持gelu、silu、relu、relu6和lrelu。如果不选择，会产生马赛克现象 |
 | --num_classes   |    是    | 类别个数                         |   int    | 类别个数，用于区分类别                                       |
 | --class_name    |    是    | 类别名称                         |   int    | 类别序号，用于对指定类别生成。如果输入为-1，则模型为每类输出一张图片 |

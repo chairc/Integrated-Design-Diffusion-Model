@@ -22,10 +22,10 @@ from torch.cuda.amp import autocast, GradScaler
 from tqdm import tqdm
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from model.ddpm import Diffusion as DDPMDiffusion
-from model.ddim import Diffusion as DDIMDiffusion
-from model.modules import EMA
-from model.network import UNet
+from model.samples.ddpm import Diffusion as DDPMDiffusion
+from model.samples.ddim import Diffusion as DDIMDiffusion
+from model.modules.module import EMA
+from model.networks.network import UNet, CSPDarkUnet
 from utils.initializer import device_initializer, seed_initializer, load_model_weight_initializer
 from utils.lr_scheduler import set_cosine_lr
 from utils.utils import plot_images, save_images, get_dataset, setup_logging, save_train_logging
@@ -46,6 +46,8 @@ def train(rank=None, args=None):
     seed_initializer(seed_id=args.seed)
     # Sample type
     sample = args.sample
+    # Network
+    network = args.network
     # Run name
     run_name = args.run_name
     # Input image size
@@ -113,11 +115,16 @@ def train(rank=None, args=None):
     dataloader = get_dataset(args=args, distributed=distributed)
     # Resume training
     resume = args.resume
+    # Network
+    if network == "cspdarkunet":
+        Network = CSPDarkUnet
+    else:
+        Network = UNet
     # Model
     if not conditional:
-        model = UNet(device=device, image_size=image_size, act=act).to(device)
+        model = Network(device=device, image_size=image_size, act=act).to(device)
     else:
-        model = UNet(num_classes=num_classes, device=device, image_size=image_size, act=act).to(device)
+        model = Network(num_classes=num_classes, device=device, image_size=image_size, act=act).to(device)
     # Distributed training
     if distributed:
         model = nn.parallel.DistributedDataParallel(module=model, device_ids=[device], find_unused_parameters=True)
@@ -336,6 +343,9 @@ if __name__ == "__main__":
     # If not set, the default is for 'ddpm'. You can set it to either 'ddpm' or 'ddim'.
     # Option: ddpm/ddim
     parser.add_argument("--sample", type=str, default="ddpm")
+    # Set network
+    # Option: unet/cspdarkunet
+    parser.add_argument("--network", type=str, default="unet")
     # File name for initializing the model (required)
     parser.add_argument("--run_name", type=str, default="df")
     # Total epoch for training (required)

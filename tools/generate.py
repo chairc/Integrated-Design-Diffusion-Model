@@ -14,9 +14,9 @@ import logging
 import coloredlogs
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from model.ddpm import Diffusion as DDPMDiffusion
-from model.ddim import Diffusion as DDIMDiffusion
-from model.network import UNet
+from model.samples.ddpm import Diffusion as DDPMDiffusion
+from model.samples.ddim import Diffusion as DDIMDiffusion
+from model.networks.network import UNet, CSPDarkUnet
 from utils.initializer import device_initializer, load_model_weight_initializer
 from utils.utils import plot_images, save_images, check_and_create_dir
 
@@ -36,6 +36,8 @@ def generate(args):
     conditional = args.conditional
     # Sample type
     sample = args.sample
+    # Network
+    network = args.network
     # Generation name
     generate_name = args.generate_name
     # Image size
@@ -52,6 +54,11 @@ def generate(args):
     device = device_initializer()
     # Check and create result path
     check_and_create_dir(result_path)
+    # Network
+    if network == "cspdarkunet":
+        Network = CSPDarkUnet
+    else:
+        Network = UNet
     # Initialize the diffusion model
     if sample == "ddpm":
         diffusion = DDPMDiffusion(img_size=image_size, device=device)
@@ -68,7 +75,7 @@ def generate(args):
         class_name = args.class_name
         # classifier-free guidance interpolation weight
         cfg_scale = args.cfg_scale
-        model = UNet(num_classes=num_classes, device=device, image_size=image_size, act=act).to(device)
+        model = Network(num_classes=num_classes, device=device, image_size=image_size, act=act).to(device)
         load_model_weight_initializer(model=model, weight_path=weight_path, device=device, is_train=False)
         if class_name == -1:
             y = torch.arange(num_classes).long().to(device)
@@ -77,7 +84,7 @@ def generate(args):
             y = torch.Tensor([class_name] * num_images).long().to(device)
         x = diffusion.sample(model=model, n=num_images, labels=y, cfg_scale=cfg_scale)
     else:
-        model = UNet(device=device, image_size=image_size, act=act).to(device)
+        model = Network(device=device, image_size=image_size, act=act).to(device)
         load_model_weight_initializer(model=model, weight_path=weight_path, device=device, is_train=False)
         x = diffusion.sample(model=model, n=num_images)
     # If there is no path information, it will only be displayed
@@ -117,6 +124,9 @@ if __name__ == "__main__":
     # If not set, the default is for 'ddpm'. You can set it to either 'ddpm' or 'ddim'.
     # Option: ddpm/ddim
     parser.add_argument("--sample", type=str, default="ddpm")
+    # Set network
+    # Option: unet/cspdarkunet
+    parser.add_argument("--network", type=str, default="unet")
     # Set activation function (needed)
     # [Note] The activation function settings are consistent with the loaded model training settings.
     # [Note] If you do not set the same activation function as the model, mosaic phenomenon will occur.

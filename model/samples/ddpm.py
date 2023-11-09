@@ -11,7 +11,7 @@ import coloredlogs
 
 from tqdm import tqdm
 
-from .base import BaseDiffusion
+from model.samples.base import BaseDiffusion
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
