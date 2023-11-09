@@ -17,11 +17,15 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 │       ├── class_2
 │       └── class_3
 ├── model
-│   ├── base.py
-│   ├── ddim.py
-│   ├── ddpm.py
-│   ├── modules.py
-│   └── network.py
+│   └── modules
+│       └── module.py
+│   └── networks
+│       ├── base.py
+│       └── network.py
+│   └── samples
+│       ├── base.py
+│       ├── ddim.py
+│       └── ddpm.py
 ├── results
 ├── test
 │   ├── noising_test
@@ -29,7 +33,7 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 │   │   └── noise
 │   └── test_module.py
 ├── tools
-│   ├── deploy.py
+│   ├── deploy.py
 │   ├── generate.py
 │   └── train.py
 ├── utils
@@ -42,8 +46,8 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 ### Next Steps
 
 - [x] 1. Implement cosine learning rate optimization. (2023-07-31)
-- [ ] 2. Use a more advanced U-Net network model.
-- [ ] 3. Generate larger-sized images.
+- [x] 2. Use a more advanced U-Net network model. (2023-11-09)
+- [x] 3. Generate larger-sized images. (2023-11-09)
 - [x] 4. Implement multi-GPU distributed training. (2023-07-15)
 - [x] 5. Enable fast deployment and API on cloud servers. (2023-08-28)
 - [x] 6. Adding DDIM Sampling Method. (2023-08-03)
@@ -90,9 +94,11 @@ The training GPU implements environment for this README is as follows: models ar
 
    Set the `--result_path` parameter to the file path on your local or remote server where you want to save the results.
 
-   Set the `--num_classes` parameter to `10` (this is the total number of your classes.
+   Set the `--num_classes` parameter to `10` (this is the total number of your classes).
 
    Set any other custom parameters as needed. If the error `CUDA out of memory` is shown in your terminal, turn down `--batch_size` and `num_workers`.
+
+   In the custom parameters, you can set different `--sample` such as `ddpm` or `ddim` , and set different training networks `--network` such as `unet` or `cspdarkunet`. Of course, activation function `--act`, optimizer `--optim`, half-precision training `--fp16`, learning rate method `--lr_func` and other parameters can also be customized.
 
    For detailed commands, refer to the **Training Parameters** section.
 
@@ -170,6 +176,7 @@ The training GPU implements environment for this README is as follows: models ar
 | --seed |  | Initialize Seed | int | Set the seed for reproducible image generation from the network |
 | --conditional          |             | Enable conditional training     | bool | Enable to modify custom configurations, such as modifying the number of classes and classifier-free guidance interpolation weights |
 | --sample | | Sampling method | str | Set the sampling method type, currently supporting DDPM and DDIM. |
+| --network | | Training network | str | Set the training network, currently supporting UNet, CSPDarkUNet. |
 | --run_name             |             | File name                       | str  | File name used to initialize the model and save information  |
 | --epochs               |             | Total number of epochs          | int  | Total number of training epochs                              |
 | --batch_size           |             | Training batch size             | int  | Size of each training batch                                  |
@@ -194,6 +201,8 @@ The training GPU implements environment for this README is as follows: models ar
 | --world_size          |          | Number of distributed nodes    | int   | Number of distributed nodes, corresponds to the actual number of GPUs or distributed nodes being used |
 | --num_classes          |      ✓      | Number of classes               | int  | Number of classes used for classification                    |
 | --cfg_scale            |      ✓      | Classifier-free guidance weight | int  | Classifier-free guidance interpolation weight for better model generation effects |
+
+
 
 ### Generation
 
@@ -228,6 +237,7 @@ The training GPU implements environment for this README is as follows: models ar
 | --weight_path   |             | Path to model weights           | str  | Path to the model weights file, required for network generation |
 | --result_path   |             | Save path                       | str  | Path to save the generated images                            |
 | --sample        |             | Sampling method                 | str  | Set the sampling method type, currently supporting DDPM and DDIM. |
+| --network       |             | Training network                | str  | Set the training network, currently supporting UNet, CSPDarkUNet. |
 | --act           |             | Activation function             | str  | Activation function selection. Currently supports gelu, silu, relu, relu6 and lrelu. If you do not set the same activation function as the model, mosaic phenomenon will occur. |
 | --num_classes   |      ✓      | Number of classes               | int  | Number of classes for classification                         |
 | --class_name    |      ✓      | Class name                      | int  | Index of the class to generate images. if class name is `-1`, the model would output one image per class. |
