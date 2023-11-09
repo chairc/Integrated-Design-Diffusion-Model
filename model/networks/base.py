@@ -39,7 +39,7 @@ class BaseNet(nn.Module):
         self.act = act
 
         if self.num_classes is not None:
-            self.label_emb = nn.Embedding(num_embeddings=num_classes, embedding_dim=time_channel)
+            self.label_emb = nn.Embedding(num_embeddings=self.num_classes, embedding_dim=self.time_channel)
 
     def init_channel(self, channel):
         """
