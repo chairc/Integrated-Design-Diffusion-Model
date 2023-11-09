@@ -19,8 +19,8 @@ from torchvision.utils import save_image
 from torchsummary import summary
 from matplotlib import pyplot as plt
 
-from model.ddpm import Diffusion
-from model.network import UNet
+from model.samples.ddpm import Diffusion
+from model.networks.network import UNet, CSPDarkUnet
 from utils.utils import get_dataset, delete_files
 from utils.initializer import device_initializer
 from utils.lr_scheduler import set_cosine_lr
@@ -118,12 +118,24 @@ class TestModule(unittest.TestCase):
         :return: None
         """
         image_size = 64
+        # Select model
+        # Option: unet/cspdarkunet
+        model = "cspdarkunet"
         device = device_initializer()
-        net = UNet(num_classes=10, device=device, image_size=image_size)
-        net = net.to(device)
         x = torch.randn(1, 3, image_size, image_size).to(device)
         t = x.new_tensor([500] * x.shape[0]).long().to(device)
         y = x.new_tensor([1] * x.shape[0]).long().to(device)
+        if model == "unet":
+            # Test UNet
+            Net = UNet
+        elif model == "cspdarkunet":
+            # Test CSPDarkUnet
+            Net = CSPDarkUnet
+        else:
+            logger.warning(msg="No model, and default selection unet")
+            Net = UNet
+        net = Net(num_classes=10, device=device, image_size=image_size)
+        net = net.to(device)
         print(net)
         summary(model=net, input_data=[x, t, y])
 
