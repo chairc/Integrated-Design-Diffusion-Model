@@ -75,8 +75,8 @@ def load_model_weight_initializer(model, weight_path, device, is_train=True):
     if not is_train:
         new_model_weights_dict = {}
         for key, value in model_weights_dict.items():
-            if key.startswith('module.'):
-                new_key = key[len('module.'):]
+            if key.startswith("module."):
+                new_key = key[len("module."):]
                 new_model_weights_dict[new_key] = value
             else:
                 new_model_weights_dict[key] = value

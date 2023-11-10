@@ -339,7 +339,7 @@ class SPPFBottleneck(nn.Module):
     https://github.com/ultralytics/yolov5/blob/3eefab1bb109214a614485b6c5f80f22c122f2b2/models/common.py#L182
     """
 
-    # kernel_sizes=5等价于SPP(kernel_sizes=(5, 9, 13))
+    # 'kernel_sizes = 5' is the same as 'SPP(kernel_sizes=(5, 9, 13))'
     def __init__(self, in_channels, out_channels, kernel_size=5, act="silu"):
         """
         Initialize the SPPFBottleneck
