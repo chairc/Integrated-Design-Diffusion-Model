@@ -18,16 +18,13 @@ from torch import nn as nn
 from torch import distributed as dist
 from torch import multiprocessing as mp
 from torch.utils.tensorboard import SummaryWriter
-from torch.cuda.amp import autocast, GradScaler
+from torch.cuda.amp import autocast
 from tqdm import tqdm
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from model.samples.ddpm import DDPMDiffusion
-from model.samples.ddim import DDIMDiffusion
 from model.modules.module import EMA
-from model.networks.network import UNet, CSPDarkUnet
-from utils.initializer import device_initializer, seed_initializer, load_model_weight_initializer
-from utils.lr_scheduler import set_cosine_lr
+from utils.initializer import device_initializer, seed_initializer, load_model_weight_initializer, network_initializer, \
+    optimizer_initializer, sample_initializer, lr_initializer, fp16_initializer
 from utils.utils import plot_images, save_images, get_dataset, setup_logging, save_train_logging
 
 logger = logging.getLogger(__name__)
@@ -116,10 +113,7 @@ def train(rank=None, args=None):
     # Resume training
     resume = args.resume
     # Network
-    if network == "cspdarkunet":
-        Network = CSPDarkUnet
-    else:
-        Network = UNet
+    Network = network_initializer(network=network, device=device)
     # Model
     if not conditional:
         model = Network(device=device, image_size=image_size, act=act).to(device)
@@ -129,10 +123,7 @@ def train(rank=None, args=None):
     if distributed:
         model = nn.parallel.DistributedDataParallel(module=model, device_ids=[device], find_unused_parameters=True)
     # Model optimizer
-    if optim == "adam":
-        optimizer = torch.optim.Adam(params=model.parameters(), lr=init_lr)
-    else:
-        optimizer = torch.optim.AdamW(params=model.parameters(), lr=init_lr)
+    optimizer = optimizer_initializer(model=model, optim=optim, init_lr=init_lr, device=device)
     # Resume training
     if resume:
         load_model_dir = args.load_model_dir
@@ -149,23 +140,12 @@ def train(rank=None, args=None):
         logger.info(msg=f"[{device}]: Successfully load optimizer optim_model_{load_epoch}.pt")
     else:
         start_epoch = 0
-    if fp16:
-        logger.info(msg=f"[{device}]: Fp16 training is opened.")
-        # Used to scale gradients to prevent overflow
-        scaler = GradScaler()
-    else:
-        logger.info(msg=f"[{device}]: Fp32 training.")
-        scaler = None
+    # Set harf-precision
+    scaler = fp16_initializer(fp16=fp16, device=device)
     # Loss function
     mse = nn.MSELoss()
     # Initialize the diffusion model
-    if sample == "ddpm":
-        diffusion = DDPMDiffusion(img_size=image_size, device=device)
-    elif sample == "ddim":
-        diffusion = DDIMDiffusion(img_size=image_size, device=device)
-    else:
-        diffusion = DDPMDiffusion(img_size=image_size, device=device)
-        logger.warning(msg=f"[{device}]: Setting sample error, we has been automatically set to ddpm.")
+    diffusion = sample_initializer(sample=sample, image_size=image_size, device=device)
     # Tensorboard
     tb_logger = SummaryWriter(log_dir=results_tb_dir)
     # Train log
@@ -182,15 +162,9 @@ def train(rank=None, args=None):
     for epoch in range(start_epoch, args.epochs):
         logger.info(msg=f"[{device}]: Start epoch {epoch}:")
         # Set learning rate
-        if lr_func == "cosine":
-            current_lr = set_cosine_lr(optimizer=optimizer, current_epoch=epoch, max_epoch=args.epochs,
-                                       lr_min=init_lr * 0.01, lr_max=init_lr, warmup=False)
-        elif lr_func == "warmup_cosine":
-            current_lr = set_cosine_lr(optimizer=optimizer, current_epoch=epoch, max_epoch=args.epochs,
-                                       lr_min=init_lr * 0.01, lr_max=init_lr, warmup=True)
-        else:
-            current_lr = init_lr
-        logger.info(msg=f"[{device}]: This epoch learning rate is {current_lr}")
+        current_lr = lr_initializer(lr_func=lr_func, optimizer=optimizer, epoch=epoch, epochs=args.epochs,
+                                    init_lr=init_lr, device=device)
+        tb_logger.add_scalar(tag=f"[{device}]: Current LR", scalar_value=current_lr, global_step=epoch)
         pbar = tqdm(dataloader)
         # Initialize images and labels
         images, labels = None, None
