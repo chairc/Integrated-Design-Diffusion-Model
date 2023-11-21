@@ -19,7 +19,7 @@ from torchvision.utils import save_image
 from torchsummary import summary
 from matplotlib import pyplot as plt
 
-from model.samples.ddpm import Diffusion
+from model.samples.ddpm import DDPMDiffusion
 from model.networks.network import UNet, CSPDarkUnet
 from utils.utils import get_dataset, delete_files
 from utils.initializer import device_initializer
@@ -82,7 +82,7 @@ class TestModule(unittest.TestCase):
         # Recreate the folder
         os.makedirs(name=save_path, exist_ok=True)
         # Diffusion model initialization
-        diffusion = Diffusion(device="cpu")
+        diffusion = DDPMDiffusion(device="cpu")
         # Get image and noise tensor
         image = next(iter(dataloader))[0]
         time = torch.Tensor([0, 50, 125, 225, 350, 500, 675, 999]).long()

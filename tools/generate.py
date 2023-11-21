@@ -14,8 +14,8 @@ import logging
 import coloredlogs
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from model.samples.ddpm import Diffusion as DDPMDiffusion
-from model.samples.ddim import Diffusion as DDIMDiffusion
+from model.samples.ddpm import DDPMDiffusion
+from model.samples.ddim import DDIMDiffusion
 from model.networks.network import UNet, CSPDarkUnet
 from utils.initializer import device_initializer, load_model_weight_initializer
 from utils.utils import plot_images, save_images, check_and_create_dir

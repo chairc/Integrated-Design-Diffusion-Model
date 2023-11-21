@@ -22,8 +22,8 @@ from torch.cuda.amp import autocast, GradScaler
 from tqdm import tqdm
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from model.samples.ddpm import Diffusion as DDPMDiffusion
-from model.samples.ddim import Diffusion as DDIMDiffusion
+from model.samples.ddpm import DDPMDiffusion
+from model.samples.ddim import DDIMDiffusion
 from model.modules.module import EMA
 from model.networks.network import UNet, CSPDarkUnet
 from utils.initializer import device_initializer, seed_initializer, load_model_weight_initializer

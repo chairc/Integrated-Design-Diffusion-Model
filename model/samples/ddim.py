@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
 
 
-class Diffusion(BaseDiffusion):
+class DDIMDiffusion(BaseDiffusion):
     """
     DDIM class
     """
