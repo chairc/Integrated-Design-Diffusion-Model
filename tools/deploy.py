@@ -17,11 +17,9 @@ import coloredlogs
 import torch
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from model.samples.ddpm import DDPMDiffusion
-from model.samples.ddim import DDIMDiffusion
 from model.networks.network import UNet
 from utils.utils import save_images
-from utils.initializer import device_initializer, load_model_weight_initializer
+from utils.initializer import device_initializer, load_model_weight_initializer, sample_initializer
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
@@ -53,13 +51,7 @@ def generate(parse_json_data):
     # Run device initializer
     device = device_initializer()
     # Initialize the diffusion model
-    if sample == "ddpm":
-        diffusion = DDPMDiffusion(img_size=image_size, device=device)
-    elif sample == "ddim":
-        diffusion = DDIMDiffusion(img_size=image_size, device=device)
-    else:
-        diffusion = DDPMDiffusion(img_size=image_size, device=device)
-        logger.warning(msg=f"[{device}]: Setting sample error, we has been automatically set to ddpm.")
+    diffusion = sample_initializer(sample=sample, image_size=image_size, device=device)
     # Initialize model
     if conditional:
         # Number of classes

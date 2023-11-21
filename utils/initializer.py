@@ -13,6 +13,13 @@ import coloredlogs
 
 from collections import OrderedDict
 
+from torch.cuda.amp import GradScaler
+
+from model.networks.network import UNet, CSPDarkUnet
+from model.samples.ddim import DDIMDiffusion
+from model.samples.ddpm import DDPMDiffusion
+from utils.lr_scheduler import set_cosine_lr
+
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
 
@@ -85,3 +92,97 @@ def load_model_weight_initializer(model, weight_path, device, is_train=True):
     model_weights_dict = {k: v for k, v in model_weights_dict.items() if np.shape(model_dict[k]) == np.shape(v)}
     model_dict.update(model_weights_dict)
     model.load_state_dict(state_dict=OrderedDict(model_dict))
+
+
+def network_initializer(network, device):
+    """
+    Initialize base network
+    :param network: Network name
+    :return: Network
+    """
+    if network == "unet":
+        Network = UNet
+    elif network == "cspdarkunet":
+        Network = CSPDarkUnet
+    else:
+        Network = UNet
+        logger.warning(msg=f"[{device}]: Setting network error, we has been automatically set to unet.")
+    logger.info(msg=f"[{device}]: This base network is {network}")
+    return Network
+
+
+def optimizer_initializer(model, optim, init_lr, device):
+    """
+    Initialize optimizer
+    :param model: Model
+    :param optim: Optimizer name
+    :param init_lr: Initialize learning rate
+    :return: optimizer
+    """
+    if optim == "adam":
+        optimizer = torch.optim.Adam(params=model.parameters(), lr=init_lr)
+    elif optim == "adamw":
+        optimizer = torch.optim.AdamW(params=model.parameters(), lr=init_lr)
+    else:
+        optimizer = torch.optim.AdamW(params=model.parameters(), lr=init_lr)
+        logger.warning(msg=f"[{device}]: Setting optimizer error, we has been automatically set to adamw.")
+    logger.info(msg=f"[{device}]: This base optimizer is {optim}")
+    return optimizer
+
+
+def sample_initializer(sample, image_size, device):
+    """
+    Initialize sample
+    :param sample: Sample function
+    :param image_size: image size
+    :param device: GPU or CPU
+    :return: diffusion
+    """
+    if sample == "ddpm":
+        diffusion = DDPMDiffusion(img_size=image_size, device=device)
+    elif sample == "ddim":
+        diffusion = DDIMDiffusion(img_size=image_size, device=device)
+    else:
+        diffusion = DDPMDiffusion(img_size=image_size, device=device)
+        logger.warning(msg=f"[{device}]: Setting sample error, we has been automatically set to ddpm.")
+    return diffusion
+
+
+def lr_initializer(lr_func, optimizer, epoch, epochs, init_lr, device):
+    """
+    Initialize learning rate
+    :param lr_func: learning rate function
+    :param optimizer: Optimizer
+    :param epoch: Current epoch
+    :param epochs: Total epoch
+    :param init_lr: Initialize learning rate
+    :param device: GPU or CPU
+    :return: current_lr
+    """
+    if lr_func == "cosine":
+        current_lr = set_cosine_lr(optimizer=optimizer, current_epoch=epoch, max_epoch=epochs,
+                                   lr_min=init_lr * 0.01, lr_max=init_lr, warmup=False)
+    elif lr_func == "warmup_cosine":
+        current_lr = set_cosine_lr(optimizer=optimizer, current_epoch=epoch, max_epoch=epochs,
+                                   lr_min=init_lr * 0.01, lr_max=init_lr, warmup=True)
+    else:
+        current_lr = init_lr
+    logger.info(msg=f"[{device}]: This epoch learning rate is {current_lr}")
+    return current_lr
+
+
+def fp16_initializer(fp16, device):
+    """
+    Initialize harf-precision
+    :param fp16: harf-precision
+    :param device: GPU or CPU
+    :return: scaler
+    """
+    if fp16:
+        logger.info(msg=f"[{device}]: Fp16 training is opened.")
+        # Used to scale gradients to prevent overflow
+        scaler = GradScaler()
+    else:
+        logger.info(msg=f"[{device}]: Fp32 training.")
+        scaler = None
+    return scaler

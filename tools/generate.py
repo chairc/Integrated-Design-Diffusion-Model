@@ -14,10 +14,7 @@ import logging
 import coloredlogs
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from model.samples.ddpm import DDPMDiffusion
-from model.samples.ddim import DDIMDiffusion
-from model.networks.network import UNet, CSPDarkUnet
-from utils.initializer import device_initializer, load_model_weight_initializer
+from utils.initializer import device_initializer, load_model_weight_initializer, network_initializer, sample_initializer
 from utils.utils import plot_images, save_images, check_and_create_dir
 
 logger = logging.getLogger(__name__)
@@ -55,18 +52,9 @@ def generate(args):
     # Check and create result path
     check_and_create_dir(result_path)
     # Network
-    if network == "cspdarkunet":
-        Network = CSPDarkUnet
-    else:
-        Network = UNet
+    Network = network_initializer(network=network, device=device)
     # Initialize the diffusion model
-    if sample == "ddpm":
-        diffusion = DDPMDiffusion(img_size=image_size, device=device)
-    elif sample == "ddim":
-        diffusion = DDIMDiffusion(img_size=image_size, device=device)
-    else:
-        diffusion = DDPMDiffusion(img_size=image_size, device=device)
-        logger.warning(msg=f"[{device}]: Setting sample error, we has been automatically set to ddpm.")
+    diffusion = sample_initializer(sample=sample, image_size=image_size, device=device)
     # Initialize model
     if conditional:
         # Number of classes
