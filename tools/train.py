@@ -11,14 +11,12 @@ import argparse
 import copy
 import logging
 import coloredlogs
-import numpy as np
 import torch
 
 from torch import nn as nn
 from torch import distributed as dist
 from torch import multiprocessing as mp
 from torch.utils.tensorboard import SummaryWriter
-from torch.cuda.amp import autocast
 from tqdm import tqdm
 
 sys.path.append(os.path.dirname(sys.path[0]))
@@ -169,67 +167,13 @@ def train(rank=None, args=None):
         # Initialize images and labels
         images, labels = None, None
         for i, (images, labels) in enumerate(pbar):
-            # The images are all resized in dataloader
-            images = images.to(device)
-            # Generates a tensor of size images.shape[0] * images.shape[0] randomly sampled time steps
-            time = diffusion.sample_time_steps(images.shape[0]).to(device)
-            # Add noise, return as x value at time t and standard normal distribution
-            x_time, noise = diffusion.noise_images(x=images, time=time)
-            # Enable half-precision training
-            if fp16:
-                # Half-precision training
-                with autocast():
-                    # Half-precision unconditional training
-                    if not conditional:
-                        # Half-precision unconditional model prediction
-                        predicted_noise = model(x_time, time)
-                    # Conditional training, need to add labels
-                    else:
-                        labels = labels.to(device)
-                        # Random unlabeled hard training, using only time steps and no class information
-                        if np.random.random() < 0.1:
-                            labels = None
-                        # Half-precision conditional model prediction
-                        predicted_noise = model(x_time, time, labels)
-                    # To calculate the MSE loss
-                    # You need to use the standard normal distribution of x at time t and the predicted noise
-                    loss = mse(noise, predicted_noise)
-                # The optimizer clears the gradient of the model parameters
-                optimizer.zero_grad()
-                scaler.scale(loss).backward()
-                scaler.step(optimizer)
-                scaler.update()
-            # Use full-precision
-            else:
-                # Full-precision unconditional training
-                if not conditional:
-                    # Full-precision unconditional model prediction
-                    predicted_noise = model(x_time, time)
-                # Conditional training, need to add labels
-                else:
-                    labels = labels.to(device)
-                    # Random unlabeled hard training, using only time steps and no class information
-                    if np.random.random() < 0.1:
-                        labels = None
-                    # Full-precision conditional model prediction
-                    predicted_noise = model(x_time, time, labels)
-                # To calculate the MSE loss
-                # You need to use the standard normal distribution of x at time t and the predicted noise
-                loss = mse(noise, predicted_noise)
-                # The optimizer clears the gradient of the model parameters
-                optimizer.zero_grad()
-                # Automatically calculate gradients
-                loss.backward()
-                # The optimizer updates the parameters of the model
-                optimizer.step()
-            # EMA
-            ema.step_ema(ema_model=ema_model, model=model)
-
-            # TensorBoard logging
-            pbar.set_postfix(MSE=loss.item())
-            tb_logger.add_scalar(tag=f"[{device}]: MSE", scalar_value=loss.item(),
-                                 global_step=epoch * len_dataloader + i)
-
+            # Train one epoch
+            fit_result = model.fit_one_epoch(epoch=epoch, images=images, labels=labels, i=i,
+                                             len_dataloader=len_dataloader, diffusion=diffusion,
+                                             conditional=conditional, model=model, ema_model=ema_model,
+                                             optimizer=optimizer, scaler=scaler, mse=mse, fp16=fp16, ema=ema,
+                                             tb_logger=tb_logger, pbar=pbar)
+            model, ema_model, optimizer, scaler = fit_result
         # Saving and validating models in the main process
         if save_models:
             # Saving model

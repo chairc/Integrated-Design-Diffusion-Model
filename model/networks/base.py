@@ -5,8 +5,11 @@
     @Author : chairc
     @Site   : https://github.com/chairc
 """
+import random
+
 import torch
 import torch.nn as nn
+from torch.cuda.amp import autocast
 
 
 class BaseNet(nn.Module):
@@ -66,3 +69,88 @@ class BaseNet(nn.Module):
         pos_enc_b = torch.cos(input=inv_freq_value)
         pos_enc = torch.cat(tensors=[pos_enc_a, pos_enc_b], dim=-1)
         return pos_enc
+
+    def fit_one_epoch(self, epoch, images, labels, i, len_dataloader, diffusion, conditional, model, ema_model,
+                      optimizer, scaler, mse, fp16, ema, tb_logger, pbar):
+        """
+        Base train one epoch function (default), subclass models can override this function
+        :param epoch: Current epoch
+        :param images: Images
+        :param labels: Labels
+        :param i: Current iter
+        :param len_dataloader: Length of dataloader
+        :param diffusion: Which sample
+        :param conditional: Enable conditional training
+        :param model: Current model
+        :param ema_model: Ema model
+        :param optimizer: Optimizer
+        :param scaler: scaler for harf-precision
+        :param mse: Mse loss
+        :param fp16: Enable harf-precision training
+        :param ema: Update ema model
+        :param tb_logger: Tensorboard logger
+        :param pbar: tqdm bar
+        :return: None
+        """
+        # The images are all resized in dataloader
+        images = images.to(self.device)
+        # Generates a tensor of size images.shape[0] * images.shape[0] randomly sampled time steps
+        time = diffusion.sample_time_steps(images.shape[0]).to(self.device)
+        # Add noise, return as x value at time t and standard normal distribution
+        x_time, noise = diffusion.noise_images(x=images, time=time)
+        # Enable half-precision training
+        if fp16:
+            # Half-precision training
+            with autocast():
+                # Half-precision unconditional training
+                if not conditional:
+                    # Half-precision unconditional model prediction
+                    predicted_noise = model(x_time, time)
+                # Conditional training, need to add labels
+                else:
+                    labels = labels.to(self.device)
+                    # Random unlabeled hard training, using only time steps and no class information
+                    if random.random() < 0.1:
+                        labels = None
+                    # Half-precision conditional model prediction
+                    predicted_noise = model(x_time, time, labels)
+                # To calculate the MSE loss
+                # You need to use the standard normal distribution of x at time t and the predicted noise
+                loss = mse(noise, predicted_noise)
+            # The optimizer clears the gradient of the model parameters
+            optimizer.zero_grad()
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
+        # Use full-precision
+        else:
+            # Full-precision unconditional training
+            if not conditional:
+                # Full-precision unconditional model prediction
+                predicted_noise = model(x_time, time)
+            # Conditional training, need to add labels
+            else:
+                labels = labels.to(self.device)
+                # Random unlabeled hard training, using only time steps and no class information
+                if random.random() < 0.1:
+                    labels = None
+                # Full-precision conditional model prediction
+                predicted_noise = model(x_time, time, labels)
+            # To calculate the MSE loss
+            # You need to use the standard normal distribution of x at time t and the predicted noise
+            loss = mse(noise, predicted_noise)
+            # The optimizer clears the gradient of the model parameters
+            optimizer.zero_grad()
+            # Automatically calculate gradients
+            loss.backward()
+            # The optimizer updates the parameters of the model
+            optimizer.step()
+        # EMA
+        ema.step_ema(ema_model=ema_model, model=model)
+
+        # TensorBoard logging
+        pbar.set_postfix(MSE=loss.item())
+        tb_logger.add_scalar(tag=f"[{self.device}]: MSE", scalar_value=loss.item(),
+                             global_step=epoch * len_dataloader + i)
+
+        return model, ema_model, optimizer, scaler
