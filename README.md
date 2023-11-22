@@ -52,6 +52,8 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 - [x] 5. Enable fast deployment and API on cloud servers. (2023-08-28)
 - [x] 6. Adding DDIM Sampling Method. (2023-08-03)
 - [x] 7. Support other image generation. (2023-09-16)
+- [ ] 8. Low-resolution generated images for super-resolution enhancement
+- [ ] 9. Use Latent Diffusion and reduce GPU memory usage
 
 ### Training
 
