@@ -24,21 +24,23 @@ logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
 
 
-def device_initializer():
+def device_initializer(device_id=0):
     """
     This function initializes the running device information when the program runs for the first time
     :return: cpu or cuda
     """
-    logger.info(msg="Init program, it is checking the basic setting.")
+    logger.info(msg="Init program, it is checking the basic device setting.")
     device_dict = {}
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
-        device = torch.device(device="cuda")
+        # Set device with custom setting
+        device = torch.device("cuda", device_id)
         is_init = torch.cuda.is_initialized()
         device_count = torch.cuda.device_count()
         device_name = torch.cuda.get_device_name(device=device)
         device_cap = torch.cuda.get_device_capability(device=device)
         device_prop = torch.cuda.get_device_properties(device=device)
+        device_dict["device_id"] = device_id
         device_dict["is_init"] = is_init
         device_dict["device_count"] = device_count
         device_dict["device_name"] = device_name
@@ -46,7 +48,7 @@ def device_initializer():
         device_dict["device_prop"] = device_prop
         logger.info(msg=device_dict)
     else:
-        logger.warning(msg="The device is using cpu.")
+        logger.warning(msg="Warning: The device is using cpu, the device would slow down the model running speed.")
         device = torch.device(device="cpu")
     return device
 
