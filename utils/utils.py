@@ -34,6 +34,19 @@ def plot_images(images, fig_size=(64, 64)):
     plt.show()
 
 
+def plot_one_image_in_images(images, fig_size=(64, 64)):
+    """
+    Draw one image in images
+    :param images: Image
+    :param fig_size: Draw image size
+    :return: None
+    """
+    plt.figure(figsize=fig_size)
+    for i in images.cpu():
+        plt.imshow(X=i)
+        plt.imshow()
+
+
 def save_images(images, path, **kwargs):
     """
     Save images
@@ -46,6 +59,27 @@ def save_images(images, path, **kwargs):
     image_array = grid.permute(1, 2, 0).to("cpu").numpy()
     im = Image.fromarray(obj=image_array)
     im.save(fp=path)
+
+
+def save_one_image_in_images(images, path, generate_name, **kwargs):
+    """
+    Save one image in images
+    :param images: Image
+    :param generate_name: generate image name
+    :param path: Save path
+    :param kwargs: Other parameters
+    :return: None
+    """
+    # This is counter
+    count = 0
+    # Show image in images
+    for i in images.cpu():
+        grid = torchvision.utils.make_grid(tensor=i, **kwargs)
+        image_array = grid.permute(1, 2, 0).to("cpu").numpy()
+        im = Image.fromarray(obj=image_array)
+        # Rename every images
+        im.save(fp=os.path.join(path, f"{generate_name}_{count}.jpg"))
+        count += 1
 
 
 def get_dataset(args, distributed=False):

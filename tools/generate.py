@@ -15,7 +15,7 @@ import coloredlogs
 
 sys.path.append(os.path.dirname(sys.path[0]))
 from utils.initializer import device_initializer, load_model_weight_initializer, network_initializer, sample_initializer
-from utils.utils import plot_images, save_images, check_and_create_dir
+from utils.utils import plot_images, save_images, save_one_image_in_images, check_and_create_dir
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
@@ -81,6 +81,7 @@ def generate(args):
         plot_images(images=x)
     else:
         save_images(images=x, path=os.path.join(result_path, f"{generate_name}.jpg"))
+        save_one_image_in_images(images=x, path=result_path, generate_name=generate_name)
         plot_images(images=x)
     logger.info(msg="Finish generation.")
 
