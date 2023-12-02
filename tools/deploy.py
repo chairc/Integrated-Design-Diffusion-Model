@@ -17,7 +17,7 @@ import coloredlogs
 import torch
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from model.networks.network import UNet
+from model.networks.unet import UNet
 from utils.utils import save_images
 from utils.initializer import device_initializer, load_model_weight_initializer, sample_initializer
 

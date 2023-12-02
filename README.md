@@ -21,7 +21,8 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 │   │   └── module.py
 │   ├── networks
 │   │   ├── base.py
-│   │   └── network.py
+│   │   ├── cspdarkunet.py
+│   │   └── unet.py
 │   └── samples
 │       ├── base.py
 │       ├── ddim.py
