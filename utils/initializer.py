@@ -15,7 +15,8 @@ from collections import OrderedDict
 
 from torch.cuda.amp import GradScaler
 
-from model.networks.network import UNet, CSPDarkUnet
+from model.networks.unet import UNet
+from model.networks.cspdarkunet import CSPDarkUnet
 from model.samples.ddim import DDIMDiffusion
 from model.samples.ddpm import DDPMDiffusion
 from utils.lr_scheduler import set_cosine_lr
