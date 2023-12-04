@@ -124,12 +124,17 @@ def optimizer_initializer(model, optim, init_lr, device):
     :param device: GPU or CPU
     :return: optimizer
     """
+    # Set model parameters
+    model_param = model.parameters()
+    # Choose an optimizer
     if optim == "adam":
-        optimizer = torch.optim.Adam(params=model.parameters(), lr=init_lr)
+        optimizer = torch.optim.Adam(params=model_param, lr=init_lr)
     elif optim == "adamw":
-        optimizer = torch.optim.AdamW(params=model.parameters(), lr=init_lr)
+        optimizer = torch.optim.AdamW(params=model_param, lr=init_lr)
+    elif optim == "sgd":
+        optimizer = torch.optim.SGD(params=model_param, lr=init_lr, momentum=0.937)
     else:
-        optimizer = torch.optim.AdamW(params=model.parameters(), lr=init_lr)
+        optimizer = torch.optim.AdamW(params=model_param, lr=init_lr)
         logger.warning(msg=f"[{device}]: Setting optimizer error, we has been automatically set to adamw.")
     logger.info(msg=f"[{device}]: This base optimizer is {optim}")
     return optimizer
