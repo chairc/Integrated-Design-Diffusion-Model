@@ -101,6 +101,7 @@ def network_initializer(network, device):
     """
     Initialize base network
     :param network: Network name
+    :param device: GPU or CPU
     :return: Network
     """
     if network == "unet":
@@ -120,6 +121,7 @@ def optimizer_initializer(model, optim, init_lr, device):
     :param model: Model
     :param optim: Optimizer name
     :param init_lr: Initialize learning rate
+    :param device: GPU or CPU
     :return: optimizer
     """
     if optim == "adam":

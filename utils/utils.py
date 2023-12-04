@@ -191,6 +191,12 @@ def delete_files(path):
 
 
 def save_train_logging(arg, save_path):
+    """
+    Save train log
+    :param arg: Argparse
+    :param save_path: Save path
+    :return: None
+    """
     with open(file=f"{save_path}/train.log", mode="a") as f:
         current_time = time.strftime("%H:%M:%S", time.localtime())
         f.write(f"{current_time}: {arg}\n")
@@ -198,6 +204,11 @@ def save_train_logging(arg, save_path):
 
 
 def check_and_create_dir(path):
+    """
+    Check and create not exist folder
+    :param path: Create path
+    :return: None
+    """
     logger.warning(msg=f"Folder '{path}' does not exist.")
     os.makedirs(name=path, exist_ok=True)
     logger.info(msg=f"Successfully create folder '{path}'.")
