@@ -14,8 +14,9 @@ import logging
 import coloredlogs
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from utils.initializer import device_initializer, load_model_weight_initializer, network_initializer, sample_initializer
+from utils.initializer import device_initializer, network_initializer, sample_initializer
 from utils.utils import plot_images, save_images, save_one_image_in_images, check_and_create_dir
+from utils.checkpoint import load_ckpt
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
@@ -64,7 +65,7 @@ def generate(args):
         # classifier-free guidance interpolation weight
         cfg_scale = args.cfg_scale
         model = Network(num_classes=num_classes, device=device, image_size=image_size, act=act).to(device)
-        load_model_weight_initializer(model=model, weight_path=weight_path, device=device, is_train=False)
+        load_ckpt(ckpt_path=weight_path, model=model, device=device, is_train=False)
         if class_name == -1:
             y = torch.arange(num_classes).long().to(device)
             num_images = num_classes
@@ -73,7 +74,7 @@ def generate(args):
         x = diffusion.sample(model=model, n=num_images, labels=y, cfg_scale=cfg_scale)
     else:
         model = Network(device=device, image_size=image_size, act=act).to(device)
-        load_model_weight_initializer(model=model, weight_path=weight_path, device=device, is_train=False)
+        load_ckpt(ckpt_path=weight_path, model=model, device=device, is_train=False)
         x = diffusion.sample(model=model, n=num_images)
     # If there is no path information, it will only be displayed
     # If it exists, it will be saved to the specified path and displayed

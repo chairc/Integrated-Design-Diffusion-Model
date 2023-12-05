@@ -11,6 +11,7 @@
 **本仓库整体结构**
 
 ```yaml
+Industrial Defect Diffusion Model
 ├── datasets
 │   └── dataset_demo
 │       ├── class_1
@@ -18,6 +19,11 @@
 │       └── class_3
 ├── model
 │   ├── modules
+│   │   ├── activation.py
+│   │   ├── attention.py
+│   │   ├── block.py
+│   │   ├── conv.py
+│   │   ├── ema.py
 │   │   └── module.py
 │   ├── networks
 │   │   ├── base.py
@@ -38,6 +44,7 @@
 │   ├── generate.py
 │   └── train.py
 ├── utils
+│   ├── checkpoint.py
 │   ├── initializer.py
 │   ├── lr_scheduler.py
 │   └── utils.py
@@ -138,12 +145,23 @@
    **有条件恢复训练命令**
 
    ```bash
-   python train.py --resume True --start_epoch 10 --load_model_dir df --sample ddpm --conditional True --run_name df --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path /your/dataset/path --result_path /your/save/path
+   # 此处为输入--start_epoch参数，使用当前编号权重
+   python train.py --resume True --start_epoch 10 --sample ddpm --conditional True --run_name df --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path /your/dataset/path --result_path /your/save/path
+   ```
+   
+   ```bash
+   # 此处为不输入--start_epoch参数，默认使用last权重
+   python train.py --resume True --sample ddpm --conditional True --run_name df --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
    **无条件恢复训练命令**
 
    ```bash
-   python train.py --resume True --start_epoch 10 --load_model_dir df --sample ddpm --conditional False --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
+   python train.py --resume True --start_epoch 10 --sample ddpm --conditional False --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
+   ```
+   
+   ```bash
+   # 此处为不输入--start_epoch参数，默认使用last权重
+   python train.py --resume True --sample ddpm --conditional False --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
 
 #### 分布式训练
@@ -200,8 +218,7 @@
 | --vis                  |          | 可视化数据集信息                 |   bool   | 打开可视化数据集信息，根据可视化生成样本信息筛选模型         |
 | --num_vis              |          | 生成的可视化图像数量             |   int    | 生成的可视化图像数量。如果不填写，则默认生成图片个数为数据集类别的个数 |
 | --resume               |          | 中断恢复训练                     |   bool   | 恢复训练将设置为“True”。注意：设置异常中断的epoch编号若在--start_model_interval参数条件外，则不生效。例如开始保存模型时间为100，中断编号为50，由于我们没有保存模型，所以无法设置任意加载epoch点。每次训练我们都会保存xxx_last.pt文件，所以我们需要使用最后一次保存的模型进行中断训练 |
-| --start_epoch          |          | 中断迭代编号                     |   int    | 设置异常中断的epoch编号                                      |
-| --load_model_dir       |          | 加载模型所在文件夹               |   str    | 写入中断的epoch上一个加载模型的所在文件夹                    |
+| --start_epoch          |          | 中断迭代编号                     |   int    | 设置异常中断的epoch编号，模型会自动加载当前编号的检查点      |
 | --distributed          |          | 分布式训练                       |   bool   | 开启分布式训练                                               |
 | --main_gpu             |          | 分布式训练主显卡                 |   int    | 设置分布式中主显卡                                           |
 | --world_size           |          | 分布式训练的节点等级             |   int    | 分布式训练的节点等级， world_size的值会与实际使用的GPU数量或分布式节点数量相对应 |

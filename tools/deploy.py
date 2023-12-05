@@ -19,7 +19,8 @@ import torch
 sys.path.append(os.path.dirname(sys.path[0]))
 from model.networks.unet import UNet
 from utils.utils import save_images
-from utils.initializer import device_initializer, load_model_weight_initializer, sample_initializer
+from utils.initializer import device_initializer, sample_initializer
+from utils.checkpoint import load_ckpt
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
@@ -61,11 +62,11 @@ def generate(parse_json_data):
         # classifier-free guidance interpolation weight
         cfg_scale = parse_json_data["cfg_scale"]
         model = UNet(num_classes=num_classes, device=device, image_size=image_size, act=act).to(device)
-        load_model_weight_initializer(model=model, weight_path=weight_path, device=device, is_train=False)
+        load_ckpt(ckpt_path=weight_path, model=model, device=device, is_train=False)
         y = torch.Tensor([class_name]).long().to(device)
     else:
         model = UNet(device=device, image_size=image_size, act=act).to(device)
-        load_model_weight_initializer(model=model, weight_path=weight_path, device=device, is_train=False)
+        load_ckpt(ckpt_path=weight_path, model=model, device=device, is_train=False)
         y = None
         cfg_scale = None
     # Generate images by diffusion models

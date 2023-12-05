@@ -11,8 +11,6 @@ import torch
 import logging
 import coloredlogs
 
-from collections import OrderedDict
-
 from torch.cuda.amp import GradScaler
 
 from model.networks.unet import UNet
@@ -67,34 +65,6 @@ def seed_initializer(seed_id=0):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
     logger.info(msg=f"The seed is initialized, and the seed ID is {seed_id}.")
-
-
-def load_model_weight_initializer(model, weight_path, device, is_train=True):
-    """
-    Initialize weight loading
-    :param model: Model
-    :param weight_path: Weight model path
-    :param device: GPU or CPU
-    :param is_train: Whether to train mode
-    :return: None
-    """
-    model_dict = model.state_dict()
-    model_weights_dict = torch.load(f=weight_path, map_location=device)
-    # Check if key contains 'module.' prefix.
-    # This method is the name after training in the distribution, check the weight and delete
-    if not is_train:
-        new_model_weights_dict = {}
-        for key, value in model_weights_dict.items():
-            if key.startswith("module."):
-                new_key = key[len("module."):]
-                new_model_weights_dict[new_key] = value
-            else:
-                new_model_weights_dict[key] = value
-        model_weights_dict = new_model_weights_dict
-        logger.info(msg="Successfully check the load weight and rename.")
-    model_weights_dict = {k: v for k, v in model_weights_dict.items() if np.shape(model_dict[k]) == np.shape(v)}
-    model_dict.update(model_weights_dict)
-    model.load_state_dict(state_dict=OrderedDict(model_dict))
 
 
 def network_initializer(network, device):

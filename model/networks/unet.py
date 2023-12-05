@@ -9,7 +9,9 @@ import torch
 import torch.nn as nn
 
 from model.networks.base import BaseNet
-from model.modules.module import UpBlock, DownBlock, DoubleConv, SelfAttention
+from model.modules.attention import SelfAttention
+from model.modules.block import DownBlock, UpBlock
+from model.modules.conv import DoubleConv
 
 
 class UNet(BaseNet):
