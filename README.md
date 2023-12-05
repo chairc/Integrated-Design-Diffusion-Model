@@ -62,6 +62,7 @@ Industrial Defect Diffusion Model
 - [x] 7. Support other image generation. (2023-09-16)
 - [ ] 8. Low-resolution generated images for super-resolution enhancement
 - [ ] 9. Use Latent Diffusion and reduce GPU memory usage
+- [x] 10. Reconstruct the overall structure of the model. (2023-12-06)
 
 ### Training
 
