@@ -38,6 +38,7 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 │   ├── generate.py
 │   └── train.py
 ├── utils
+│   ├── checkpoint.py
 │   ├── initializer.py
 │   ├── lr_scheduler.py
 │   └── utils.py
@@ -139,13 +140,26 @@ The training GPU implements environment for this README is as follows: models ar
    **Conditional Resume Training Command**
 
    ```bash
-   python train.py --resume True --start_epoch 10 --load_model_dir df --sample ddpm --conditional True --run_name df --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path /your/dataset/path --result_path /your/save/path
+   # This is using --start_epoch, default use current epoch checkpoint
+   python train.py --resume True --start_epoch 10 --sample ddpm --conditional True --run_name df --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path /your/dataset/path --result_path /your/save/path
+   ```
+   
+   ```bash
+   # This is not using --start_epoch, default use last checkpoint 
+   python train.py --resume True --sample ddpm --conditional True --run_name df --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
    **Unconditional Resume Training Command**
 
    ```bash
-   python train.py --resume True --start_epoch 10 --load_model_dir df --sample ddpm --conditional False --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
+   # This is using --start_epoch, default use current epoch checkpoint
+   python train.py --resume True --start_epoch 10 --sample ddpm --conditional False --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
+   
+   ```bash
+   # This is not using --start_epoch, default use last checkpoint 
+   python train.py --resume True --sample ddpm --conditional False --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
+   ```
+   
 #### Distributed Training
 
 1. The basic configuration is similar to regular training, but note that enabling distributed training requires setting `--distributed` to `True`. To prevent arbitrary use of distributed training, we have several conditions for enabling distributed training, such as `args.distributed`, `torch.cuda.device_count() > 1`, and `torch.cuda.is_available()`.
@@ -197,8 +211,7 @@ The training GPU implements environment for this README is as follows: models ar
 | --vis                  |             | Visualize dataset information   | bool | Enable visualization of dataset information for model selection based on visualization |
 | --num_vis | | Number of visualization images generated | int | Number of visualization images generated. If not filled, the default is the number of image classes |
 | --resume               |             | Resume interrupted training     | bool | Set to "True" to resume interrupted training. Note: If the epoch number of interruption is outside the condition of --start_model_interval, it will not take effect. For example, if the start saving model time is 100 and the interruption number is 50, we cannot set any loading epoch points because we did not save the model. We save the xxx_last.pt file every training, so we need to use the last saved model for interrupted training |
-| --start_epoch          |             | Epoch number of interruption    | int  | Epoch number where the training was interrupted              |
-| --load_model_dir       |             | Folder name of the loaded model | str  | Folder name of the previously loaded model                   |
+| --start_epoch          |             | Epoch number of interruption    | int  | Epoch number where the training was interrupted, the model will load current checkpoint |
 | --distributed         |          | Distributed training          | bool  | Enable distributed training                                 |
 | --main_gpu            |          | Main GPU for distributed      | int   | Set the main GPU for distributed training                   |
 | --world_size          |          | Number of distributed nodes    | int   | Number of distributed nodes, corresponds to the actual number of GPUs or distributed nodes being used |

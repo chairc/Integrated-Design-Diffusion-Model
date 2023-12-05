@@ -23,9 +23,10 @@ from tqdm import tqdm
 
 sys.path.append(os.path.dirname(sys.path[0]))
 from model.modules.module import EMA
-from utils.initializer import device_initializer, seed_initializer, load_model_weight_initializer, network_initializer, \
-    optimizer_initializer, sample_initializer, lr_initializer, fp16_initializer
+from utils.initializer import device_initializer, seed_initializer, network_initializer, optimizer_initializer, \
+    sample_initializer, lr_initializer, fp16_initializer
 from utils.utils import plot_images, save_images, get_dataset, setup_logging, save_train_logging
+from utils.checkpoint import load_ckpt, save_ckpt
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
@@ -126,18 +127,17 @@ def train(rank=None, args=None):
     optimizer = optimizer_initializer(model=model, optim=optim, init_lr=init_lr, device=device)
     # Resume training
     if resume:
-        load_model_dir = args.load_model_dir
+        ckpt_path = None
         start_epoch = args.start_epoch
-        # Load the previous model
-        load_epoch = str(start_epoch - 1).zfill(3)
-        model_path = os.path.join(result_path, load_model_dir, f"model_{load_epoch}.pt")
-        optim_path = os.path.join(result_path, load_model_dir, f"optim_model_{load_epoch}.pt")
-        load_model_weight_initializer(model=model, weight_path=model_path, device=device)
-        logger.info(msg=f"[{device}]: Successfully load model model_{load_epoch}.pt")
-        # Load the previous model optimizer
-        optim_weights_dict = torch.load(f=optim_path, map_location=device)
-        optimizer.load_state_dict(state_dict=optim_weights_dict)
-        logger.info(msg=f"[{device}]: Successfully load optimizer optim_model_{load_epoch}.pt")
+        # Determine which checkpoint to load
+        # 'start_epoch' is correct
+        if start_epoch is not None:
+            ckpt_path = os.path.join(results_dir, f"ckpt_{str(start_epoch - 1).zfill(3)}.pt")
+        # Parameter 'ckpt_path' is None in the train mode
+        if ckpt_path is None:
+            ckpt_path = os.path.join(results_dir, "ckpt_last.pt")
+        start_epoch = load_ckpt(ckpt_path=ckpt_path, model=model, device=device, optimizer=optimizer)
+        logger.info(msg=f"[{device}]: Successfully load resume model checkpoint.")
     else:
         start_epoch = 0
     # Set harf-precision
@@ -232,46 +232,37 @@ def train(rank=None, args=None):
 
         # Saving and validating models in the main process
         if save_models:
-            # Saving model
-            save_name = f"model_{str(epoch).zfill(3)}"
+            # Saving model, set the checkpoint name
+            save_name = f"ckpt_{str(epoch).zfill(3)}"
+            # Init ckpt params
+            ckpt_model, ckpt_ema_model, ckpt_optimizer = None, None, None
             if not conditional:
-                # Saving pt files
-                torch.save(obj=model.state_dict(), f=os.path.join(results_dir, f"model_last.pt"))
-                torch.save(obj=optimizer.state_dict(), f=os.path.join(results_dir, f"optim_last.pt"))
+                ckpt_model = model.state_dict()
+                ckpt_optimizer = optimizer.state_dict()
                 # Enable visualization
                 if vis:
                     # images.shape[0] is the number of images in the current batch
                     n = num_vis if num_vis > 0 else images.shape[0]
                     sampled_images = diffusion.sample(model=model, n=n)
                     save_images(images=sampled_images, path=os.path.join(results_vis_dir, f"{save_name}.jpg"))
-                # Saving pt files in epoch interval
-                if save_model_interval and epoch > start_model_interval:
-                    torch.save(obj=model.state_dict(), f=os.path.join(results_dir, f"{save_name}.pt"))
-                    torch.save(obj=optimizer.state_dict(), f=os.path.join(results_dir, f"optim_{save_name}.pt"))
-                    logger.info(msg=f"Save the {save_name}.pt, and optim_{save_name}.pt.")
-                logger.info(msg="Save the model.")
             else:
-                # Saving pt files
-                torch.save(obj=model.state_dict(), f=os.path.join(results_dir, f"model_last.pt"))
-                torch.save(obj=ema_model.state_dict(), f=os.path.join(results_dir, f"ema_model_last.pt"))
-                torch.save(obj=optimizer.state_dict(), f=os.path.join(results_dir, f"optim_last.pt"))
+                ckpt_model = model.state_dict()
+                ckpt_ema_model = ema_model.state_dict()
+                ckpt_optimizer = optimizer.state_dict()
                 # Enable visualization
                 if vis:
                     labels = torch.arange(num_classes).long().to(device)
                     n = num_vis if num_vis > 0 else len(labels)
                     sampled_images = diffusion.sample(model=model, n=n, labels=labels, cfg_scale=cfg_scale)
-                    ema_sampled_images = diffusion.sample(model=ema_model, n=n, labels=labels,
-                                                          cfg_scale=cfg_scale)
+                    ema_sampled_images = diffusion.sample(model=ema_model, n=n, labels=labels, cfg_scale=cfg_scale)
                     # This is a method to display the results of each model during training and can be commented out
                     # plot_images(images=sampled_images)
                     save_images(images=sampled_images, path=os.path.join(results_vis_dir, f"{save_name}.jpg"))
-                    save_images(images=ema_sampled_images, path=os.path.join(results_vis_dir, f"{save_name}_ema.jpg"))
-                if save_model_interval and epoch > start_model_interval:
-                    torch.save(obj=model.state_dict(), f=os.path.join(results_dir, f"{save_name}.pt"))
-                    torch.save(obj=ema_model.state_dict(), f=os.path.join(results_dir, f"ema_{save_name}.pt"))
-                    torch.save(obj=optimizer.state_dict(), f=os.path.join(results_dir, f"optim_{save_name}.pt"))
-                    logger.info(msg=f"Save the {save_name}.pt, ema_{save_name}.pt, and optim_{save_name}.pt.")
-                logger.info(msg="Save the model.")
+                    save_images(images=ema_sampled_images, path=os.path.join(results_vis_dir, f"ema_{save_name}.jpg"))
+            # Save checkpoint
+            save_ckpt(epoch=epoch, save_name=save_name, ckpt_model=ckpt_model, ckpt_ema_model=ckpt_ema_model,
+                      ckpt_optimizer=ckpt_optimizer, results_dir=results_dir, save_model_interval=save_model_interval,
+                      start_model_interval=start_model_interval, num_classes=num_classes)
         logger.info(msg=f"[{device}]: Finish epoch {epoch}:")
 
         # Synchronization during distributed training
@@ -365,16 +356,15 @@ if __name__ == "__main__":
     # If not filled, the default is the number of image classes (unconditional) or images.shape[0] (conditional)
     parser.add_argument("--num_vis", type=int, default=-1)
     # Resume interrupted training (needed)
-    # 1. Set to 'True' to resume interrupted training.
-    # 2. Set the resume interrupted epoch number
-    # 3. Set the directory of the previous loaded model from the interrupted epoch.
+    # 1. Set to 'True' to resume interrupted training and check if the parameter 'run_name' is correct.
+    # 2. Set the resume interrupted epoch number. (If not, we would select the last)
     # Note: If the epoch number of interruption is outside the condition of '--start_model_interval',
     # it will not take effect. For example, if the start saving model time is 100 and the interruption number is 50,
     # we cannot set any loading epoch points because we did not save the model.
-    # We save the 'xxx_last.pt' file every training, so we need to use the last saved model for interrupted training
+    # We save the 'ckpt_last.pt' file every training, so we need to use the last saved model for interrupted training
+    # If you do not know what epoch the checkpoint is, rename this checkpoint is 'ckpt_last'.pt
     parser.add_argument("--resume", type=bool, default=False)
-    parser.add_argument("--start_epoch", type=int, default=-1)
-    parser.add_argument("--load_model_dir", type=str, default="")
+    parser.add_argument("--start_epoch", type=int, default=None)
 
     # =================================Enable distributed training (if applicable)=================================
     # Enable distributed training (needed)
