@@ -9,7 +9,9 @@ import torch
 import torch.nn as nn
 
 from model.networks.base import BaseNet
-from model.modules.module import SelfAttention, CSPDarkUpBlock, CSPDarkDownBlock, BaseConv
+from model.modules.attention import SelfAttention
+from model.modules.block import CSPDarkDownBlock,CSPDarkUpBlock
+from model.modules.conv import BaseConv
 
 
 class CSPDarkUnet(BaseNet):

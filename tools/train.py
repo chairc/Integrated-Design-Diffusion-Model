@@ -22,7 +22,7 @@ from torch.cuda.amp import autocast
 from tqdm import tqdm
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from model.modules.module import EMA
+from model.modules.ema import EMA
 from utils.initializer import device_initializer, seed_initializer, network_initializer, optimizer_initializer, \
     sample_initializer, lr_initializer, fp16_initializer
 from utils.utils import plot_images, save_images, get_dataset, setup_logging, save_train_logging

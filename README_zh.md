@@ -11,6 +11,7 @@
 **本仓库整体结构**
 
 ```yaml
+Industrial Defect Diffusion Model
 ├── datasets
 │   └── dataset_demo
 │       ├── class_1
@@ -18,6 +19,11 @@
 │       └── class_3
 ├── model
 │   ├── modules
+│   │   ├── activation.py
+│   │   ├── attention.py
+│   │   ├── block.py
+│   │   ├── conv.py
+│   │   ├── ema.py
 │   │   └── module.py
 │   ├── networks
 │   │   ├── base.py

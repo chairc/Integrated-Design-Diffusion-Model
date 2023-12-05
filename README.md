@@ -11,6 +11,7 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 **Repository Structure**
 
 ```yaml
+Industrial Defect Diffusion Model
 ├── datasets
 │   └── dataset_demo
 │       ├── class_1
@@ -18,6 +19,11 @@ We named this project IDDM: Industrial Defect Diffusion Model. It aims to reprod
 │       └── class_3
 ├── model
 │   ├── modules
+│   │   ├── activation.py
+│   │   ├── attention.py
+│   │   ├── block.py
+│   │   ├── conv.py
+│   │   ├── ema.py
 │   │   └── module.py
 │   ├── networks
 │   │   ├── base.py
