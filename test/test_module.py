@@ -22,6 +22,7 @@ from matplotlib import pyplot as plt
 from utils.utils import get_dataset, delete_files
 from utils.initializer import device_initializer, network_initializer, sample_initializer
 from utils.lr_scheduler import set_cosine_lr
+from utils.checkpoint import separate_ckpt_weights
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
@@ -151,6 +152,31 @@ class TestModule(unittest.TestCase):
         client_socket.send("-iccv-over".encode("utf-8"))
         client_socket.close()
         logger.info(msg="Send message successfully!")
+
+    def test_separate_ckpt_weights(self):
+        """
+        test separate checkpoint weights
+        :return: None
+        """
+        # Checkpoint path
+        ckpt_root_path = "/your/checkpoint/root/path"
+        ckpt_name = "your_checkpoint.pt"
+        ckpt_path = os.path.join(ckpt_root_path, ckpt_name)
+        # Load model
+        ckpt = torch.load(f=ckpt_path, map_location="cpu")
+        print(len(ckpt["model"]), len(ckpt["ema_model"]), len(ckpt["optimizer"]))
+        ckpt_model = separate_ckpt_weights(ckpt=ckpt, separate_model=False)
+        ckpt_ema_model = separate_ckpt_weights(ckpt=ckpt, separate_ema_model=False)
+        ckpt_optimizer = separate_ckpt_weights(ckpt=ckpt, separate_optimizer=False)
+        print(len(ckpt_model["model"]), ckpt_model["ema_model"], ckpt_model["optimizer"])
+        print(ckpt_ema_model["model"], len(ckpt_ema_model["ema_model"]), ckpt_ema_model["optimizer"])
+        print(ckpt_optimizer["model"], ckpt_optimizer["ema_model"], len(ckpt_optimizer["optimizer"]))
+        torch.save(obj=ckpt_model, f=os.path.join(ckpt_root_path, "ckpt_model.pt"))
+        logger.info(msg="Save ckpt_model successfully!")
+        torch.save(obj=ckpt_ema_model, f=os.path.join(ckpt_root_path, "ckpt_ema_model.pt"))
+        logger.info(msg="Save ckpt_ema_model successfully!")
+        torch.save(obj=ckpt_optimizer, f=os.path.join(ckpt_root_path, "ckpt_optimizer.pt"))
+        logger.info(msg="Save ckpt_optimizer successfully!")
 
 
 if __name__ == "__main__":
