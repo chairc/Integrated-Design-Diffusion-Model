@@ -109,3 +109,22 @@ def save_ckpt(epoch, save_name, ckpt_model, ckpt_ema_model, ckpt_optimizer, resu
         shutil.copyfile(last_filename, filename)
         logger.info(msg=f"Save the {save_name}.pt")
     logger.info(msg="Finish saving the model.")
+
+
+def separate_ckpt_weights(ckpt, separate_model=True, separate_ema_model=True, separate_optimizer=True):
+    """
+    Separate checkpoint weights
+    :param ckpt: checkpoint
+    :param separate_model: Whether to separate model
+    :param separate_ema_model: Whether to separate ema model
+    :param separate_optimizer: Whether to separate optimizer
+    :return: ckpt_state
+    """
+    ckpt_state = ckpt.copy()
+    if separate_model:
+        ckpt_state["model"] = None
+    if separate_ema_model:
+        ckpt_state["ema_model"] = None
+    if separate_optimizer:
+        ckpt_state["optimizer"] = None
+    return ckpt_state
