@@ -113,6 +113,8 @@ def train(rank=None, args=None):
     dataloader = get_dataset(args=args, distributed=distributed)
     # Resume training
     resume = args.resume
+    # Pretrain
+    pretrain = args.pretrain
     # Network
     Network = network_initializer(network=network, device=device)
     # Model
@@ -136,9 +138,16 @@ def train(rank=None, args=None):
         # Parameter 'ckpt_path' is None in the train mode
         if ckpt_path is None:
             ckpt_path = os.path.join(results_dir, "ckpt_last.pt")
-        start_epoch = load_ckpt(ckpt_path=ckpt_path, model=model, device=device, optimizer=optimizer)
+        start_epoch = load_ckpt(ckpt_path=ckpt_path, model=model, device=device, optimizer=optimizer,
+                                is_distributed=distributed)
         logger.info(msg=f"[{device}]: Successfully load resume model checkpoint.")
     else:
+        # Pretrain mode
+        if pretrain:
+            pretrain_path = args.pretrain_path
+            load_ckpt(ckpt_path=pretrain_path, model=model, device=device, is_pretrain=pretrain,
+                      is_distributed=distributed)
+            logger.info(msg=f"[{device}]: Successfully load pretrain model checkpoint.")
         start_epoch = 0
     # Set harf-precision
     scaler = fp16_initializer(fp16=fp16, device=device)
@@ -365,6 +374,10 @@ if __name__ == "__main__":
     # If you do not know what epoch the checkpoint is, rename this checkpoint is 'ckpt_last'.pt
     parser.add_argument("--resume", type=bool, default=False)
     parser.add_argument("--start_epoch", type=int, default=None)
+    # Enable use pretrain model (needed)
+    parser.add_argument("--pretrain", type=bool, default=False)
+    # Pretrain model load path (needed)
+    parser.add_argument("--pretrain_path", type=str, default="")
 
     # =================================Enable distributed training (if applicable)=================================
     # Enable distributed training (needed)

@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
 
 
-def load_ckpt(ckpt_path, model, device, optimizer=None, is_train=True):
+def load_ckpt(ckpt_path, model, device, optimizer=None, is_train=True, is_pretrain=False, is_distributed=False):
     """
     Load checkpoint weight files
     :param ckpt_path: Checkpoint path
@@ -26,17 +26,32 @@ def load_ckpt(ckpt_path, model, device, optimizer=None, is_train=True):
     :param optimizer: Optimizer
     :param device: GPU or CPU
     :param is_train: Whether to train mode
+    :param is_pretrain: Whether to load pretrain checkpoint
+    :param is_distributed:  Whether to distribute training
     :return: start_epoch + 1
     """
     # Load checkpoint
     ckpt_state = torch.load(f=ckpt_path, map_location=device)
-    logger.info(msg=f"[{device}]: Successfully load checkpoint, path is '{ckpt_path}'.")
+    if is_pretrain:
+        logger.info(msg=f"[{device}]: Successfully load pretrain checkpoint, path is '{ckpt_path}'.")
+    else:
+        logger.info(msg=f"[{device}]: Successfully load checkpoint, path is '{ckpt_path}'.")
+    # Check checkpoint's structure
+    assert ckpt_state["model"] is not None or ckpt_state["ema_model"] is not None, \
+        "Error!! Checkpoint model and ema_model are not None. Please check checkpoint's structure."
+    # 'model' is default option
+    if ckpt_state["model"] is None:
+        logger.info(msg=f"[{device}]: Failed to load checkpoint 'model', 'ema_model' would be loaded.")
+        ckpt_model = ckpt_state["ema_model"]
+    else:
+        logger.info(msg=f"[{device}]: Successfully to load checkpoint 'model'.")
+        ckpt_model = ckpt_state["model"]
     # Load the current model
-    ckpt_model = ckpt_state["model"]
-    load_model_ckpt(model=model, model_ckpt=ckpt_model, is_train=is_train)
+    load_model_ckpt(model=model, model_ckpt=ckpt_model, is_train=is_train, is_pretrain=is_pretrain,
+                    is_distributed=is_distributed)
     logger.info(msg=f"[{device}]: Successfully load model checkpoint.")
     # Train mode
-    if is_train:
+    if is_train and not is_pretrain:
         # Load the previous model optimizer
         optim_weights_dict = ckpt_state["optimizer"]
         optimizer.load_state_dict(state_dict=optim_weights_dict)
@@ -47,19 +62,21 @@ def load_ckpt(ckpt_path, model, device, optimizer=None, is_train=True):
         return start_epoch + 1
 
 
-def load_model_ckpt(model, model_ckpt, is_train=True):
+def load_model_ckpt(model, model_ckpt, is_train=True, is_pretrain=False, is_distributed=False):
     """
     Initialize weight loading
     :param model: Model
     :param model_ckpt: Model checkpoint
     :param is_train: Whether to train mode
+    :param is_pretrain: Whether to load pretrain checkpoint
+    :param is_distributed:  Whether to distribute training
     :return: None
     """
     model_dict = model.state_dict()
     model_weights_dict = model_ckpt
     # Check if key contains 'module.' prefix.
     # This method is the name after training in the distribution, check the weight and delete
-    if not is_train:
+    if not is_train or (is_train and is_pretrain and not is_distributed):
         new_model_weights_dict = {}
         for key, value in model_weights_dict.items():
             if key.startswith("module."):
@@ -69,6 +86,26 @@ def load_model_ckpt(model, model_ckpt, is_train=True):
                 new_model_weights_dict[key] = value
         model_weights_dict = new_model_weights_dict
         logger.info(msg="Successfully check the load weight and rename.")
+    # Train mode and it is pretraining
+    if is_train and is_pretrain:
+        if is_distributed:
+            new_model_weights_dict = {}
+            # Check if key contains 'module.' prefix.
+            # Create distributed training model weight
+            for key, value in model_weights_dict.items():
+                if not key.startswith("module."):
+                    # Add 'module.'
+                    new_key = "module." + key
+                    new_model_weights_dict[new_key] = value
+                else:
+                    new_model_weights_dict[key] = value
+            model_weights_dict = new_model_weights_dict
+            logger.info(msg="Successfully check the load pretrain distributed weight and rename.")
+            # Eliminate the impact of number of classes
+            model_weights_dict["module.label_emb.weight"] = None
+        else:
+            # Eliminate the impact of number of classes
+            model_weights_dict["label_emb.weight"] = None
     model_weights_dict = {k: v for k, v in model_weights_dict.items() if np.shape(model_dict[k]) == np.shape(v)}
     model_dict.update(model_weights_dict)
     model.load_state_dict(state_dict=OrderedDict(model_dict))
