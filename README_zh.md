@@ -337,6 +337,12 @@ Industrial Defect Diffusion Model
 
 ![model_459_ema](assets/animate_face_459_ema.jpg)
 
+#### 基于64×64模型生成160×160（任意大尺寸）图像
+
+当然，我们根据64×64的基础模型，在`generate.py`文件中生成160×160的`NEU-DET`图片（单张输出，每张图片占用显存21GB）。详细图片如下：
+
+![model_499_ema](assets/neu160_0.jpg)![model_499_ema](assets/neu160_1.jpg)![model_499_ema](assets/neu160_2.jpg)![model_499_ema](assets/neu160_3.jpg)![model_499_ema](assets/neu160_4.jpg)![model_499_ema](assets/neu160_5.jpg)
+
 ### 部署
 
 未完待续

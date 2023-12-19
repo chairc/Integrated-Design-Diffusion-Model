@@ -334,6 +334,13 @@ We conducted training on the following four datasets using the `DDPM` sampler wi
 
 ![model_459_ema](assets/animate_face_459_ema.jpg)
 
+#### Base on the 64×64 model to generate 160×160 (every size) images
+
+Of course, based on the 64×64 U-Net model, we generate 160×160 `NEU-DET` images in the `generate.py` file (single output, each image occupies 21GB of GPU memory). Detailed images are as follows:
+
+![model_499_ema](assets/neu160_0.jpg)![model_499_ema](assets/neu160_1.jpg)![model_499_ema](assets/neu160_2.jpg)![model_499_ema](assets/neu160_3.jpg)![model_499_ema](assets/neu160_4.jpg)![model_499_ema](assets/neu160_5.jpg)
+
+
 ### Deployment
 
 To be continued.
