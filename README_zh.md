@@ -6,12 +6,12 @@
 
 该扩散模型为经典的ddpm，来源于论文《**[Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)**》
 
-我们将此项目命名为IDDM: Industrial Defect Diffusion Model，中文名为工业缺陷扩散模型。在此项目中进行模型复现、训练器和生成器编写、部分算法和网络结构的改进与优化，该仓库**持续维护**。
+我们将此项目命名为IDDM: Integrated Design Diffusion Model，中文名为集成设计缺陷扩散模型。在此项目中进行模型复现、训练器和生成器编写、部分算法和网络结构的改进与优化，该仓库**持续维护**。
 
 **本仓库整体结构**
 
 ```yaml
-Industrial Defect Diffusion Model
+Integrated Design Diffusion Model
 ├── datasets
 │   └── dataset_demo
 │       ├── class_1

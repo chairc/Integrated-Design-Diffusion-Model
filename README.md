@@ -1,4 +1,4 @@
-# IDDM: Industrial Defect Diffusion Model
+# IDDM: Integrated Design Diffusion Model
 
 [中文文档](README_zh.md)
 
@@ -6,12 +6,12 @@
 
 The diffusion model used in this project is based on the classic ddpm introduced in the paper "[Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)".
 
-We named this project IDDM: Industrial Defect Diffusion Model. It aims to reproduce the model, write trainers and generators, and improve and optimize certain algorithms and network structures. This repository is **actively maintained**.
+We named this project IDDM: Integrated Design Diffusion Model. It aims to reproduce the model, write trainers and generators, and improve and optimize certain algorithms and network structures. This repository is **actively maintained**.
 
 **Repository Structure**
 
 ```yaml
-Industrial Defect Diffusion Model
+Integrated Design Diffusion Model
 ├── datasets
 │   └── dataset_demo
 │       ├── class_1
