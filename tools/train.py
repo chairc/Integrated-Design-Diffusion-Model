@@ -24,7 +24,7 @@ from tqdm import tqdm
 sys.path.append(os.path.dirname(sys.path[0]))
 from model.modules.ema import EMA
 from utils.initializer import device_initializer, seed_initializer, network_initializer, optimizer_initializer, \
-    sample_initializer, lr_initializer, fp16_initializer
+    sample_initializer, lr_initializer, amp_initializer
 from utils.utils import plot_images, save_images, get_dataset, setup_logging, save_train_logging
 from utils.checkpoint import load_ckpt, save_ckpt
 
@@ -92,8 +92,8 @@ def train(rank=None, args=None):
         # Run device initializer
         device = device_initializer()
         logger.info(msg=f"[{device}]: Successfully Use normal training.")
-    # Whether to enable half-precision training
-    fp16 = args.fp16
+    # Whether to enable automatic mixed precision training
+    amp = args.amp
     # Save model interval
     save_model_interval = args.save_model_interval
     # Save model interval in the start epoch
@@ -150,7 +150,7 @@ def train(rank=None, args=None):
             logger.info(msg=f"[{device}]: Successfully load pretrain model checkpoint.")
         start_epoch = 0
     # Set harf-precision
-    scaler = fp16_initializer(fp16=fp16, device=device)
+    scaler = amp_initializer(amp=amp, device=device)
     # Loss function
     mse = nn.MSELoss()
     # Initialize the diffusion model
@@ -184,35 +184,12 @@ def train(rank=None, args=None):
             time = diffusion.sample_time_steps(images.shape[0]).to(device)
             # Add noise, return as x value at time t and standard normal distribution
             x_time, noise = diffusion.noise_images(x=images, time=time)
-            # Enable half-precision training
-            if fp16:
-                # Half-precision training
-                with autocast():
-                    # Half-precision unconditional training
-                    if not conditional:
-                        # Half-precision unconditional model prediction
-                        predicted_noise = model(x_time, time)
-                    # Conditional training, need to add labels
-                    else:
-                        labels = labels.to(device)
-                        # Random unlabeled hard training, using only time steps and no class information
-                        if np.random.random() < 0.1:
-                            labels = None
-                        # Half-precision conditional model prediction
-                        predicted_noise = model(x_time, time, labels)
-                    # To calculate the MSE loss
-                    # You need to use the standard normal distribution of x at time t and the predicted noise
-                    loss = mse(noise, predicted_noise)
-                # The optimizer clears the gradient of the model parameters
-                optimizer.zero_grad()
-                scaler.scale(loss).backward()
-                scaler.step(optimizer)
-                scaler.update()
-            # Use full-precision
-            else:
-                # Full-precision unconditional training
+            # Enable Automatic mixed precision training
+            # Automatic mixed precision training
+            with autocast(enabled=amp):
+                # Unconditional training
                 if not conditional:
-                    # Full-precision unconditional model prediction
+                    # Unconditional model prediction
                     predicted_noise = model(x_time, time)
                 # Conditional training, need to add labels
                 else:
@@ -220,13 +197,21 @@ def train(rank=None, args=None):
                     # Random unlabeled hard training, using only time steps and no class information
                     if np.random.random() < 0.1:
                         labels = None
-                    # Full-precision conditional model prediction
+                    # Conditional model prediction
                     predicted_noise = model(x_time, time, labels)
                 # To calculate the MSE loss
                 # You need to use the standard normal distribution of x at time t and the predicted noise
                 loss = mse(noise, predicted_noise)
-                # The optimizer clears the gradient of the model parameters
-                optimizer.zero_grad()
+            # The optimizer clears the gradient of the model parameters
+            optimizer.zero_grad()
+            # Update loss and optimizer
+            # Fp16 + Fp32
+            if amp:
+                scaler.scale(loss).backward()
+                scaler.step(optimizer)
+                scaler.update()
+            # Only Fp32
+            else:
                 # Automatically calculate gradients
                 loss.backward()
                 # The optimizer updates the parameters of the model
@@ -337,9 +322,9 @@ if __name__ == "__main__":
     # Unconditional dataset
     # All images are placed in a single folder, and the path represents the image folder.
     parser.add_argument("--dataset_path", type=str, default="/your/path/Defect-Diffusion-Model/datasets/dir")
-    # Enable half-precision training (needed)
+    # Enable automatic mixed precision training (needed)
     # Effectively reducing GPU memory usage may lead to lower training accuracy and results.
-    parser.add_argument("--fp16", type=bool, default=False)
+    parser.add_argument("--amp", type=bool, default=False)
     # Set optimizer (needed)
     # Option: adam/adamw
     parser.add_argument("--optim", type=str, default="adamw")

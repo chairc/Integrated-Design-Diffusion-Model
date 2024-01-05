@@ -109,7 +109,7 @@ The training GPU implements environment for this README is as follows: models ar
 
    Set any other custom parameters as needed. If the error `CUDA out of memory` is shown in your terminal, turn down `--batch_size` and `num_workers`.
 
-   In the custom parameters, you can set different `--sample` such as `ddpm` or `ddim` , and set different training networks `--network` such as `unet` or `cspdarkunet`. Of course, activation function `--act`, optimizer `--optim`, half-precision training `--fp16`, learning rate method `--lr_func` and other parameters can also be customized.
+   In the custom parameters, you can set different `--sample` such as `ddpm` or `ddim` , and set different training networks `--network` such as `unet` or `cspdarkunet`. Of course, activation function `--act`, optimizer `--optim`, automatic mixed precision training `--amp`, learning rate method `--lr_func` and other parameters can also be customized.
 
    For detailed commands, refer to the **Training Parameters** section.
 
@@ -207,7 +207,7 @@ The training GPU implements environment for this README is as follows: models ar
 | --num_workers          |             | Number of loading processes     | int  | Number of subprocesses used for data loading. It consumes a large amount of CPU and memory but can speed up training |
 | --image_size           |             | Input image size                | int  | Input image size. Adaptive input and output sizes            |
 | --dataset_path         |             | Dataset path                    | str  | Path to the conditional dataset, such as CIFAR-10, with each class in a separate folder, or the path to the unconditional dataset with all images in one folder |
-| --fp16                 |             | Half precision training         | bool | Enable half precision training. It effectively reduces GPU memory usage but may affect training accuracy and results |
+| --amp                 |             | Automatic mixed precision training | bool | Enable automatic mixed precision training. It effectively reduces GPU memory usage but may affect training accuracy and results |
 | --optim                |             | Optimizer                       | str  | Optimizer selection. Currently supports Adam and AdamW       |
 | --act | | Activation function | str | Activation function selection. Currently supports gelu, silu, relu, relu6 and lrelu |
 | --lr                   |             | Learning rate                   | float | Initial learning rate. Currently only supports linear learning rate |
