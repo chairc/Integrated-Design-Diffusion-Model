@@ -151,15 +151,15 @@ def lr_initializer(lr_func, optimizer, epoch, epochs, init_lr, device):
     return current_lr
 
 
-def fp16_initializer(fp16, device):
+def amp_initializer(amp, device):
     """
-    Initialize harf-precision
-    :param fp16: harf-precision
+    Initialize automatic mixed precision
+    :param amp: Enable automatic mixed precision
     :param device: GPU or CPU
     :return: scaler
     """
-    if fp16:
-        logger.info(msg=f"[{device}]: Fp16 training is opened.")
+    if amp:
+        logger.info(msg=f"[{device}]: Fp16 and fp32 mixed training is opened.")
         # Used to scale gradients to prevent overflow
         scaler = GradScaler()
     else:
