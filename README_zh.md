@@ -1,4 +1,4 @@
-# IDDM：工业缺陷扩散模型
+# IDDM：集成设计扩散模型
 
 [English Document](README.md)
 
