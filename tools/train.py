@@ -176,7 +176,7 @@ def train(rank=None, args=None):
         tb_logger.add_scalar(tag=f"[{device}]: Current LR", scalar_value=current_lr, global_step=epoch)
         pbar = tqdm(dataloader)
         # Initialize images and labels
-        images, labels = None, None
+        images, labels, loss_list = None, None, []
         for i, (images, labels) in enumerate(pbar):
             # The images are all resized in dataloader
             images = images.to(device)
@@ -223,6 +223,9 @@ def train(rank=None, args=None):
             pbar.set_postfix(MSE=loss.item())
             tb_logger.add_scalar(tag=f"[{device}]: MSE", scalar_value=loss.item(),
                                  global_step=epoch * len_dataloader + i)
+            loss_list.append(loss.item())
+        # Loss per epoch
+        tb_logger.add_scalar(tag=f"[{device}]: Loss", scalar_value=sum(loss_list) / len(loss_list), global_step=epoch)
 
         # Saving and validating models in the main process
         if save_models:
