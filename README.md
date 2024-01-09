@@ -4,9 +4,11 @@
 
 ### About the Model
 
-The diffusion model used in this project is based on the classic ddpm introduced in the paper "[Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)".
+This diffusion model is based on the classic DDPM (Denoising Diffusion Probabilistic Models) and DDIM (Denoising Diffusion Implicit Models) presented in the papers "[Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)" and "[Denoising Diffusion Implicit Models](https://arxiv.org/abs/2010.02502)."
 
 We named this project IDDM: Integrated Design Diffusion Model. It aims to reproduce the model, write trainers and generators, and improve and optimize certain algorithms and network structures. This repository is **actively maintained**.
+
+If you have any questions, please check [**the existing issues**](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues/9) first. If the issue persists, feel free to open a new one for assistance, or you can contact me via email at chenyu1998424@gmail.com or chairc1998@163.com.
 
 **Repository Structure**
 
