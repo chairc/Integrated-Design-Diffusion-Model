@@ -260,7 +260,7 @@ def train(rank=None, args=None):
             save_ckpt(epoch=epoch, save_name=save_name, ckpt_model=ckpt_model, ckpt_ema_model=ckpt_ema_model,
                       ckpt_optimizer=ckpt_optimizer, results_dir=results_dir, save_model_interval=save_model_interval,
                       start_model_interval=start_model_interval, conditional=conditional, image_size=image_size,
-                      sample=sample,network=network, act=act, num_classes=num_classes)
+                      sample=sample, network=network, act=act, num_classes=num_classes)
         logger.info(msg=f"[{device}]: Finish epoch {epoch}:")
 
         # Synchronization during distributed training
