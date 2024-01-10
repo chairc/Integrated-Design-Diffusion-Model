@@ -112,7 +112,8 @@ def load_model_ckpt(model, model_ckpt, is_train=True, is_pretrain=False, is_dist
 
 
 def save_ckpt(epoch, save_name, ckpt_model, ckpt_ema_model, ckpt_optimizer, results_dir, save_model_interval,
-              start_model_interval, num_classes, classes_name=None, **kwargs):
+              start_model_interval, num_classes=None, conditional=None, image_size=None, sample=None, network=None,
+              act=None, classes_name=None, **kwargs):
     """
     Save the model checkpoint weight files
     :param epoch: Current epoch
@@ -124,17 +125,19 @@ def save_ckpt(epoch, save_name, ckpt_model, ckpt_ema_model, ckpt_optimizer, resu
     :param save_model_interval: Whether to save weight each training
     :param start_model_interval: Start epoch for saving models
     :param num_classes: Number of classes
+    :param conditional: Enable conditional training
+    :param image_size: Default image size
+    :param sample: Sample type
+    :param network: Network type
+    :param act: Activation function name
     :param classes_name: All classes name
     :return: None
     """
     # Checkpoint
     ckpt_state = {
-        "start_epoch": epoch,
-        "model": ckpt_model,
-        "ema_model": ckpt_ema_model,
-        "optimizer": ckpt_optimizer,
-        "num_classes": num_classes,
-        "classes_name": classes_name,
+        "start_epoch": epoch, "model": ckpt_model, "ema_model": ckpt_ema_model, "optimizer": ckpt_optimizer,
+        "num_classes": num_classes if conditional else 1, "classes_name": classes_name, "conditional": conditional,
+        "image_size": image_size, "sample": sample, "network": network, "act": act,
     }
     # Save last checkpoint, it must be done
     last_filename = os.path.join(results_dir, f"ckpt_last.pt")
