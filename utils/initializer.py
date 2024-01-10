@@ -166,3 +166,47 @@ def amp_initializer(amp, device):
         logger.info(msg=f"[{device}]: Fp32 training.")
         scaler = None
     return scaler
+
+
+def generate_initializer(ckpt_path, args, device):
+    """
+    Check the parameters in checkpoint before generate
+    :param ckpt_path: Checkpoint path
+    :param args: Generating model parameters
+    :param device: GPU or CPU
+    :return: [conditional, sample, network, image_size, num_classes, act]
+    """
+
+    def check_param_in_dict(param, dict_params, args_param):
+        """
+        Check the params in dict
+        :param param: Parameter
+        :param dict_params: Parameters
+        :param args_param: Argparse parameter
+        :return: return_param
+        """
+        if dict_params.get(param) is not None:
+            logger.info(msg=f"[{device}]: Parameter {param} is exist.")
+            if dict_params[param] is not None:
+                logger.info(msg=f"[{device}]: Parameter {param} is not None.")
+                return_param = dict_params[param]
+            else:
+                logger.info(msg=f"[{device}]: Parameter {param} is not None.")
+                return_param = args_param
+        else:
+            logger.info(msg=f"[{device}]: Parameter {param} is not exist.")
+            return_param = args_param
+        return return_param
+
+    logger.info(msg=f"[{device}]: Checking parameters validity.")
+    # Load checkpoint before generate
+    ckpt_state = torch.load(f=ckpt_path, map_location=device)
+    # Valid
+    conditional = check_param_in_dict(param="conditional", dict_params=ckpt_state, args_param=args.conditional)
+    sample = check_param_in_dict(param="sample", dict_params=ckpt_state, args_param=args.sample)
+    network = check_param_in_dict(param="network", dict_params=ckpt_state, args_param=args.network)
+    image_size = check_param_in_dict(param="image_size", dict_params=ckpt_state, args_param=args.image_size)
+    num_classes = check_param_in_dict(param="num_classes", dict_params=ckpt_state, args_param=args.num_classes)
+    act = check_param_in_dict(param="act", dict_params=ckpt_state, args_param=args.act)
+    logger.info(msg=f"[{device}]: Successfully checked parameters.")
+    return conditional, sample, network, image_size, num_classes, act
