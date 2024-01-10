@@ -14,7 +14,7 @@ import logging
 import coloredlogs
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from utils.initializer import device_initializer, network_initializer, sample_initializer
+from utils.initializer import device_initializer, network_initializer, sample_initializer, generate_initializer
 from utils.utils import plot_images, save_images, save_one_image_in_images, check_and_create_dir
 from utils.checkpoint import load_ckpt
 
@@ -30,36 +30,29 @@ def generate(args):
     """
     logger.info(msg="Start generation.")
     logger.info(msg=f"Input params: {args}")
-    # Enable conditional generation
-    conditional = args.conditional
-    # Sample type
-    sample = args.sample
-    # Network
-    network = args.network
-    # Generation name
-    generate_name = args.generate_name
-    # Image size
-    image_size = args.image_size
-    # Select activation function
-    act = args.act
-    # Number of images
-    num_images = args.num_images
     # Weight path
     weight_path = args.weight_path
-    # Saving path
-    result_path = args.result_path
     # Run device initializer
     device = device_initializer()
+    # Enable conditional generation, sample type, network, image size, number of classes and select activation function
+    conditional, sample, network, image_size, num_classes, act = generate_initializer(ckpt_path=weight_path, args=args,
+                                                                                      device=device)
+    # Generation name
+    generate_name = args.generate_name
+    # Number of images
+    num_images = args.num_images
+    # Saving path
+    result_path = args.result_path
     # Check and create result path
     check_and_create_dir(result_path)
     # Network
     Network = network_initializer(network=network, device=device)
     # Initialize the diffusion model
     diffusion = sample_initializer(sample=sample, image_size=image_size, device=device)
+    # Is it necessary to expand the image?
+    expand_flag = args.image_size if image_size is not args.image_size else None
     # Initialize model
     if conditional:
-        # Number of classes
-        num_classes = args.num_classes
         # Generation class name
         class_name = args.class_name
         # classifier-free guidance interpolation weight
@@ -82,7 +75,7 @@ def generate(args):
         plot_images(images=x)
     else:
         save_images(images=x, path=os.path.join(result_path, f"{generate_name}.jpg"))
-        save_one_image_in_images(images=x, path=result_path, generate_name=generate_name)
+        save_one_image_in_images(images=x, path=result_path, generate_name=generate_name, image_size=expand_flag)
         plot_images(images=x)
     logger.info(msg="Finish generation.")
 
@@ -102,6 +95,7 @@ if __name__ == "__main__":
     # Generation name (required)
     parser.add_argument("--generate_name", type=str, default="df")
     # Input image size (required)
+    # [Warn] Compatible with older versions, version <= 1.1.1 need to be equal to model's image size
     parser.add_argument("--image_size", type=int, default=64)
     # Number of generation images (required)
     # if class name is `-1` and conditional `is` True, the model would output one image per class.
@@ -116,16 +110,19 @@ if __name__ == "__main__":
     parser.add_argument("--sample", type=str, default="ddpm")
     # Set network
     # Option: unet/cspdarkunet
+    # [Warn] Compatible with older versions, version <= 1.1.1
     parser.add_argument("--network", type=str, default="unet")
     # Set activation function (needed)
     # [Note] The activation function settings are consistent with the loaded model training settings.
     # [Note] If you do not set the same activation function as the model, mosaic phenomenon will occur.
     # Option: gelu/silu/relu/relu6/lrelu
+    # [Warn] Compatible with older versions, version <= 1.1.1
     parser.add_argument("--act", type=str, default="gelu")
 
     # =====================Enable the conditional generation (if '--conditional' is set to 'True')=====================
     # Number of classes (required)
     # [Note] The classes settings are consistent with the loaded model training settings.
+    # [Warn] Compatible with older versions, version <= 1.1.1
     parser.add_argument("--num_classes", type=int, default=10)
     # Class name (required)
     # if class name is `-1`, the model would output one image per class.
