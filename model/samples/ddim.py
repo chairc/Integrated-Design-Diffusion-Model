@@ -22,7 +22,7 @@ class DDIMDiffusion(BaseDiffusion):
     DDIM class
     """
 
-    def __init__(self, noise_steps=1000, sample_steps=50, beta_start=1e-4, beta_end=0.02, img_size=256, device="cpu"):
+    def __init__(self, noise_steps=1000, sample_steps=100, beta_start=1e-4, beta_end=0.02, img_size=256, device="cpu"):
         """
         The implement of DDIM
         Paper: Denoising Diffusion Implicit Models

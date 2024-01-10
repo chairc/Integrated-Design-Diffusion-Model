@@ -8,6 +8,7 @@
 import os
 import sys
 import argparse
+import time
 
 import torch
 import logging
@@ -42,7 +43,7 @@ def generate(args):
     # Number of images
     num_images = args.num_images
     # Saving path
-    result_path = args.result_path
+    result_path = os.path.join(args.result_path, str(time.time()))
     # Check and create result path
     check_and_create_dir(result_path)
     # Network
