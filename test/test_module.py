@@ -20,7 +20,7 @@ from torchsummary import summary
 from matplotlib import pyplot as plt
 
 from utils.utils import get_dataset, delete_files
-from utils.initializer import device_initializer, network_initializer, sample_initializer
+from utils.initializer import device_initializer, network_initializer, sample_initializer, generate_initializer
 from utils.lr_scheduler import set_cosine_lr
 from utils.checkpoint import separate_ckpt_weights
 
@@ -177,6 +177,48 @@ class TestModule(unittest.TestCase):
         logger.info(msg="Save ckpt_ema_model successfully!")
         torch.save(obj=ckpt_optimizer, f=os.path.join(ckpt_root_path, "ckpt_optimizer.pt"))
         logger.info(msg="Save ckpt_optimizer successfully!")
+
+    def test_ckpt_parameters(self):
+        """
+        Test checkpoint parameters validity
+        :return: None
+        """
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--conditional", type=bool, default=True)
+        parser.add_argument("--image_size", type=int, default=128)
+        parser.add_argument("--sample", type=str, default="ddpm")
+        parser.add_argument("--network", type=str, default="cspdarkunet")
+        parser.add_argument("--act", type=str, default="gelu")
+        parser.add_argument("--num_classes", type=int, default=10)
+        args = parser.parse_args()
+        device = device_initializer()
+        ckpt_path = "/your/test/model/path/test.pt"
+        results = generate_initializer(ckpt_path=ckpt_path, args=args, device=device)
+        logger.info(
+            msg=f"Parser parameters: {(args.conditional, args.sample, args.network, args.image_size, args.num_classes, args.act)}")
+        logger.info(msg=f"Return parameters: {results}")
+
+    def test_pre_ckpt_add_parameters(self):
+        conditional = True
+        image_size = 64
+        sample = "ddim"
+        network = "unet"
+        act = "gelu"
+        num_classes = 10
+        classes_name = None
+        root_ckpt_path = "/your/test/model/path"
+        ckpt_name = "test.pt"
+        device = device_initializer()
+        ckpt_state = torch.load(f=os.path.join(root_ckpt_path, ckpt_name), map_location=device)
+        new_ckpt_state = {
+            "start_epoch": ckpt_state["start_epoch"], "model": ckpt_state["model"],
+            "ema_model": ckpt_state["ema_model"], "optimizer": ckpt_state["optimizer"],
+            "num_classes": num_classes if conditional else 1, "classes_name": classes_name, "conditional": conditional,
+            "image_size": image_size, "sample": sample, "network": network, "act": act,
+        }
+        torch.save(obj=new_ckpt_state, f=os.path.join(root_ckpt_path, "new_ckpt.pt"))
+        logger.info(
+            msg=f"Parser parameters: {(ckpt_state['start_epoch'], len(ckpt_state['model']), len(ckpt_state['ema_model']), len(ckpt_state['optimizer']))}")
 
 
 if __name__ == "__main__":
