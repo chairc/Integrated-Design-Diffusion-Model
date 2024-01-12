@@ -96,7 +96,8 @@ if __name__ == "__main__":
     # Generation name (required)
     parser.add_argument("--generate_name", type=str, default="df")
     # Input image size (required)
-    # [Warn] Compatible with older versions, version <= 1.1.1 need to be equal to model's image size
+    # [Warn] Compatible with older versions
+    # [Warn] Version <= 1.1.1 need to be equal to model's image size, version > 1.1.1 can set whatever you want
     parser.add_argument("--image_size", type=int, default=64)
     # Number of generation images (required)
     # if class name is `-1` and conditional `is` True, the model would output one image per class.
@@ -112,18 +113,21 @@ if __name__ == "__main__":
     # Set network
     # Option: unet/cspdarkunet
     # [Warn] Compatible with older versions, version <= 1.1.1
+    # [Warn] Version <= 1.1.1 need to be equal to model's network, version > 1.1.1 can set whatever you want
     parser.add_argument("--network", type=str, default="unet")
     # Set activation function (needed)
     # [Note] The activation function settings are consistent with the loaded model training settings.
     # [Note] If you do not set the same activation function as the model, mosaic phenomenon will occur.
     # Option: gelu/silu/relu/relu6/lrelu
     # [Warn] Compatible with older versions, version <= 1.1.1
+    # [Warn] Version <= 1.1.1 need to be equal to model's act, version > 1.1.1 can set whatever you want
     parser.add_argument("--act", type=str, default="gelu")
 
     # =====================Enable the conditional generation (if '--conditional' is set to 'True')=====================
     # Number of classes (required)
     # [Note] The classes settings are consistent with the loaded model training settings.
     # [Warn] Compatible with older versions, version <= 1.1.1
+    # [Warn] Version <= 1.1.1 need to be equal to model's num classes, version > 1.1.1 can set whatever you want
     parser.add_argument("--num_classes", type=int, default=10)
     # Class name (required)
     # if class name is `-1`, the model would output one image per class.
