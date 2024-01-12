@@ -76,7 +76,7 @@ The training GPU implements environment for this README is as follows: models ar
 
 1. **Import the Dataset**
 
-   First, upload the dataset to the target folder `datasets`. After uploading, the folder structure (for example, under the `cifar10` folder, there are folders for each class; `class0` folder contains all images for class 0) should look like the following:
+   First, upload the dataset to the target folder `datasets` [**[issue]**](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues/9#issuecomment-1882902085). After uploading, the folder structure (for example, under the `cifar10` folder, there are folders for each class; `class0` folder contains all images for class 0) should look like the following:
 
    ```yaml
     datasets
@@ -145,7 +145,7 @@ The training GPU implements environment for this README is as follows: models ar
    python train.py --sample ddpm --conditional False --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
 4. Wait for the training to complete.
-5. If the training is interrupted due to any reason, you can resume it by setting `--resume` to `True` in the `train.py` file, specifying the epoch number where the interruption occurred, providing the folder name of the interrupted training (`run_name`), and running the file again. Alternatively, you can use the following command to resume the training:  
+5. If the training is interrupted due to any reason **[[issue]](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues/9#issuecomment-1882912391)**, you can resume it by setting `--resume` to `True` in the `train.py` file, specifying the epoch number where the interruption occurred, providing the folder name of the interrupted training (`run_name`), and running the file again. Alternatively, you can use the following command to resume the training:  
    **Conditional Resume Training Command**
 
    ```bash
@@ -168,7 +168,14 @@ The training GPU implements environment for this README is as follows: models ar
    # This is not using --start_epoch, default use last checkpoint 
    python train.py --resume True --sample ddpm --conditional False --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
-   
+6. The pretrained models are released with every major [Release](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases), so please stay updated. To use a pretrained model [**[issue]**](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues/9#issuecomment-1886403967), download the model corresponding to parameters such as `network`, `image_size`, `act`, etc., and save it to any local folder. Adjust the `--pretrain` and `--pretrain_path` in the `train.py` file accordingly. You can also use the following command for training with a pretrained model:
+
+   **Command for training with a pretrained model**
+
+   ```bash
+   python train.py --pretrain True --pretrain_path /your/pretrain/path/model.pt --sample ddpm --conditional False --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
+   ```
+
 #### Distributed Training
 
 1. The basic configuration is similar to regular training, but note that enabling distributed training requires setting `--distributed` to `True`. To prevent arbitrary use of distributed training, we have several conditions for enabling distributed training, such as `args.distributed`, `torch.cuda.device_count() > 1`, and `torch.cuda.is_available()`.
@@ -212,7 +219,7 @@ The training GPU implements environment for this README is as follows: models ar
 | --amp                 |             | Automatic mixed precision training | bool | Enable automatic mixed precision training. It effectively reduces GPU memory usage but may affect training accuracy and results |
 | --optim                |             | Optimizer                       | str  | Optimizer selection. Currently supports Adam and AdamW       |
 | --act | | Activation function | str | Activation function selection. Currently supports gelu, silu, relu, relu6 and lrelu |
-| --lr                   |             | Learning rate                   | float | Initial learning rate. Currently only supports linear learning rate |
+| --lr                   |             | Learning rate                   | float | Initial learning rate. |
 | --lr_func | | Learning rate schedule | str | Setting learning rate schedule, currently supporting linear, cosine, and warmup_cosine. |
 | --result_path          |             | Save path                       | str  | Path to save the training results                            |
 | --save_model_interval  |             | Save model after each training  | bool | Whether to save the model after each training iteration for model selection based on visualization |
@@ -237,16 +244,28 @@ The training GPU implements environment for this README is as follows: models ar
 
 2. Set the necessary parameters such as `--conditional`, `--generate_name`, `--num_images`, `--num_classes`, `--class_name`, `--image_size`, `--result_path`, etc. If no parameters are set, the default settings will be used. There are two ways to set the parameters: one is to directly modify the `parser` in the `if __name__ == "__main__":` section of the `generate.py` file, and the other is to use the following commands in the console while in the `/your/path/Defect-Diffusion-Model/tools` directory:
 
-   **Conditional Generation Command**
+   **Conditional Generation Command (version > 1.1.1)**
 
    ```bash
-   python generate.py --conditional True --generate_name df --num_images 8 --num_classes 10 --class_name 0 --image_size 64 --weight_path /your/path/weight/model.pt
+   python generate.py --generate_name df --num_images 8 --class_name 0 --image_size 64 --weight_path /your/path/weight/model.pt
    ```
 
-   **Unconditional Generation Command**
+   **Unconditional Generation Command (version > 1.1.1)**
 
    ```bash
-   python generate.py --conditional False --generate_name df --num_images 8 --image_size 64 --weight_path /your/path/weight/model.pt
+   python generate.py --generate_name df --num_images 8 --image_size 64 --weight_path /your/path/weight/model.pt
+   ```
+
+   **Conditional Generation Command (version <= 1.1.1)**
+
+   ```bash
+   python generate.py --conditional True --generate_name df --num_images 8 --num_classes 10 --class_name 0 --image_size 64 --weight_path /your/path/weight/model.pt --sample ddpm --network unet --act gelu 
+   ```
+
+   **Unconditional Generation Command (version <= 1.1.1)**
+
+   ```bash
+   python generate.py --conditional False --generate_name df --num_images 8 --image_size 64 --weight_path /your/path/weight/model.pt --sample ddpm --network unet --act gelu 
    ```
 
 3. Wait for the generation process to complete.
@@ -263,10 +282,10 @@ The training GPU implements environment for this README is as follows: models ar
 | --num_images    |             | Number of generated images      | int  | Number of images to generate                                 |
 | --weight_path   |             | Path to model weights           | str  | Path to the model weights file, required for network generation |
 | --result_path   |             | Save path                       | str  | Path to save the generated images                            |
-| --sample        |             | Sampling method                 | str  | Set the sampling method type, currently supporting DDPM and DDIM. |
-| --network       |             | Training network                | str  | Set the training network, currently supporting UNet, CSPDarkUNet. |
-| --act           |             | Activation function             | str  | Activation function selection. Currently supports gelu, silu, relu, relu6 and lrelu. If you do not set the same activation function as the model, mosaic phenomenon will occur. |
-| --num_classes   |      ✓      | Number of classes               | int  | Number of classes for classification                         |
+| --sample        |             | Sampling method                 | str  | Set the sampling method type, currently supporting DDPM and DDIM. **(No need to set for models after version 1.1.1)** |
+| --network       |             | Training network                | str  | Set the training network, currently supporting UNet, CSPDarkUNet. **(No need to set for models after version 1.1.1)** |
+| --act           |             | Activation function             | str  | Activation function selection. Currently supports gelu, silu, relu, relu6 and lrelu. If you do not set the same activation function as the model, mosaic phenomenon will occur. **(No need to set for models after version 1.1.1)** |
+| --num_classes   |      ✓      | Number of classes               | int  | Number of classes for classification **(No need to set for models after version 1.1.1)** |
 | --class_name    |      ✓      | Class name                      | int  | Index of the class to generate images. if class name is `-1`, the model would output one image per class. |
 | --cfg_scale     |      ✓      | Classifier-free guidance weight | int  | Weight for classifier-free guidance interpolation, for better generation model performance |
 
@@ -338,7 +357,7 @@ We conducted training on the following four datasets using the `DDPM` sampler wi
 
 #### Base on the 64×64 model to generate 160×160 (every size) images
 
-Of course, based on the 64×64 U-Net model, we generate 160×160 `NEU-DET` images in the `generate.py` file (single output, each image occupies 21GB of GPU memory). Detailed images are as follows:
+Of course, based on the 64×64 U-Net model, we generate 160×160 `NEU-DET` images in the `generate.py` file (single output, each image occupies 21GB of GPU memory). **Attention this [[issues]](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues/9#issuecomment-1886422210)**! If it's an image with defect textures where the features are not clear, generating a large size directly might not have these issues, such as in NRSD or NEU datasets. However, if the image contains a background with specific distinctive features, you may need to use super-resolution or resizing to increase the size, for example, in Cifar10, CelebA-HQ, etc. **If you really need large-sized images, you can directly train with large pixel images if there is enough GPU memory.** Detailed images are as follows:
 
 ![model_499_ema](assets/neu160_0.jpg)![model_499_ema](assets/neu160_1.jpg)![model_499_ema](assets/neu160_2.jpg)![model_499_ema](assets/neu160_3.jpg)![model_499_ema](assets/neu160_4.jpg)![model_499_ema](assets/neu160_5.jpg)
 
