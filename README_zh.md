@@ -76,7 +76,7 @@ Integrated Design Diffusion Model
 
 1. **导入数据集** 
 
-   首先，将数据集上传至目标文件夹`datasets`中。上传后文件夹格式（例如：cifar10文件夹下存放着所有类别；class0文件夹下存储着class0这个类别的所有图片）如下方列表所示：
+   首先，将数据集上传至目标文件夹`datasets`中[**[issue]**](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues/9#issuecomment-1882902085)。上传后文件夹格式（例如：cifar10文件夹下存放着所有类别；class0文件夹下存储着class0这个类别的所有图片）如下方列表所示：
    ```yaml
     datasets
     └── cifar10
@@ -144,7 +144,7 @@ Integrated Design Diffusion Model
    python train.py --sample ddpm --conditional False --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
 4. 等待训练即可
-5. 若因异常原因中断训练，我们可以在`train.py`文件，首先将`--resume`设置为`True`，其次设置异常中断的迭代编号，再写入该次训练的所在文件夹（run_name），最后运行文件即可。也可以使用如下命令进行恢复：
+5. 若因异常原因中断训练**[[issue]](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues/9#issuecomment-1882912391)**，我们可以在`train.py`文件，首先将`--resume`设置为`True`，其次设置异常中断的迭代编号，再写入该次训练的所在文件夹（run_name），最后运行文件即可。也可以使用如下命令进行恢复：
    **有条件恢复训练命令**
 
    ```bash
@@ -165,6 +165,12 @@ Integrated Design Diffusion Model
    ```bash
    # 此处为不输入--start_epoch参数，默认使用last权重
    python train.py --resume True --sample ddpm --conditional False --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
+   ```
+6. 预训练模型在每次大版本[Release](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases)中发布，请留意。预训练模型使用方法如下[**[issue]**](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues/9#issuecomment-1886403967)，首先将对应`network`、`image_size`、`act`等相同参数的模型下到本地任意文件夹下。直接调整`train.py`中`--pretrain`和`--pretrain_path`即可。也可以使用如下命令进行预训练：
+   **使用预训练模型训练命令**
+
+   ```bash
+   python train.py --pretrain True --pretrain_path /your/pretrain/path/model.pt --sample ddpm --conditional False --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
 
 #### 分布式训练
@@ -213,7 +219,7 @@ Integrated Design Diffusion Model
 | --amp                  |          | 混合精度训练                     |   bool   | 开启混合精度训练，有效减少显存使用，但无法保证训练精度和训练结果 |
 | --optim                |          | 优化器                           |   str    | 优化器选择，目前支持adam和adamw                              |
 | --act                  |          | 激活函数                         |   str    | 激活函数选择，目前支持gelu、silu、relu、relu6和lrelu         |
-| --lr                   |          | 学习率                           |  float   | 初始化学习率，目前仅支持线性学习率                           |
+| --lr                   |          | 学习率                           |  float   | 初始化学习率                                                 |
 | --lr_func              |          | 学习率方法                       |   str    | 设置学习率方法，当前支持linear、cosine和warmup_cosine        |
 | --result_path          |          | 保存路径                         |   str    | 保存路径                                                     |
 | --save_model_interval  |          | 是否每次训练储存                 |   bool   | 是否每次训练储存，根据可视化生成样本信息筛选模型             |
@@ -238,18 +244,29 @@ Integrated Design Diffusion Model
 1. 打开`generate.py`文件，找到`--weight_path`参数，将参数中的路径修改为模型权重路径，例如`/your/path/weight/model.pt`
 
 2. 设置必要参数，例如`--conditional`，`--generate_name`，`--num_images`，`--num_classes`，`--class_name`，`--image_size`，`--result_path`等参数，若不设置参数则使用默认设置。我们有两种参数设置方法，其一是直接对`generate.py`文件`if __name__ == "__main__":`中的`parser`进行设置；其二是在控制台在`/your/path/Defect-Diffiusion-Model/tools`路径下输入以下命令：
-   **有条件生成命令**
+   **有条件生成命令（1.1.1版本以上）**
 
    ```bash
-   python generate.py --conditional True --generate_name df --num_images 8 --num_classes 10 --class_name 0 --image_size 64 --weight_path /your/path/weight/model.pt
+   python generate.py --generate_name df --num_images 8 --class_name 0 --image_size 64 --weight_path /your/path/weight/model.pt
    ```
 
-   **无条件生成命令**
+   **无条件生成命令（1.1.1版本以上）**
 
    ```bash
-   python generate.py --conditional False --generate_name df --num_images 8 --image_size 64 --weight_path /your/path/weight/model.pt
+   python generate.py --generate_name df --num_images 8 --image_size 64 --weight_path /your/path/weight/model.pt
    ```
-
+   **有条件生成命令（1.1.1版本及以下）**
+   
+   ```bash
+   python generate.py --conditional True --generate_name df --num_images 8 --num_classes 10 --class_name 0 --image_size 64 --weight_path /your/path/weight/model.pt --sample ddpm --network unet --act gelu 
+   ```
+   
+   **无条件生成命令（1.1.1版本及以下）**
+   
+   ```bash
+   python generate.py --conditional False --generate_name df --num_images 8 --image_size 64 --weight_path /your/path/weight/model.pt --sample ddpm --network unet --act gelu 
+   ```
+   
 3. 等待生成即可
 
 #### 生成参数
@@ -264,10 +281,10 @@ Integrated Design Diffusion Model
 | --num_images    |          | 生成图片个数                     |   int    | 单次生成图片个数                                             |
 | --weight_path   |          | 权重路径                         |   str    | 模型权重路径，网络生成需要加载文件                           |
 | --result_path   |          | 保存路径                         |   str    | 保存路径                                                     |
-| --sample        |          | 采样方式                         |   str    | 设置采样器类别，当前支持ddpm，ddim                           |
-| --network       |          | 训练网络                         |   str    | 设置训练网络，当前支持UNet，CSPDarkUNet                      |
-| --act           |          | 激活函数                         |   str    | 激活函数选择，目前支持gelu、silu、relu、relu6和lrelu。如果不选择，会产生马赛克现象 |
-| --num_classes   |    是    | 类别个数                         |   int    | 类别个数，用于区分类别                                       |
+| --sample        |          | 采样方式                         |   str    | 设置采样器类别，当前支持ddpm，ddim**（1.1.1版本后的模型可不用设置）** |
+| --network       |          | 训练网络                         |   str    | 设置训练网络，当前支持UNet，CSPDarkUNet**（1.1.1版本后的模型可不用设置）** |
+| --act           |          | 激活函数                         |   str    | 激活函数选择，目前支持gelu、silu、relu、relu6和lrelu。如果不选择，会产生马赛克现象**（1.1.1版本后的模型可不用设置）** |
+| --num_classes   |    是    | 类别个数                         |   int    | 类别个数，用于区分类别**（1.1.1版本后的模型可不用设置）**    |
 | --class_name    |    是    | 类别名称                         |   int    | 类别序号，用于对指定类别生成。如果输入为-1，则模型为每类输出一张图片 |
 | --cfg_scale     |    是    | classifier-free guidance插值权重 |   int    | classifier-free guidance插值权重，用户更好生成模型效果       |
 
@@ -341,7 +358,7 @@ Integrated Design Diffusion Model
 
 #### 基于64×64模型生成160×160（任意大尺寸）图像
 
-当然，我们根据64×64的基础模型，在`generate.py`文件中生成160×160的`NEU-DET`图片（单张输出，每张图片占用显存21GB）。详细图片如下：
+当然，我们根据64×64的基础模型，在`generate.py`文件中生成160×160的`NEU-DET`图片（单张输出，每张图片占用显存21GB）。**请注意这个**[[**issue**]](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues/9#issuecomment-1886422210)：如果是缺陷纹理那种图片，特征物不明显的直接生成大尺寸就不会有这些问题，例如NRSD、NEU数据集。如果是含有背景有特定明显特征的则需要超分或者resize提升尺寸，例如Cifar10、CelebA-HQ等。**如果实在需要大尺寸图像，在显存足够的情况下直接训练大像素图片。**详细图片如下：
 
 ![model_499_ema](assets/neu160_0.jpg)![model_499_ema](assets/neu160_1.jpg)![model_499_ema](assets/neu160_2.jpg)![model_499_ema](assets/neu160_3.jpg)![model_499_ema](assets/neu160_4.jpg)![model_499_ema](assets/neu160_5.jpg)
 
