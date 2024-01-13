@@ -90,7 +90,7 @@ def train(rank=None, args=None):
     else:
         distributed = False
         # Run device initializer
-        device = device_initializer()
+        device = device_initializer(device_id=args.use_gpu)
         logger.info(msg=f"[{device}]: Successfully Use normal training.")
     # Whether to enable automatic mixed precision training
     amp = args.amp
@@ -367,6 +367,8 @@ if __name__ == "__main__":
     parser.add_argument("--pretrain", type=bool, default=False)
     # Pretrain model load path (needed)
     parser.add_argument("--pretrain_path", type=str, default="")
+    # Set the use GPU in normal training (required)
+    parser.add_argument("--use_gpu", type=int, default=0)
 
     # =================================Enable distributed training (if applicable)=================================
     # Enable distributed training (needed)

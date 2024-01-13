@@ -230,6 +230,7 @@ Integrated Design Diffusion Model
 | --start_epoch          |          | 中断迭代编号                     |   int    | 设置异常中断的epoch编号，模型会自动加载当前编号的检查点      |
 | --pretrain             |          | 预训练模型训练                   |   bool   | 设置是否启用加载预训练模型训练                               |
 | --pretrain_path        |          | 预训练模型路径                   |   str    | 预训练模型加载地址                                           |
+| --use_gpu              |          | 设置运行指定的GPU                |   int    | 一般训练中设置指定的运行GPU，输入为GPU的编号                 |
 | --distributed          |          | 分布式训练                       |   bool   | 开启分布式训练                                               |
 | --main_gpu             |          | 分布式训练主显卡                 |   int    | 设置分布式中主显卡                                           |
 | --world_size           |          | 分布式训练的节点等级             |   int    | 分布式训练的节点等级， world_size的值会与实际使用的GPU数量或分布式节点数量相对应 |

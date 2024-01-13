@@ -230,6 +230,7 @@ The training GPU implements environment for this README is as follows: models ar
 | --start_epoch          |             | Epoch number of interruption    | int  | Epoch number where the training was interrupted, the model will load current checkpoint |
 | --pretrain | | Enable use pretrain model | bool | Enable use pretrain mode to load checkpoint |
 | --pretrain_path | | Pretrain model load path | str | Pretrain model load path |
+| --use_gpu | | Set the use GPU | int | Set the use GPU in normal training, input is GPU's id |
 | --distributed         |          | Distributed training          | bool  | Enable distributed training                                 |
 | --main_gpu            |          | Main GPU for distributed      | int   | Set the main GPU for distributed training                   |
 | --world_size          |          | Number of distributed nodes    | int   | Number of distributed nodes, corresponds to the actual number of GPUs or distributed nodes being used |
