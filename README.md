@@ -1,5 +1,32 @@
 # IDDM: Integrated Design Diffusion Model
 
+<div align="left">
+    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model" target="_blank">
+        <img src="https://img.shields.io/badge/IDDM-Integrated Design Diffusion Model-blue.svg">
+    </a>
+    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/blob/main/LICENSE" target="_blank">
+        <img src="https://img.shields.io/github/license/chairc/Integrated-Design-Diffusion-Model" />
+    </a>
+    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/issues">
+        <img src="https://img.shields.io/github/issues/chairc/Integrated-Design-Diffusion-Model.svg" />
+    </a>
+    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/releases" target="_blank">
+        <img alt="GitHub release" src="https://img.shields.io/github/v/release/chairc/Integrated-Design-Diffusion-Model">
+    </a>
+    <a href="#" target="_blank">
+        <img alt="GitHub all releases" src="https://img.shields.io/github/downloads/chairc/Integrated-Design-Diffusion-Model/total?color=3eb370">
+    </a>
+</div>
+
+<div align="left">
+    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/stargazers">
+        <img src="https://img.shields.io/github/stars/chairc/Integrated-Design-Diffusion-Model.svg" />
+    </a>
+    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/forks" target="_blank">
+        <img alt="GitHub forks" src="https://img.shields.io/github/forks/chairc/Integrated-Design-Diffusion-Model?color=eb6ea5">
+    </a>
+</div>
+
 [中文文档](README_zh.md)
 
 ### About the Model
@@ -230,6 +257,7 @@ The training GPU implements environment for this README is as follows: models ar
 | --start_epoch          |             | Epoch number of interruption    | int  | Epoch number where the training was interrupted, the model will load current checkpoint |
 | --pretrain | | Enable use pretrain model | bool | Enable use pretrain mode to load checkpoint |
 | --pretrain_path | | Pretrain model load path | str | Pretrain model load path |
+| --use_gpu | | Set the use GPU | int | Set the use GPU in normal training, input is GPU's id |
 | --distributed         |          | Distributed training          | bool  | Enable distributed training                                 |
 | --main_gpu            |          | Main GPU for distributed      | int   | Set the main GPU for distributed training                   |
 | --world_size          |          | Number of distributed nodes    | int   | Number of distributed nodes, corresponds to the actual number of GPUs or distributed nodes being used |
@@ -368,6 +396,16 @@ To be continued.
 
 ### Acknowledgements
 
+**People**：
+
 [@dome272](https://github.com/dome272/Diffusion-Models-pytorch)
 
-[@OpenAi](https://github.com/openai/improved-diffusion)
+**Organization**：
+
+[@JetBrains](https://www.jetbrains.com/)
+
+[@Python](https://www.python.org/)
+
+[@Pytorch](https://pytorch.org/)
+
+<img src="assets/Pycharm.png" alt="Pycharm" style="zoom:25%;" /><img src="assets/Python.png" alt="Python" style="zoom:25%;" /><img src="assets/pytorch.png" alt="pytorch" style="zoom:25%;" />
