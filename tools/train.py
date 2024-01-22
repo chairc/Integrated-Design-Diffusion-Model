@@ -380,7 +380,7 @@ if __name__ == "__main__":
     # The value of world size will correspond to the actual number of GPUs or distributed nodes being used
     parser.add_argument("--world_size", type=int, default=2)
 
-    # =====================Enable the conditional generation (if '--conditional' is set to 'True')=====================
+    # =====================Enable the conditional training (if '--conditional' is set to 'True')=====================
     # Number of classes (required)
     # [Note] The classes settings are consistent with the loaded datasets settings.
     parser.add_argument("--num_classes", type=int, default=10)

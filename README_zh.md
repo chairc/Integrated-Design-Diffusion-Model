@@ -25,6 +25,7 @@
         <img alt="GitHub forks" src="https://img.shields.io/github/forks/chairc/Integrated-Design-Diffusion-Model?color=eb6ea5">
     </a>
 </div>
+
 [English Document](README.md)
 
 ### 关于模型
