@@ -75,8 +75,11 @@ Integrated Design Diffusion Model
 ├── utils
 │   ├── checkpoint.py
 │   ├── initializer.py
+│   ├── logger.py
 │   ├── lr_scheduler.py
 │   └── utils.py
+├── webuipy
+│   └──web.py
 └── weight
 ```
 
@@ -91,7 +94,8 @@ Integrated Design Diffusion Model
 - [x] 7. Support other image generation. (2023-09-16)
 - [ ] 8. Low-resolution generated images for super-resolution enhancement
 - [ ] 9. Use Latent Diffusion and reduce GPU memory usage
-- [x] 10. Reconstruct the overall structure of the model. (2023-12-06)
+- [x] 10. Reconstruct the overall structure of the model (2023-12-06)
+- [x]  11. Write visual webui interface. (2024-01-23)
 
 ### Training
 
