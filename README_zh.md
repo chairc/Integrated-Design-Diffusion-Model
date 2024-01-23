@@ -74,8 +74,11 @@ Integrated Design Diffusion Model
 ├── utils
 │   ├── checkpoint.py
 │   ├── initializer.py
+│   ├── logger.py
 │   ├── lr_scheduler.py
 │   └── utils.py
+├── webuipy
+│   └──web.py
 └── weight
 ```
 
@@ -91,6 +94,7 @@ Integrated Design Diffusion Model
 - [ ] 8. 低分辨率生成图像进行超分辨率增强
 - [ ] 9. 使用Latent方式降低显存消耗
 - [x] 10. 重构model整体结构（2023-12-06）
+- [x]   11. 编写可视化webui界面（2024-01-23）
 
 ### 训练
 
