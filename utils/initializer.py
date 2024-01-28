@@ -23,9 +23,12 @@ logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
 
 
-def device_initializer(device_id=0):
+def device_initializer(device_id=0, is_train=False):
     """
     This function initializes the running device information when the program runs for the first time
+    [Warn] This project will no longer support CPU training after v1.1.2
+    :param device_id: Device id
+    :param is_train: Whether to train mode
     :return: cpu or cuda
     """
     logger.info(msg="Init program, it is checking the basic device setting.")
@@ -46,10 +49,15 @@ def device_initializer(device_id=0):
         device_dict["device_cap"] = device_cap
         device_dict["device_prop"] = device_prop
         logger.info(msg=device_dict)
+        return device
     else:
-        logger.warning(msg="Warning: The device is using cpu, the device would slow down the model running speed.")
-        device = torch.device(device="cpu")
-    return device
+        logger.warning(msg="This project will no longer support CPU training after version 1.1.2")
+        if is_train:
+            raise NotImplementedError("CPU training is no longer supported after version 1.1.2")
+        else:
+            # Generate or test mode
+            logger.warning(msg="Warning: The device is using cpu, the device would slow down the model running speed.")
+            return torch.device(device="cpu")
 
 
 def seed_initializer(seed_id=0):
@@ -159,13 +167,11 @@ def amp_initializer(amp, device):
     :return: scaler
     """
     if amp:
-        logger.info(msg=f"[{device}]: Fp16 and fp32 mixed training is opened.")
-        # Used to scale gradients to prevent overflow
-        scaler = GradScaler()
+        logger.info(msg=f"[{device}]: Automatic mixed precision training.")
     else:
-        logger.info(msg=f"[{device}]: Fp32 training.")
-        scaler = None
-    return scaler
+        logger.info(msg=f"[{device}]: Normal training.")
+    # Used to scale gradients to prevent overflow
+    return GradScaler(enabled=amp)
 
 
 def generate_initializer(ckpt_path, args, device):
