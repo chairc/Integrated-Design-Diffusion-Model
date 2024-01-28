@@ -167,13 +167,11 @@ def amp_initializer(amp, device):
     :return: scaler
     """
     if amp:
-        logger.info(msg=f"[{device}]: Fp16 and fp32 mixed training is opened.")
-        # Used to scale gradients to prevent overflow
-        scaler = GradScaler()
+        logger.info(msg=f"[{device}]: Automatic mixed precision training.")
     else:
-        logger.info(msg=f"[{device}]: Fp32 training.")
-        scaler = None
-    return scaler
+        logger.info(msg=f"[{device}]: Normal training.")
+    # Used to scale gradients to prevent overflow
+    return GradScaler(enabled=amp)
 
 
 def generate_initializer(ckpt_path, args, device):

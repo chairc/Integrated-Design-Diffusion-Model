@@ -206,16 +206,9 @@ def train(rank=None, args=None):
             optimizer.zero_grad()
             # Update loss and optimizer
             # Fp16 + Fp32
-            if amp:
-                scaler.scale(loss).backward()
-                scaler.step(optimizer)
-                scaler.update()
-            # Only Fp32
-            else:
-                # Automatically calculate gradients
-                loss.backward()
-                # The optimizer updates the parameters of the model
-                optimizer.step()
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
             # EMA
             ema.step_ema(ema_model=ema_model, model=model)
 
