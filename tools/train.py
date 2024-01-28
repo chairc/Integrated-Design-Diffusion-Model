@@ -78,7 +78,7 @@ def train(rank=None, args=None):
         dist.init_process_group(backend="nccl" if torch.cuda.is_available() else "gloo", rank=rank,
                                 world_size=world_size)
         # Set device ID
-        device = device_initializer(device_id=rank)
+        device = device_initializer(device_id=rank, is_train=True)
         # There may be random errors, using this function can reduce random errors in cudnn
         # torch.backends.cudnn.deterministic = True
         # Synchronization during distributed training
@@ -90,7 +90,7 @@ def train(rank=None, args=None):
     else:
         distributed = False
         # Run device initializer
-        device = device_initializer(device_id=args.use_gpu)
+        device = device_initializer(device_id=args.use_gpu, is_train=True)
         logger.info(msg=f"[{device}]: Successfully Use normal training.")
     # Whether to enable automatic mixed precision training
     amp = args.amp
