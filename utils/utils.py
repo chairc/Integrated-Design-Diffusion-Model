@@ -216,6 +216,6 @@ def check_and_create_dir(path):
     :param path: Create path
     :return: None
     """
-    logger.warning(msg=f"Folder '{path}' does not exist.")
+    logger.warning(msg=f"Folder '{path}' is not exist.")
     os.makedirs(name=path, exist_ok=True)
     logger.info(msg=f"Successfully create folder '{path}'.")

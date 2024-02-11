@@ -22,7 +22,7 @@ class DDPMDiffusion(BaseDiffusion):
     DDPM class
     """
 
-    def __init__(self, noise_steps=1000, beta_start=1e-4, beta_end=0.02, img_size=256, device="cpu"):
+    def __init__(self, noise_steps=1000, beta_start=1e-4, beta_end=2e-2, img_size=256, device="cpu"):
         """
         The implement of DDPM
         Paper: Denoising Diffusion Probabilistic Models

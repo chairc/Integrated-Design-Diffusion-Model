@@ -194,13 +194,13 @@ def generate_initializer(ckpt_path, args, device):
         if dict_params.get(param) is not None:
             logger.info(msg=f"[{device}]: Parameter {param} is exist.")
             if dict_params[param] is not None:
-                logger.info(msg=f"[{device}]: Parameter {param} is not None.")
+                logger.info(msg=f"[{device}]: Parameter {param} value is not None.")
                 return_param = dict_params[param]
             else:
-                logger.info(msg=f"[{device}]: Parameter {param} is not None.")
+                logger.warning(msg=f"[{device}]: Parameter {param} value is None.")
                 return_param = args_param
         else:
-            logger.info(msg=f"[{device}]: Parameter {param} is not exist.")
+            logger.warning(msg=f"[{device}]: Parameter {param} is not exist.")
             return_param = args_param
         return return_param
 

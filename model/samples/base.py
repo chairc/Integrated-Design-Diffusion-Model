@@ -15,7 +15,7 @@ class BaseDiffusion:
     Base diffusion class
     """
 
-    def __init__(self, noise_steps=1000, beta_start=1e-4, beta_end=0.02, img_size=256, device="cpu"):
+    def __init__(self, noise_steps=1000, beta_start=1e-4, beta_end=2e-2, img_size=256, device="cpu"):
         """
         Diffusion model base class
         :param noise_steps: Noise steps
@@ -77,6 +77,10 @@ class BaseDiffusion:
                 beta_t = min(1 - alpha_hat(t2) / alpha_hat(t1), max_beta)
                 betas.append(beta_t)
             return torch.tensor(betas)
+        elif schedule_name == "sqrt_linear":
+            return torch.linspace(start=self.beta_start ** 0.5, end=self.beta_end ** 0.5, steps=self.noise_steps) ** 2
+        elif schedule_name == "sqrt":
+            return torch.linspace(start=self.beta_start, end=self.beta_end, steps=self.noise_steps) ** 0.5
         else:
             raise NotImplementedError(f"Unknown beta schedule: {schedule_name}")
 
