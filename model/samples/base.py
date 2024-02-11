@@ -15,7 +15,7 @@ class BaseDiffusion:
     Base diffusion class
     """
 
-    def __init__(self, noise_steps=1000, beta_start=1e-4, beta_end=0.02, img_size=256, device="cpu"):
+    def __init__(self, noise_steps=1000, beta_start=1e-4, beta_end=2e-2, img_size=256, device="cpu"):
         """
         Diffusion model base class
         :param noise_steps: Noise steps
