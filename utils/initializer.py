@@ -8,6 +8,7 @@
 import random
 import numpy as np
 import torch
+import torch.nn as nn
 import logging
 import coloredlogs
 
@@ -15,6 +16,7 @@ from torch.cuda.amp import GradScaler
 
 from model.networks.unet import UNet
 from model.networks.cspdarkunet import CSPDarkUnet
+from model.networks.sr.srv1 import SRv1
 from model.samples.ddim import DDIMDiffusion
 from model.samples.ddpm import DDPMDiffusion
 from utils.lr_scheduler import set_cosine_lr
@@ -91,6 +93,40 @@ def network_initializer(network, device):
         logger.warning(msg=f"[{device}]: Setting network error, we has been automatically set to unet.")
     logger.info(msg=f"[{device}]: This base network is {network}")
     return Network
+
+
+def sr_network_initializer(network, device):
+    """
+    Initialize super resolution network
+    :param network: Network name
+    :param device: GPU or CPU
+    :return: Network
+    """
+    if network == "srv1":
+        Network = SRv1
+    else:
+        Network = SRv1
+        logger.warning(msg=f"[{device}]: Setting network error, we has been automatically set to srv1.")
+    logger.info(msg=f"[{device}]: This super resolution network is {network}")
+    return Network
+
+
+def loss_initializer(loss_name, device):
+    """
+    Initialize loss function
+    :param loss_name: Loss function name
+    :param device: GPU or CPU
+    :return: Network
+    """
+    if loss_name == "mse":
+        loss_function = nn.MSELoss()
+    elif loss_name == "l1":
+        loss_function = nn.L1Loss()
+    else:
+        loss_function = nn.MSELoss()
+        logger.warning(msg=f"[{device}]: Setting loss function error, we has been automatically set to mse loss.")
+    logger.info(msg=f"[{device}]: This super resolution loss function is {loss_name}")
+    return loss_function
 
 
 def optimizer_initializer(model, optim, init_lr, device):

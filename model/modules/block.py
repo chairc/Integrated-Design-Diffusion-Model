@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 
 from model.modules.conv import BaseConv, DoubleConv
-from model.modules.module import CSPLayer
+from model.modules.module import CSPLayer, DenseModule
 
 
 class DownBlock(nn.Module):
@@ -129,3 +129,20 @@ class CSPDarkUpBlock(nn.Module):
         x = self.conv(x)
         emb = self.emb_layer(time)[:, :, None, None].repeat(1, 1, x.shape[-2], x.shape[-1])
         return x + emb
+
+
+class ResidualDenseBlock(nn.Module):
+    def __init__(self, in_channels, out_channels, n=1, act="silu"):
+        super().__init__()
+        mid_channels = in_channels
+        module_list = []
+        for _ in range(n):
+            module_list.append(DenseModule(in_channels=mid_channels, out_channels=out_channels, act=act))
+            mid_channels += out_channels
+        self.m = nn.Sequential(*module_list)
+        self.conv = nn.Conv2d(in_channels=mid_channels, out_channels=in_channels, kernel_size=1, padding=0, bias=False)
+
+    def forward(self, x):
+        y = self.m(x)
+        y = self.conv(y)
+        return x + y

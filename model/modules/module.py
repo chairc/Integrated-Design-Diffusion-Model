@@ -12,6 +12,7 @@ import torch
 import torch.nn as nn
 
 from model.modules.conv import BaseConv
+from model.modules.activation import get_activation_function
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
@@ -108,3 +109,22 @@ class CSPLayer(nn.Module):
         x_1 = self.m(x_1)
         x = torch.cat([x_1, x_2], dim=1)
         return self.conv3(x)
+
+
+class DenseModule(nn.Module):
+    def __init__(self, in_channels, out_channels, act="silu"):
+        """
+        Initialize the DenseModule
+        :param in_channels: Input channels
+        :param out_channels: Output channels
+        :param act: Activation function
+        """
+        super().__init__()
+        self.conv = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, padding=1, bias=False)
+        self.act = get_activation_function(name=act)
+
+    def forward(self, x):
+        y = self.conv(x)
+        y = self.act(y)
+        y = torch.cat([x, y], dim=1)
+        return y

@@ -17,6 +17,7 @@ import torchvision
 from PIL import Image
 from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader, DistributedSampler
+from sr.dataset import SRDataset
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
@@ -155,6 +156,18 @@ def get_dataset(args, distributed=False):
                                 pin_memory=True, sampler=sampler)
     else:
         dataloader = DataLoader(dataset=dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers,
+                                pin_memory=True)
+    return dataloader
+
+
+def get_sr_dataset(image_size, dataset_path, batch_size, num_workers, distributed=False):
+    dataset = SRDataset(image_size=image_size, dataset_path=dataset_path)
+    if distributed:
+        sampler = DistributedSampler(dataset)
+        dataloader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=False,
+                                num_workers=num_workers, pin_memory=True, sampler=sampler)
+    else:
+        dataloader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers,
                                 pin_memory=True)
     return dataloader
 

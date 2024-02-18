@@ -55,6 +55,8 @@ Integrated Design Diffusion Model
 │   │   ├── ema.py
 │   │   └── module.py
 │   ├── networks
+│   │   ├── sr
+│   │   │   └── srv1.py
 │   │   ├── base.py
 │   │   ├── cspdarkunet.py
 │   │   └── unet.py
@@ -63,6 +65,11 @@ Integrated Design Diffusion Model
 │       ├── ddim.py
 │       └── ddpm.py
 ├── results
+├── sr
+│   ├── dataset.py
+│   ├── demo.py
+│   ├── interface.py
+│   └── train.py
 ├── test
 │   ├── noising_test
 │   │   ├── landscape
@@ -78,7 +85,7 @@ Integrated Design Diffusion Model
 │   ├── logger.py
 │   ├── lr_scheduler.py
 │   └── utils.py
-├── webuipy
+├── webui
 │   └──web.py
 └── weight
 ```
@@ -92,7 +99,7 @@ Integrated Design Diffusion Model
 - [x] 5. Enable fast deployment and API on cloud servers. (2023-08-28)
 - [x] 6. Adding DDIM Sampling Method. (2023-08-03)
 - [x] 7. Support other image generation. (2023-09-16)
-- [ ] 8. Low-resolution generated images for super-resolution enhancement
+- [x] 8. Low-resolution generated images for super-resolution enhancement.[~~Super resolution model, the effect is uncertain.~~] (2024-02-18)
 - [ ] 9. Use Latent Diffusion and reduce GPU memory usage
 - [x] 10. Reconstruct the overall structure of the model (2023-12-06)
 - [x]  11. Write visual webui interface. (2024-01-23)
