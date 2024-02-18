@@ -54,6 +54,8 @@ Integrated Design Diffusion Model
 │   │   ├── ema.py
 │   │   └── module.py
 │   ├── networks
+│   │   ├── sr
+│   │   │   └── srv1.py
 │   │   ├── base.py
 │   │   ├── cspdarkunet.py
 │   │   └── unet.py
@@ -62,6 +64,11 @@ Integrated Design Diffusion Model
 │       ├── ddim.py
 │       └── ddpm.py
 ├── results
+├── sr
+│   ├── dataset.py
+│   ├── demo.py
+│   ├── interface.py
+│   └── train.py
 ├── test
 │   ├── noising_test
 │   │   ├── landscape
@@ -77,7 +84,7 @@ Integrated Design Diffusion Model
 │   ├── logger.py
 │   ├── lr_scheduler.py
 │   └── utils.py
-├── webuipy
+├── webui
 │   └──web.py
 └── weight
 ```
@@ -91,7 +98,7 @@ Integrated Design Diffusion Model
 - [x] 5. 云服务器快速部署和接口（2023-08-28）
 - [x] 6. 增加DDIM采样方法（2023-08-03）
 - [x] 7. 支持其它图像生成（2023-09-16）
-- [ ] 8. 低分辨率生成图像进行超分辨率增强
+- [x] 8. 低分辨率生成图像进行超分辨率增强[~~超分模型效果待定~~]（2024-02-18）
 - [ ] 9. 使用Latent方式降低显存消耗
 - [x] 10. 重构model整体结构（2023-12-06）
 - [x]   11. 编写可视化webui界面（2024-01-23）
