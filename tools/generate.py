@@ -44,6 +44,8 @@ def generate(args):
     num_images = args.num_images
     # Use ema
     use_ema = args.use_ema
+    # Format of images
+    image_format = args.image_format
     # Saving path
     result_path = os.path.join(args.result_path, str(time.time()))
     # Check and create result path
@@ -77,8 +79,8 @@ def generate(args):
     if result_path == "" or result_path is None:
         plot_images(images=x)
     else:
-        save_images(images=x, path=os.path.join(result_path, f"{generate_name}.jpg"))
-        save_one_image_in_images(images=x, path=result_path, generate_name=generate_name, image_size=expand_flag)
+        save_images(images=x, path=os.path.join(result_path, f"{generate_name}.{image_format}"))
+        save_one_image_in_images(images=x, path=result_path, generate_name=generate_name, image_size=expand_flag, image_format=image_format)
         plot_images(images=x)
     logger.info(msg="Finish generation.")
 
@@ -101,6 +103,10 @@ if __name__ == "__main__":
     # [Warn] Compatible with older versions
     # [Warn] Version <= 1.1.1 need to be equal to model's image size, version > 1.1.1 can set whatever you want
     parser.add_argument("--image_size", type=int, default=64)
+    # Generated image format
+    # Recommend to use png for better generation quality.
+    # Option: jpg/png
+    parser.add_argument("--image_format", type=str, default="png")
     # Number of generation images (required)
     # if class name is `-1` and conditional `is` True, the model would output one image per class.
     parser.add_argument("--num_images", type=int, default=8)
