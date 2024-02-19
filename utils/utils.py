@@ -62,13 +62,14 @@ def save_images(images, path, **kwargs):
     im.save(fp=path)
 
 
-def save_one_image_in_images(images, path, generate_name, image_size=None, **kwargs):
+def save_one_image_in_images(images, path, generate_name, image_size=None, img_format="jpg", **kwargs):
     """
     Save one image in images
     :param images: Image
     :param generate_name: generate image name
     :param path: Save path
     :param image_size: Resize image size
+    :param img_format: Format of the output image
     :param kwargs: Other parameters
     :return: None
     """
@@ -80,13 +81,13 @@ def save_one_image_in_images(images, path, generate_name, image_size=None, **kwa
         image_array = grid.permute(1, 2, 0).to("cpu").numpy()
         im = Image.fromarray(obj=image_array)
         # Rename every images
-        im.save(fp=os.path.join(path, f"{generate_name}_{count}.jpg"))
+        im.save(fp=os.path.join(path, f"{generate_name}_{count}.{img_format}"))
         if image_size is not None:
             logger.info(msg=f"Image is resizing {image_size}.")
             # Resize
             # TODO: Super-resolution algorithm replacement
             im = im.resize(size=(image_size, image_size), resample=Image.ANTIALIAS)
-            im.save(fp=os.path.join(path, f"{generate_name}_{image_size}_{count}.jpg"))
+            im.save(fp=os.path.join(path, f"{generate_name}_{image_size}_{count}.{img_format}"))
         count += 1
 
 
