@@ -42,6 +42,8 @@ def generate(args):
     generate_name = args.generate_name
     # Number of images
     num_images = args.num_images
+    # Use ema
+    use_ema = args.use_ema
     # Format of images
     image_format = args.image_format
     # Saving path
@@ -61,7 +63,7 @@ def generate(args):
         # classifier-free guidance interpolation weight
         cfg_scale = args.cfg_scale
         model = Network(num_classes=num_classes, device=device, image_size=image_size, act=act).to(device)
-        load_ckpt(ckpt_path=weight_path, model=model, device=device, is_train=False)
+        load_ckpt(ckpt_path=weight_path, model=model, device=device, is_train=False, is_use_ema=use_ema)
         if class_name == -1:
             y = torch.arange(num_classes).long().to(device)
             num_images = num_classes
@@ -108,6 +110,10 @@ if __name__ == "__main__":
     # Number of generation images (required)
     # if class name is `-1` and conditional `is` True, the model would output one image per class.
     parser.add_argument("--num_images", type=int, default=8)
+    # Use ema model
+    # If set to false, the pt file of the ordinary model will be used
+    # If true, the pt file of the ema model will be used
+    parser.add_argument("--use_ema", type=bool, default=False)
     # Weight path (required)
     parser.add_argument("--weight_path", type=str, default="/your/path/Defect-Diffusion-Model/weight/model.pt")
     # Saving path (required)

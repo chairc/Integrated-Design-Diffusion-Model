@@ -18,7 +18,8 @@ logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
 
 
-def load_ckpt(ckpt_path, model, device, optimizer=None, is_train=True, is_pretrain=False, is_distributed=False):
+def load_ckpt(ckpt_path, model, device, optimizer=None, is_train=True, is_pretrain=False, is_distributed=False,
+              is_use_ema=False):
     """
     Load checkpoint weight files
     :param ckpt_path: Checkpoint path
@@ -28,6 +29,7 @@ def load_ckpt(ckpt_path, model, device, optimizer=None, is_train=True, is_pretra
     :param is_train: Whether to train mode
     :param is_pretrain: Whether to load pretrain checkpoint
     :param is_distributed:  Whether to distribute training
+    :param is_use_ema:  Whether to use ema model or model
     :return: start_epoch + 1
     """
     # Load checkpoint
@@ -44,8 +46,12 @@ def load_ckpt(ckpt_path, model, device, optimizer=None, is_train=True, is_pretra
         logger.info(msg=f"[{device}]: Failed to load checkpoint 'model', 'ema_model' would be loaded.")
         ckpt_model = ckpt_state["ema_model"]
     else:
-        logger.info(msg=f"[{device}]: Successfully to load checkpoint 'model'.")
-        ckpt_model = ckpt_state["model"]
+        if is_use_ema:
+            logger.info(msg=f"[{device}]: Successfully to load checkpoint 'ema_model', using ema is True.")
+            ckpt_model = ckpt_state["ema_model"]
+        else:
+            logger.info(msg=f"[{device}]: Successfully to load checkpoint 'model'.")
+            ckpt_model = ckpt_state["model"]
     # Load the current model
     load_model_ckpt(model=model, model_ckpt=ckpt_model, is_train=is_train, is_pretrain=is_pretrain,
                     is_distributed=is_distributed)
