@@ -105,11 +105,9 @@ if __name__ == "__main__":
     # if class name is `-1` and conditional `is` True, the model would output one image per class.
     parser.add_argument("--num_images", type=int, default=1)
     # Weight path (required)
-    #parser.add_argument("--weight_path", type=str, default="/your/path/Defect-Diffusion-Model/weight/model.pt")
-    parser.add_argument("--weight_path", type=str, default=r"C:\Users\94540\Desktop\final_year_project\ddpm_model\tools\ckpt\ganyu_pretrain.pt")
+    parser.add_argument("--weight_path", type=str, default="/your/path/Defect-Diffusion-Model/weight/model.pt")
     # Saving path (required)
-    #parser.add_argument("--result_path", type=str, default="/your/path/Defect-Diffusion-Model/results/vis")
-    parser.add_argument("--result_path", type=str, default=r"C:\Users\94540\Desktop\png_test")
+    parser.add_argument("--result_path", type=str, default="/your/path/Defect-Diffusion-Model/results/vis")
     # Set the sample type (required)
     # If not set, the default is for 'ddpm'. You can set it to either 'ddpm' or 'ddim'.
     # Option: ddpm/ddim
