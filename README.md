@@ -318,6 +318,7 @@ The training GPU implements environment for this README is as follows: models ar
 | --conditional   |             | Enable conditional generation   | bool | If enabled, allows custom configuration, such as modifying classes or classifier-free guidance interpolation weights |
 | --generate_name |             | File name                       | str  | File name to initialize the model for saving purposes        |
 | --image_size    |             | Input image size                | int  | Size of input images, adaptive input/output size. if class name is -1 and conditional is True, the model would output one image per class. |
+| --image_format  |             | Generated image format          | str  | Generated image format, jpg/png/jpeg. Recommend to use png for better generation quality. |
 | --num_images    |             | Number of generated images      | int  | Number of images to generate                                 |
 | --weight_path   |             | Path to model weights           | str  | Path to the model weights file, required for network generation |
 | --result_path   |             | Save path                       | str  | Path to save the generated images                            |

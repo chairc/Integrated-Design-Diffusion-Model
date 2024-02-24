@@ -32,7 +32,7 @@
 
 该扩散模型为经典的ddpm和ddim，来源于论文《**[Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)**》和《**[Denoising Diffusion Implicit Models](https://arxiv.org/abs/2010.02502)**》。
 
-我们将此项目命名为IDDM: Integrated Design Diffusion Model，中文名为集成设计缺陷扩散模型。在此项目中进行模型复现、训练器和生成器编写、部分算法和网络结构的改进与优化，该仓库**持续维护**。
+我们将此项目命名为IDDM: Integrated Design Diffusion Model，中文名为集成设计扩散模型。在此项目中进行模型复现、训练器和生成器编写、部分算法和网络结构的改进与优化，该仓库**持续维护**。
 
 如果有任何问题，请先到此[**issue**](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues/9)进行问题查询，若无法解决可以加入我们的QQ群：949120343、开启新issue提问或联系我的邮箱：chenyu1998424@gmail.com/chairc1998@163.com
 
@@ -316,6 +316,7 @@ Integrated Design Diffusion Model
 | --conditional   |          | 开启条件生成                     |   bool   | 若开启可修改自定义配置，例如修改类别、classifier-free guidance插值权重 |
 | --generate_name |          | 文件名称                         |   str    | 初始化模型的文件名称，用于设置保存信息                       |
 | --image_size    |          | 输入图像大小                     |   int    | 输入图像大小，自适应输入输出尺寸。如果输入为-1并且开启条件生成为真，则模型为每类输出一张图片 |
+| --image_format  |          | 生成图片格式                     |   str    | 生成图片格式，jpg/png/jpeg等。推荐使用png获取更好的生产质量  |
 | --num_images    |          | 生成图片个数                     |   int    | 单次生成图片个数                                             |
 | --weight_path   |          | 权重路径                         |   str    | 模型权重路径，网络生成需要加载文件                           |
 | --result_path   |          | 保存路径                         |   str    | 保存路径                                                     |
