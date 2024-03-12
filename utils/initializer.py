@@ -19,6 +19,7 @@ from model.networks.cspdarkunet import CSPDarkUnet
 from model.networks.sr.srv1 import SRv1
 from model.samples.ddim import DDIMDiffusion
 from model.samples.ddpm import DDPMDiffusion
+from model.samples.plms import PLMSDiffusion
 from utils.lr_scheduler import set_cosine_lr
 
 logger = logging.getLogger(__name__)
@@ -166,6 +167,8 @@ def sample_initializer(sample, image_size, device):
         diffusion = DDPMDiffusion(img_size=image_size, device=device)
     elif sample == "ddim":
         diffusion = DDIMDiffusion(img_size=image_size, device=device)
+    elif sample == "plms":
+        diffusion = PLMSDiffusion(img_size=image_size, device=device)
     else:
         diffusion = DDPMDiffusion(img_size=image_size, device=device)
         logger.warning(msg=f"[{device}]: Setting sample error, we has been automatically set to ddpm.")
