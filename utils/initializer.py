@@ -248,10 +248,9 @@ def generate_initializer(ckpt_path, args, device):
     ckpt_state = torch.load(f=ckpt_path, map_location=device)
     # Valid
     conditional = check_param_in_dict(param="conditional", dict_params=ckpt_state, args_param=args.conditional)
-    sample = check_param_in_dict(param="sample", dict_params=ckpt_state, args_param=args.sample)
     network = check_param_in_dict(param="network", dict_params=ckpt_state, args_param=args.network)
     image_size = check_param_in_dict(param="image_size", dict_params=ckpt_state, args_param=args.image_size)
     num_classes = check_param_in_dict(param="num_classes", dict_params=ckpt_state, args_param=args.num_classes)
     act = check_param_in_dict(param="act", dict_params=ckpt_state, args_param=args.act)
     logger.info(msg=f"[{device}]: Successfully checked parameters.")
-    return conditional, sample, network, image_size, num_classes, act
+    return conditional, network, image_size, num_classes, act

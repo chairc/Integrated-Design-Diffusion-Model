@@ -22,6 +22,8 @@ from torch.cuda.amp import autocast
 from tqdm import tqdm
 
 sys.path.append(os.path.dirname(sys.path[0]))
+from config.choices import sample_choices, network_choices, optim_choices, act_choices, lr_func_choices, \
+    image_format_choices
 from model.modules.ema import EMA
 from utils.initializer import device_initializer, seed_initializer, network_initializer, optimizer_initializer, \
     sample_initializer, lr_initializer, amp_initializer
@@ -102,6 +104,8 @@ def train(rank=None, args=None):
     vis = args.vis
     # Number of visualization images generated
     num_vis = args.num_vis
+    # Generated image format
+    image_format = args.image_format
     # Saving path
     result_path = args.result_path
     # Create data logging path
@@ -234,7 +238,8 @@ def train(rank=None, args=None):
                     # images.shape[0] is the number of images in the current batch
                     n = num_vis if num_vis > 0 else images.shape[0]
                     sampled_images = diffusion.sample(model=model, n=n)
-                    save_images(images=sampled_images, path=os.path.join(results_vis_dir, f"{save_name}.jpg"))
+                    save_images(images=sampled_images,
+                                path=os.path.join(results_vis_dir, f"{save_name}.{image_format}"))
             else:
                 ckpt_model = model.state_dict()
                 ckpt_ema_model = ema_model.state_dict()
@@ -247,8 +252,10 @@ def train(rank=None, args=None):
                     ema_sampled_images = diffusion.sample(model=ema_model, n=n, labels=labels, cfg_scale=cfg_scale)
                     # This is a method to display the results of each model during training and can be commented out
                     # plot_images(images=sampled_images)
-                    save_images(images=sampled_images, path=os.path.join(results_vis_dir, f"{save_name}.jpg"))
-                    save_images(images=ema_sampled_images, path=os.path.join(results_vis_dir, f"ema_{save_name}.jpg"))
+                    save_images(images=sampled_images,
+                                path=os.path.join(results_vis_dir, f"{save_name}.{image_format}"))
+                    save_images(images=ema_sampled_images,
+                                path=os.path.join(results_vis_dir, f"ema_{save_name}.{image_format}"))
             # Save checkpoint
             save_ckpt(epoch=epoch, save_name=save_name, ckpt_model=ckpt_model, ckpt_ema_model=ckpt_ema_model,
                       ckpt_optimizer=ckpt_optimizer, results_dir=results_dir, save_model_interval=save_model_interval,
@@ -296,12 +303,12 @@ if __name__ == "__main__":
     # [Note] We recommend enabling it to 'True'.
     parser.add_argument("--conditional", type=bool, default=True)
     # Set the sample type (required)
-    # If not set, the default is for 'ddpm'. You can set it to either 'ddpm' or 'ddim'.
-    # Option: ddpm/ddim
-    parser.add_argument("--sample", type=str, default="ddpm")
+    # If not set, the default is for 'ddpm'. You can set it to either 'ddpm', 'ddim' or 'plms'.
+    # Option: ddpm/ddim/plms
+    parser.add_argument("--sample", type=str, default="ddpm", choices=sample_choices)
     # Set network
     # Option: unet/cspdarkunet
-    parser.add_argument("--network", type=str, default="unet")
+    parser.add_argument("--network", type=str, default="unet", choices=network_choices)
     # File name for initializing the model (required)
     parser.add_argument("--run_name", type=str, default="df")
     # Total epoch for training (required)
@@ -323,16 +330,16 @@ if __name__ == "__main__":
     # Effectively reducing GPU memory usage may lead to lower training accuracy and results.
     parser.add_argument("--amp", type=bool, default=False)
     # Set optimizer (needed)
-    # Option: adam/adamw
-    parser.add_argument("--optim", type=str, default="adamw")
+    # Option: adam/adamw/sgd
+    parser.add_argument("--optim", type=str, default="adamw", choices=optim_choices)
     # Set activation function (needed)
     # Option: gelu/silu/relu/relu6/lrelu
-    parser.add_argument("--act", type=str, default="gelu")
+    parser.add_argument("--act", type=str, default="gelu", choices=act_choices)
     # Learning rate (needed)
     parser.add_argument("--lr", type=float, default=3e-4)
     # Learning rate function (needed)
     # Option: linear/cosine/warmup_cosine
-    parser.add_argument("--lr_func", type=str, default="linear")
+    parser.add_argument("--lr_func", type=str, default="linear", choices=lr_func_choices)
     # Saving path (required)
     parser.add_argument("--result_path", type=str, default="/your/path/Defect-Diffusion-Model/results")
     # Whether to save weight each training (recommend)
@@ -346,6 +353,10 @@ if __name__ == "__main__":
     # Number of visualization images generated (recommend)
     # If not filled, the default is the number of image classes (unconditional) or images.shape[0] (conditional)
     parser.add_argument("--num_vis", type=int, default=-1)
+    # Generated image format
+    # Recommend to use png for better generation quality.
+    # Option: jpg/png
+    parser.add_argument("--image_format", type=str, default="png", choices=image_format_choices)
     # Resume interrupted training (needed)
     # 1. Set to 'True' to resume interrupted training and check if the parameter 'run_name' is correct.
     # 2. Set the resume interrupted epoch number. (If not, we would select the last)

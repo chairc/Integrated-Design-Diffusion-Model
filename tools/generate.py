@@ -36,10 +36,12 @@ def generate(args):
     # Run device initializer
     device = device_initializer()
     # Enable conditional generation, sample type, network, image size, number of classes and select activation function
-    conditional, sample, network, image_size, num_classes, act = generate_initializer(ckpt_path=weight_path, args=args,
-                                                                                      device=device)
+    conditional, network, image_size, num_classes, act = generate_initializer(ckpt_path=weight_path, args=args,
+                                                                              device=device)
     # Generation name
     generate_name = args.generate_name
+    # Sample
+    sample = args.sample
     # Number of images
     num_images = args.num_images
     # Use ema
