@@ -102,7 +102,8 @@ Integrated Design Diffusion Model
 - [x] 8. Low-resolution generated images for super-resolution enhancement.[~~Super resolution model, the effect is uncertain.~~] (2024-02-18)
 - [ ] 9. Use Latent Diffusion and reduce GPU memory usage
 - [x] 10. Reconstruct the overall structure of the model (2023-12-06)
-- [x]  11. Write visual webui interface. (2024-01-23)
+- [x] 11. Write visual webui interface. (2024-01-23)
+- [x] 12. Adding PLMS Sampling Method. (2024-03-12)
 
 ### Training
 
@@ -264,6 +265,7 @@ The training GPU implements environment for this README is as follows: models ar
 | --start_model_interval |             | Start epoch for saving models   | int  | Start epoch for saving models. This option saves disk space. If not set, the default is -1. If set, it starts saving models from the specified epoch. It needs to be used with --save_model_interval |
 | --vis                  |             | Visualize dataset information   | bool | Enable visualization of dataset information for model selection based on visualization |
 | --num_vis | | Number of visualization images generated | int | Number of visualization images generated. If not filled, the default is the number of image classes |
+| --image_format | | Generated image format in training | str | Generated image format in training, recommend to use png for better generation quality |
 | --resume               |             | Resume interrupted training     | bool | Set to "True" to resume interrupted training. Note: If the epoch number of interruption is outside the condition of --start_model_interval, it will not take effect. For example, if the start saving model time is 100 and the interruption number is 50, we cannot set any loading epoch points because we did not save the model. We save the xxx_last.pt file every training, so we need to use the last saved model for interrupted training |
 | --start_epoch          |             | Epoch number of interruption    | int  | Epoch number where the training was interrupted, the model will load current checkpoint |
 | --pretrain | | Enable use pretrain model | bool | Enable use pretrain mode to load checkpoint |
