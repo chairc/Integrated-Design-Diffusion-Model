@@ -40,6 +40,8 @@
 
 ```yaml
 Integrated Design Diffusion Model
+├── config
+│   └── choices.py
 ├── datasets
 │   └── dataset_demo
 │       ├── class_1
@@ -62,7 +64,8 @@ Integrated Design Diffusion Model
 │   └── samples
 │       ├── base.py
 │       ├── ddim.py
-│       └── ddpm.py
+│       ├── ddpm.py
+│       └── plms.py
 ├── results
 ├── sr
 │   ├── dataset.py
