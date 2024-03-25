@@ -3,6 +3,9 @@
     <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model" target="_blank">
         <img src="https://img.shields.io/badge/IDDM-Integrated Design Diffusion Model-blue.svg">
     </a>
+    <a href="https://doi.org/10.5281/zenodo.10866129">
+        <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.10866129.svg" alt="DOI">
+    </a>
     <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/blob/main/LICENSE" target="_blank">
         <img src="https://img.shields.io/github/license/chairc/Integrated-Design-Diffusion-Model" />
     </a>
@@ -409,6 +412,22 @@ Integrated Design Diffusion Model
 ### 部署
 
 未完待续
+
+### 关于引用
+
+如果在学术论文中使用该项目进行实验，在可能的情况下，请适当引用我们的项目，为此我们表示感谢。具体引用格式可访问**[此网站](https://zenodo.org/records/10866129**。
+
+```
+@software{chen_2024_10866129,
+  author       = {Chen Yu},
+  title        = {IDDM: Integrated Design Diffusion Model},
+  month        = mar,
+  year         = 2024,
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.10866129},
+  url          = {https://doi.org/10.5281/zenodo.10866129}
+}
+```
 
 ### 致谢
 
