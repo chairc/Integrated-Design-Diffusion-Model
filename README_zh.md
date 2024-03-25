@@ -3,6 +3,9 @@
     <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model" target="_blank">
         <img src="https://img.shields.io/badge/IDDM-Integrated Design Diffusion Model-blue.svg">
     </a>
+    <a href="https://doi.org/10.5281/zenodo.10866129">
+        <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.10866129.svg" alt="DOI">
+    </a>
     <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/blob/main/LICENSE" target="_blank">
         <img src="https://img.shields.io/github/license/chairc/Integrated-Design-Diffusion-Model" />
     </a>
@@ -30,7 +33,7 @@
 
 ### 关于模型
 
-该扩散模型为经典的ddpm和ddim，来源于论文《**[Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)**》和《**[Denoising Diffusion Implicit Models](https://arxiv.org/abs/2010.02502)**》。
+该扩散模型为经典的ddpm、ddim和plms，来源于论文《**[Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)**》、《**[Denoising Diffusion Implicit Models](https://arxiv.org/abs/2010.02502)**》和《**[Pseudo Numerical Methods for Diffusion Models on Manifolds](https://openreview.net/forum?id=PlKWVd2yBkY)**》。
 
 我们将此项目命名为IDDM: Integrated Design Diffusion Model，中文名为集成设计扩散模型。在此项目中进行模型复现、训练器和生成器编写、部分算法和网络结构的改进与优化，该仓库**持续维护**。
 
@@ -40,6 +43,8 @@
 
 ```yaml
 Integrated Design Diffusion Model
+├── config
+│   └── choices.py
 ├── datasets
 │   └── dataset_demo
 │       ├── class_1
@@ -62,7 +67,8 @@ Integrated Design Diffusion Model
 │   └── samples
 │       ├── base.py
 │       ├── ddim.py
-│       └── ddpm.py
+│       ├── ddpm.py
+│       └── plms.py
 ├── results
 ├── sr
 │   ├── dataset.py
@@ -101,7 +107,8 @@ Integrated Design Diffusion Model
 - [x] 8. 低分辨率生成图像进行超分辨率增强[~~超分模型效果待定~~]（2024-02-18）
 - [ ] 9. 使用Latent方式降低显存消耗
 - [x] 10. 重构model整体结构（2023-12-06）
-- [x]   11. 编写可视化webui界面（2024-01-23）
+- [x] 11. 编写可视化webui界面（2024-01-23）
+- [x] 12. 增加PLMS采样方法（2024-03-12）
 
 ### 训练
 
@@ -263,6 +270,7 @@ Integrated Design Diffusion Model
 | --start_model_interval |          | 设置开始每次训练存储编号         |   int    | 设置开始每次训练存储的epoch编号，该设置可节约磁盘空间，若不设置默认-1，若设置则从第epoch时开始保存每次训练pt文件，需要与--save_model_interval同时开启 |
 | --vis                  |          | 可视化数据集信息                 |   bool   | 打开可视化数据集信息，根据可视化生成样本信息筛选模型         |
 | --num_vis              |          | 生成的可视化图像数量             |   int    | 生成的可视化图像数量。如果不填写，则默认生成图片个数为数据集类别的个数 |
+| --image_format         |          | 生成图片格式                     |   str    | 在训练中生成图片格式，默认为png                              |
 | --resume               |          | 中断恢复训练                     |   bool   | 恢复训练将设置为“True”。注意：设置异常中断的epoch编号若在--start_model_interval参数条件外，则不生效。例如开始保存模型时间为100，中断编号为50，由于我们没有保存模型，所以无法设置任意加载epoch点。每次训练我们都会保存xxx_last.pt文件，所以我们需要使用最后一次保存的模型进行中断训练 |
 | --start_epoch          |          | 中断迭代编号                     |   int    | 设置异常中断的epoch编号，模型会自动加载当前编号的检查点      |
 | --pretrain             |          | 预训练模型训练                   |   bool   | 设置是否启用加载预训练模型训练                               |
@@ -404,6 +412,22 @@ Integrated Design Diffusion Model
 ### 部署
 
 未完待续
+
+### 关于引用
+
+如果在学术论文中使用该项目进行实验，在可能的情况下，请适当引用我们的项目，为此我们表示感谢。具体引用格式可访问**[此网站](https://zenodo.org/records/10866129**。
+
+```
+@software{chen_2024_10866129,
+  author       = {Chen Yu},
+  title        = {IDDM: Integrated Design Diffusion Model},
+  month        = mar,
+  year         = 2024,
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.10866129},
+  url          = {https://doi.org/10.5281/zenodo.10866129}
+}
+```
 
 ### 致谢
 

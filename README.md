@@ -4,6 +4,9 @@
     <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model" target="_blank">
         <img src="https://img.shields.io/badge/IDDM-Integrated Design Diffusion Model-blue.svg">
     </a>
+    <a href="https://doi.org/10.5281/zenodo.10866129">
+        <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.10866129.svg" alt="DOI">
+    </a>
     <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/blob/main/LICENSE" target="_blank">
         <img src="https://img.shields.io/github/license/chairc/Integrated-Design-Diffusion-Model" />
     </a>
@@ -31,7 +34,7 @@
 
 ### About the Model
 
-This diffusion model is based on the classic DDPM (Denoising Diffusion Probabilistic Models) and DDIM (Denoising Diffusion Implicit Models) presented in the papers "[Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)" and "[Denoising Diffusion Implicit Models](https://arxiv.org/abs/2010.02502)."
+This diffusion model is based on the classic DDPM (Denoising Diffusion Probabilistic Models), DDIM (Denoising Diffusion Implicit Models) and PLMS (Pseudo Numerical Methods for Diffusion Models on Manifolds) presented in the papers "[Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)", "[Denoising Diffusion Implicit Models](https://arxiv.org/abs/2010.02502)" and "[Pseudo Numerical Methods for Diffusion Models on Manifolds](https://openreview.net/forum?id=PlKWVd2yBkY)".
 
 We named this project IDDM: Integrated Design Diffusion Model. It aims to reproduce the model, write trainers and generators, and improve and optimize certain algorithms and network structures. This repository is **actively maintained**.
 
@@ -41,6 +44,8 @@ If you have any questions, please check [**the existing issues**](https://github
 
 ```yaml
 Integrated Design Diffusion Model
+├── config
+│   └── choices.py
 ├── datasets
 │   └── dataset_demo
 │       ├── class_1
@@ -63,7 +68,8 @@ Integrated Design Diffusion Model
 │   └── samples
 │       ├── base.py
 │       ├── ddim.py
-│       └── ddpm.py
+│       ├── ddpm.py
+│       └── plms.py
 ├── results
 ├── sr
 │   ├── dataset.py
@@ -102,7 +108,8 @@ Integrated Design Diffusion Model
 - [x] 8. Low-resolution generated images for super-resolution enhancement.[~~Super resolution model, the effect is uncertain.~~] (2024-02-18)
 - [ ] 9. Use Latent Diffusion and reduce GPU memory usage
 - [x] 10. Reconstruct the overall structure of the model (2023-12-06)
-- [x]  11. Write visual webui interface. (2024-01-23)
+- [x] 11. Write visual webui interface. (2024-01-23)
+- [x] 12. Adding PLMS Sampling Method. (2024-03-12)
 
 ### Training
 
@@ -264,6 +271,7 @@ The training GPU implements environment for this README is as follows: models ar
 | --start_model_interval |             | Start epoch for saving models   | int  | Start epoch for saving models. This option saves disk space. If not set, the default is -1. If set, it starts saving models from the specified epoch. It needs to be used with --save_model_interval |
 | --vis                  |             | Visualize dataset information   | bool | Enable visualization of dataset information for model selection based on visualization |
 | --num_vis | | Number of visualization images generated | int | Number of visualization images generated. If not filled, the default is the number of image classes |
+| --image_format | | Generated image format in training | str | Generated image format in training, recommend to use png for better generation quality |
 | --resume               |             | Resume interrupted training     | bool | Set to "True" to resume interrupted training. Note: If the epoch number of interruption is outside the condition of --start_model_interval, it will not take effect. For example, if the start saving model time is 100 and the interruption number is 50, we cannot set any loading epoch points because we did not save the model. We save the xxx_last.pt file every training, so we need to use the last saved model for interrupted training |
 | --start_epoch          |             | Epoch number of interruption    | int  | Epoch number where the training was interrupted, the model will load current checkpoint |
 | --pretrain | | Enable use pretrain model | bool | Enable use pretrain mode to load checkpoint |
@@ -405,6 +413,22 @@ Of course, based on the 64×64 U-Net model, we generate 160×160 `NEU-DET` image
 ### Deployment
 
 To be continued.
+
+### About Citation
+
+If this project is used for experiments in an academic paper, where possible please cite our project appropriately and we appreciate this. The specific citation format can be found at **[this website](https://zenodo.org/records/10866129)**.
+
+```
+@software{chen_2024_10866129,
+  author       = {Chen Yu},
+  title        = {IDDM: Integrated Design Diffusion Model},
+  month        = mar,
+  year         = 2024,
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.10866129},
+  url          = {https://doi.org/10.5281/zenodo.10866129}
+}
+```
 
 ### Acknowledgements
 
