@@ -266,7 +266,8 @@ Integrated Design Diffusion Model
 | --lr                   |          | 学习率                           |  float   | 初始化学习率                                                 |
 | --lr_func              |          | 学习率方法                       |   str    | 设置学习率方法，当前支持linear、cosine和warmup_cosine        |
 | --result_path          |          | 保存路径                         |   str    | 保存路径                                                     |
-| --save_model_interval  |          | 是否每次训练储存                 |   bool   | 是否每次训练储存，根据可视化生成样本信息筛选模型             |
+| --save_model_interval  |          | 是否在训练中储存                 |   bool   | 是否在训练中储存，根据可视化生成样本信息筛选模型，如果为False，则只保存最后一个模型 |
+| --save_model_interval_epochs |          | 保存模型周期                     |   int    | 保存模型间隔并每 X 周期保存一个模型                          |
 | --start_model_interval |          | 设置开始每次训练存储编号         |   int    | 设置开始每次训练存储的epoch编号，该设置可节约磁盘空间，若不设置默认-1，若设置则从第epoch时开始保存每次训练pt文件，需要与--save_model_interval同时开启 |
 | --vis                  |          | 可视化数据集信息                 |   bool   | 打开可视化数据集信息，根据可视化生成样本信息筛选模型         |
 | --num_vis              |          | 生成的可视化图像数量             |   int    | 生成的可视化图像数量。如果不填写，则默认生成图片个数为数据集类别的个数 |

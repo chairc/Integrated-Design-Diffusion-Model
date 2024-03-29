@@ -267,7 +267,8 @@ The training GPU implements environment for this README is as follows: models ar
 | --lr                   |             | Learning rate                   | float | Initial learning rate. |
 | --lr_func | | Learning rate schedule | str | Setting learning rate schedule, currently supporting linear, cosine, and warmup_cosine. |
 | --result_path          |             | Save path                       | str  | Path to save the training results                            |
-| --save_model_interval  |             | Save model after each training  | bool | Whether to save the model after each training iteration for model selection based on visualization |
+| --save_model_interval  |             | Save model after in training | bool | Whether to save the model after each training iteration for model selection based on visualization. If false, the model only save the last one |
+| --save_model_interval_epochs | | Save the model interval | int | Save model interval and save it every X epochs |
 | --start_model_interval |             | Start epoch for saving models   | int  | Start epoch for saving models. This option saves disk space. If not set, the default is -1. If set, it starts saving models from the specified epoch. It needs to be used with --save_model_interval |
 | --vis                  |             | Visualize dataset information   | bool | Enable visualization of dataset information for model selection based on visualization |
 | --num_vis | | Number of visualization images generated | int | Number of visualization images generated. If not filled, the default is the number of image classes |
