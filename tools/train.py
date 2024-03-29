@@ -98,6 +98,8 @@ def train(rank=None, args=None):
     amp = args.amp
     # Save model interval
     save_model_interval = args.save_model_interval
+    # Save model interval and save it every X epochs
+    save_model_interval_epochs = args.save_model_interval_epochs
     # Save model interval in the start epoch
     start_model_interval = args.start_model_interval
     # Enable data visualization
@@ -259,6 +261,7 @@ def train(rank=None, args=None):
             # Save checkpoint
             save_ckpt(epoch=epoch, save_name=save_name, ckpt_model=ckpt_model, ckpt_ema_model=ckpt_ema_model,
                       ckpt_optimizer=ckpt_optimizer, results_dir=results_dir, save_model_interval=save_model_interval,
+                      save_model_interval_epochs=save_model_interval_epochs,
                       start_model_interval=start_model_interval, conditional=conditional, image_size=image_size,
                       sample=sample, network=network, act=act, num_classes=num_classes)
         logger.info(msg=f"[{device}]: Finish epoch {epoch}:")
@@ -342,8 +345,11 @@ if __name__ == "__main__":
     parser.add_argument("--lr_func", type=str, default="linear", choices=lr_func_choices)
     # Saving path (required)
     parser.add_argument("--result_path", type=str, default="/your/path/Defect-Diffusion-Model/results")
-    # Whether to save weight each training (recommend)
+    # Whether to save weight in training (recommend)
+    # If false, only save the last one.
     parser.add_argument("--save_model_interval", type=bool, default=True)
+    # Save model interval and save it every X epochs (needed)
+    parser.add_argument("--save_model_interval_epochs", type=int, default=10)
     # Start epoch for saving models (needed)
     # This option saves disk space. If not set, the default is '-1'. If set,
     # it starts saving models from the specified epoch. It needs to be used with '--save_model_interval'

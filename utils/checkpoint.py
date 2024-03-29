@@ -118,8 +118,8 @@ def load_model_ckpt(model, model_ckpt, is_train=True, is_pretrain=False, is_dist
 
 
 def save_ckpt(epoch, save_name, ckpt_model, ckpt_ema_model, ckpt_optimizer, results_dir, save_model_interval,
-              start_model_interval, num_classes=None, conditional=None, image_size=None, sample=None, network=None,
-              act=None, classes_name=None, **kwargs):
+              save_model_interval_epochs, start_model_interval, num_classes=None, conditional=None, image_size=None,
+              sample=None, network=None, act=None, classes_name=None, **kwargs):
     """
     Save the model checkpoint weight files
     :param epoch: Current epoch
@@ -129,6 +129,7 @@ def save_ckpt(epoch, save_name, ckpt_model, ckpt_ema_model, ckpt_optimizer, resu
     :param ckpt_optimizer: Optimizer
     :param results_dir: Results dir
     :param save_model_interval: Whether to save weight each training
+    :param save_model_interval_epochs: Save model interval and save it every X epochs
     :param start_model_interval: Start epoch for saving models
     :param num_classes: Number of classes
     :param conditional: Enable conditional training
@@ -151,9 +152,10 @@ def save_ckpt(epoch, save_name, ckpt_model, ckpt_ema_model, ckpt_optimizer, resu
     logger.info(msg=f"Save the ckpt_last.pt")
     # If save each checkpoint, just copy the last saved checkpoint and rename it
     if save_model_interval and epoch > start_model_interval:
-        filename = os.path.join(results_dir, f"{save_name}.pt")
-        shutil.copyfile(last_filename, filename)
-        logger.info(msg=f"Save the {save_name}.pt")
+        if epoch % save_model_interval_epochs == 0:
+            filename = os.path.join(results_dir, f"{save_name}.pt")
+            shutil.copyfile(last_filename, filename)
+            logger.info(msg=f"Save the {save_name}.pt")
     logger.info(msg="Finish saving the model.")
 
 
