@@ -17,6 +17,8 @@ import torchvision
 from PIL import Image
 from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader, DistributedSampler
+
+from config.choices import RANDOM_RESIZED_CROP_SCALE, MEAN, STD
 from sr.dataset import SRDataset
 
 logger = logging.getLogger(__name__)
@@ -141,11 +143,12 @@ def get_dataset(args, distributed=False):
         # torchvision.transforms.Resize(80), args.image_size + 1/4 * args.image_size
         torchvision.transforms.Resize(size=int(args.image_size + args.image_size / 4)),
         # Random adjustment cropping
-        torchvision.transforms.RandomResizedCrop(size=args.image_size, scale=(0.8, 1.0)),
+        torchvision.transforms.RandomResizedCrop(size=args.image_size, scale=RANDOM_RESIZED_CROP_SCALE),
         # To Tensor Format
         torchvision.transforms.ToTensor(),
-        # For standardization, the mean and standard deviation are both 0.5
-        torchvision.transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
+        # For standardization, the mean and standard deviation
+        # Refer to the initialization of ImageNet
+        torchvision.transforms.Normalize(mean=MEAN, std=STD)
     ])
     # Load the folder data under the current path,
     # and automatically divide the labels according to the dataset under each file name

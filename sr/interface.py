@@ -13,6 +13,7 @@ import torch
 import torchvision
 import logging
 
+from config.choices import MEAN, STD
 from utils.checkpoint import load_ckpt
 from utils.initializer import sr_network_initializer, device_initializer
 from utils.utils import check_and_create_dir
@@ -62,8 +63,8 @@ def prepare_image(images):
     transforms = torchvision.transforms.Compose([
         # To Tensor Format
         torchvision.transforms.ToTensor(),
-        # For standardization, the mean and standard deviation are both 0.5
-        torchvision.transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
+        # For standardization, the mean and standard deviation
+        torchvision.transforms.Normalize(mean=MEAN, std=STD)
     ])
     images = transforms(images).unsqueeze(dim=0)
     return images

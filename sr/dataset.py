@@ -12,6 +12,8 @@ import torchvision
 from PIL import Image
 from torch.utils.data import Dataset
 
+from config.choices import MEAN, STD
+
 
 class SRDataset(Dataset):
     def __init__(self, image_size=64, dataset_path="", scale=4):
@@ -25,8 +27,8 @@ class SRDataset(Dataset):
             torchvision.transforms.Resize(size=(int(self.image_size), int(self.image_size))),
             # To Tensor Format
             torchvision.transforms.ToTensor(),
-            # For standardization, the mean and standard deviation are both 0.5
-            torchvision.transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
+            # For standardization, the mean and standard deviation
+            torchvision.transforms.Normalize(mean=MEAN, std=STD)
         ])
         self.hr_transforms = torchvision.transforms.Compose([
             # Resize input size
@@ -34,8 +36,8 @@ class SRDataset(Dataset):
             torchvision.transforms.Resize(size=(int(self.image_size * self.scale), int(self.image_size * self.scale))),
             # To Tensor Format
             torchvision.transforms.ToTensor(),
-            # For standardization, the mean and standard deviation are both 0.5
-            torchvision.transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
+            # For standardization, the mean and standard deviation
+            torchvision.transforms.Normalize(mean=MEAN, std=STD)
         ])
 
     def __getitem__(self, index):
