@@ -15,6 +15,7 @@ import logging
 import coloredlogs
 
 sys.path.append(os.path.dirname(sys.path[0]))
+from config.choices import sample_choices, network_choices, act_choices, image_format_choices
 from utils.initializer import device_initializer, network_initializer, sample_initializer, generate_initializer
 from utils.utils import plot_images, save_images, save_one_image_in_images, check_and_create_dir
 from utils.checkpoint import load_ckpt
@@ -94,11 +95,6 @@ if __name__ == "__main__":
     # recommend: Recommend to set
     parser = argparse.ArgumentParser()
     # =================================Base settings=================================
-    # Enable conditional generation (required)
-    # If enabled, you can modify the custom configuration.
-    # For more details, please refer to the boundary line at the bottom.
-    # [Note] The conditional settings are consistent with the loaded model training settings.
-    parser.add_argument("--conditional", type=bool, default=True)
     # Generation name (required)
     parser.add_argument("--generate_name", type=str, default="df")
     # Input image size (required)
@@ -108,7 +104,7 @@ if __name__ == "__main__":
     # Generated image format
     # Recommend to use png for better generation quality.
     # Option: jpg/png
-    parser.add_argument("--image_format", type=str, default="png")
+    parser.add_argument("--image_format", type=str, default="png", choices=image_format_choices)
     # Number of generation images (required)
     # if class name is `-1` and conditional `is` True, the model would output one image per class.
     parser.add_argument("--num_images", type=int, default=8)
@@ -121,34 +117,43 @@ if __name__ == "__main__":
     # Saving path (required)
     parser.add_argument("--result_path", type=str, default="/your/path/Defect-Diffusion-Model/results/vis")
     # Set the sample type (required)
-    # If not set, the default is for 'ddpm'. You can set it to either 'ddpm' or 'ddim'.
-    # Option: ddpm/ddim
-    parser.add_argument("--sample", type=str, default="ddpm")
-    # Set network
-    # Option: unet/cspdarkunet
-    # [Warn] Compatible with older versions, version <= 1.1.1
-    # [Warn] Version <= 1.1.1 need to be equal to model's network, version > 1.1.1 can set whatever you want
-    parser.add_argument("--network", type=str, default="unet")
-    # Set activation function (needed)
-    # [Note] The activation function settings are consistent with the loaded model training settings.
-    # [Note] If you do not set the same activation function as the model, mosaic phenomenon will occur.
-    # Option: gelu/silu/relu/relu6/lrelu
-    # [Warn] Compatible with older versions, version <= 1.1.1
-    # [Warn] Version <= 1.1.1 need to be equal to model's act, version > 1.1.1 can set whatever you want
-    parser.add_argument("--act", type=str, default="gelu")
+    # If not set, the default is for 'ddpm'. You can set it to either 'ddpm', 'ddim' or 'plms'.
+    # Option: ddpm/ddim/plms
+    parser.add_argument("--sample", type=str, default="ddpm", choices=sample_choices)
 
     # =====================Enable the conditional generation (if '--conditional' is set to 'True')=====================
-    # Number of classes (required)
-    # [Note] The classes settings are consistent with the loaded model training settings.
-    # [Warn] Compatible with older versions, version <= 1.1.1
-    # [Warn] Version <= 1.1.1 need to be equal to model's num classes, version > 1.1.1 can set whatever you want
-    parser.add_argument("--num_classes", type=int, default=10)
     # Class name (required)
     # if class name is `-1`, the model would output one image per class.
     # [Note] The setting range should be [0, num_classes - 1].
     parser.add_argument("--class_name", type=int, default=0)
     # classifier-free guidance interpolation weight, users can better generate model effect (recommend)
     parser.add_argument("--cfg_scale", type=int, default=3)
+
+    # =====================Older versions(version <= 1.1.1)=====================
+    # Enable conditional generation (required)
+    # If enabled, you can modify the custom configuration.
+    # For more details, please refer to the boundary line at the bottom.
+    # [Note] The conditional settings are consistent with the loaded model training settings.
+    # [Warn] Compatible with older versions, version <= 1.1.1
+    # [Warn] Version <= 1.1.1 need to be equal to model's network, version > 1.1.1 can set whatever you want
+    parser.add_argument("--conditional", type=bool, default=True)
+    # Set network
+    # Option: unet/cspdarkunet
+    # [Warn] Compatible with older versions, version <= 1.1.1
+    # [Warn] Version <= 1.1.1 need to be equal to model's network, version > 1.1.1 can set whatever you want
+    parser.add_argument("--network", type=str, default="unet", choices=network_choices)
+    # Set activation function (needed)
+    # [Note] The activation function settings are consistent with the loaded model training settings.
+    # [Note] If you do not set the same activation function as the model, mosaic phenomenon will occur.
+    # Option: gelu/silu/relu/relu6/lrelu
+    # [Warn] Compatible with older versions, version <= 1.1.1
+    # [Warn] Version <= 1.1.1 need to be equal to model's act, version > 1.1.1 can set whatever you want
+    parser.add_argument("--act", type=str, default="gelu", choices=act_choices)
+    # Number of classes (required)
+    # [Note] The classes settings are consistent with the loaded model training settings.
+    # [Warn] Compatible with older versions, version <= 1.1.1
+    # [Warn] Version <= 1.1.1 need to be equal to model's num classes, version > 1.1.1 can set whatever you want
+    parser.add_argument("--num_classes", type=int, default=10)
 
     args = parser.parse_args()
     generate(args)
