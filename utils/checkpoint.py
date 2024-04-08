@@ -19,7 +19,7 @@ coloredlogs.install(level="INFO")
 
 
 def load_ckpt(ckpt_path, model, device, optimizer=None, is_train=True, is_pretrain=False, is_distributed=False,
-              is_use_ema=False):
+              is_use_ema=False, conditional=False):
     """
     Load checkpoint weight files
     :param ckpt_path: Checkpoint path
@@ -30,6 +30,7 @@ def load_ckpt(ckpt_path, model, device, optimizer=None, is_train=True, is_pretra
     :param is_pretrain: Whether to load pretrain checkpoint
     :param is_distributed:  Whether to distribute training
     :param is_use_ema:  Whether to use ema model or model
+    :param conditional:  Whether conditional training
     :return: start_epoch + 1
     """
     # Load checkpoint
@@ -54,7 +55,7 @@ def load_ckpt(ckpt_path, model, device, optimizer=None, is_train=True, is_pretra
             ckpt_model = ckpt_state["model"]
     # Load the current model
     load_model_ckpt(model=model, model_ckpt=ckpt_model, is_train=is_train, is_pretrain=is_pretrain,
-                    is_distributed=is_distributed)
+                    is_distributed=is_distributed, conditional=conditional)
     logger.info(msg=f"[{device}]: Successfully load model checkpoint.")
     # Train mode
     if is_train and not is_pretrain:
@@ -68,7 +69,7 @@ def load_ckpt(ckpt_path, model, device, optimizer=None, is_train=True, is_pretra
         return start_epoch + 1
 
 
-def load_model_ckpt(model, model_ckpt, is_train=True, is_pretrain=False, is_distributed=False):
+def load_model_ckpt(model, model_ckpt, is_train=True, is_pretrain=False, is_distributed=False, conditional=False):
     """
     Initialize weight loading
     :param model: Model
@@ -76,6 +77,7 @@ def load_model_ckpt(model, model_ckpt, is_train=True, is_pretrain=False, is_dist
     :param is_train: Whether to train mode
     :param is_pretrain: Whether to load pretrain checkpoint
     :param is_distributed:  Whether to distribute training
+    :param conditional:  Whether conditional training
     :return: None
     """
     model_dict = model.state_dict()
@@ -93,7 +95,7 @@ def load_model_ckpt(model, model_ckpt, is_train=True, is_pretrain=False, is_dist
         model_weights_dict = new_model_weights_dict
         logger.info(msg="Successfully check the load weight and rename.")
     # Train mode and it is pretraining
-    if is_train and is_pretrain:
+    if is_train and is_pretrain and conditional:
         if is_distributed:
             new_model_weights_dict = {}
             # Check if key contains 'module.' prefix.

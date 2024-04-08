@@ -145,14 +145,14 @@ def train(rank=None, args=None):
         if ckpt_path is None:
             ckpt_path = os.path.join(results_dir, "ckpt_last.pt")
         start_epoch = load_ckpt(ckpt_path=ckpt_path, model=model, device=device, optimizer=optimizer,
-                                is_distributed=distributed)
+                                is_distributed=distributed, conditional=conditional)
         logger.info(msg=f"[{device}]: Successfully load resume model checkpoint.")
     else:
         # Pretrain mode
         if pretrain:
             pretrain_path = args.pretrain_path
             load_ckpt(ckpt_path=pretrain_path, model=model, device=device, is_pretrain=pretrain,
-                      is_distributed=distributed)
+                      is_distributed=distributed, conditional=conditional)
             logger.info(msg=f"[{device}]: Successfully load pretrain model checkpoint.")
         start_epoch = 0
     # Set harf-precision
