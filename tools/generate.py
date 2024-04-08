@@ -66,7 +66,8 @@ def generate(args):
         # classifier-free guidance interpolation weight
         cfg_scale = args.cfg_scale
         model = Network(num_classes=num_classes, device=device, image_size=image_size, act=act).to(device)
-        load_ckpt(ckpt_path=weight_path, model=model, device=device, is_train=False, is_use_ema=use_ema)
+        load_ckpt(ckpt_path=weight_path, model=model, device=device, is_train=False, is_use_ema=use_ema,
+                  conditional=conditional)
         if class_name == -1:
             y = torch.arange(num_classes).long().to(device)
             num_images = num_classes
@@ -75,7 +76,7 @@ def generate(args):
         x = diffusion.sample(model=model, n=num_images, labels=y, cfg_scale=cfg_scale)
     else:
         model = Network(device=device, image_size=image_size, act=act).to(device)
-        load_ckpt(ckpt_path=weight_path, model=model, device=device, is_train=False)
+        load_ckpt(ckpt_path=weight_path, model=model, device=device, is_train=False, conditional=conditional)
         x = diffusion.sample(model=model, n=num_images)
     # If there is no path information, it will only be displayed
     # If it exists, it will be saved to the specified path and displayed
