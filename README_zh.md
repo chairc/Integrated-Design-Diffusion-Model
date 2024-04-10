@@ -44,7 +44,8 @@
 ```yaml
 Integrated Design Diffusion Model
 ├── config
-│   └── choices.py
+│   ├── choices.py
+│   └── version.py
 ├── datasets
 │   └── dataset_demo
 │       ├── class_1

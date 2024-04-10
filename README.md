@@ -45,7 +45,8 @@ If you have any questions, please check [**the existing issues**](https://github
 ```yaml
 Integrated Design Diffusion Model
 ├── config
-│   └── choices.py
+│   ├── choices.py
+│   └── version.py
 ├── datasets
 │   └── dataset_demo
 │       ├── class_1
