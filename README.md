@@ -45,7 +45,8 @@ If you have any questions, please check [**the existing issues**](https://github
 ```yaml
 Integrated Design Diffusion Model
 ├── config
-│   └── choices.py
+│   ├── choices.py
+│   └── version.py
 ├── datasets
 │   └── dataset_demo
 │       ├── class_1
@@ -273,6 +274,7 @@ The training GPU implements environment for this README is as follows: models ar
 | --vis                  |             | Visualize dataset information   | bool | Enable visualization of dataset information for model selection based on visualization |
 | --num_vis | | Number of visualization images generated | int | Number of visualization images generated. If not filled, the default is the number of image classes |
 | --image_format | | Generated image format in training | str | Generated image format in training, recommend to use png for better generation quality |
+| --noise_schedule | | Noise schedule | str | This method is a model noise adding method |
 | --resume               |             | Resume interrupted training     | bool | Set to "True" to resume interrupted training. Note: If the epoch number of interruption is outside the condition of --start_model_interval, it will not take effect. For example, if the start saving model time is 100 and the interruption number is 50, we cannot set any loading epoch points because we did not save the model. We save the xxx_last.pt file every training, so we need to use the last saved model for interrupted training |
 | --start_epoch          |             | Epoch number of interruption    | int  | Epoch number where the training was interrupted, the model will load current checkpoint |
 | --pretrain | | Enable use pretrain model | bool | Enable use pretrain mode to load checkpoint |
