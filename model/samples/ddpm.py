@@ -22,7 +22,8 @@ class DDPMDiffusion(BaseDiffusion):
     DDPM class
     """
 
-    def __init__(self, noise_steps=1000, beta_start=1e-4, beta_end=2e-2, img_size=256, device="cpu"):
+    def __init__(self, noise_steps=1000, beta_start=1e-4, beta_end=2e-2, img_size=256, device="cpu",
+                 schedule_name="linear"):
         """
         The implement of DDPM
         Paper: Denoising Diffusion Probabilistic Models
@@ -32,9 +33,10 @@ class DDPMDiffusion(BaseDiffusion):
         :param beta_end: β end
         :param img_size: Image size
         :param device: Device type
+        :param schedule_name: Prepare the noise schedule name
         """
 
-        super().__init__(noise_steps, beta_start, beta_end, img_size, device)
+        super().__init__(noise_steps, beta_start, beta_end, img_size, device, schedule_name)
 
     def sample(self, model, n, labels=None, cfg_scale=None):
         """

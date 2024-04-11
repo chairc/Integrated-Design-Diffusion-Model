@@ -23,7 +23,7 @@ from tqdm import tqdm
 
 sys.path.append(os.path.dirname(sys.path[0]))
 from config.choices import sample_choices, network_choices, optim_choices, act_choices, lr_func_choices, \
-    image_format_choices
+    image_format_choices, noise_schedule_choices
 from model.modules.ema import EMA
 from utils.initializer import device_initializer, seed_initializer, network_initializer, optimizer_initializer, \
     sample_initializer, lr_initializer, amp_initializer
@@ -108,6 +108,8 @@ def train(rank=None, args=None):
     num_vis = args.num_vis
     # Generated image format
     image_format = args.image_format
+    # Noise schedule
+    noise_schedule = args.noise_schedule
     # Saving path
     result_path = args.result_path
     # Create data logging path
@@ -160,7 +162,7 @@ def train(rank=None, args=None):
     # Loss function
     mse = nn.MSELoss()
     # Initialize the diffusion model
-    diffusion = sample_initializer(sample=sample, image_size=image_size, device=device)
+    diffusion = sample_initializer(sample=sample, image_size=image_size, device=device, schedule_name=noise_schedule)
     # Tensorboard
     tb_logger = SummaryWriter(log_dir=results_tb_dir)
     # Train log
@@ -363,6 +365,9 @@ if __name__ == "__main__":
     # Recommend to use png for better generation quality.
     # Option: jpg/png
     parser.add_argument("--image_format", type=str, default="png", choices=image_format_choices)
+    # Noise schedule
+    # This method is a model noise adding method
+    parser.add_argument("--noise_schedule", type=str, default="linear", choices=noise_schedule_choices)
     # Resume interrupted training (needed)
     # 1. Set to 'True' to resume interrupted training and check if the parameter 'run_name' is correct.
     # 2. Set the resume interrupted epoch number. (If not, we would select the last)

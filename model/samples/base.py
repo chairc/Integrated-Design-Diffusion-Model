@@ -15,7 +15,8 @@ class BaseDiffusion:
     Base diffusion class
     """
 
-    def __init__(self, noise_steps=1000, beta_start=1e-4, beta_end=2e-2, img_size=256, device="cpu"):
+    def __init__(self, noise_steps=1000, beta_start=1e-4, beta_end=2e-2, img_size=256, device="cpu",
+                 schedule_name="linear"):
         """
         Diffusion model base class
         :param noise_steps: Noise steps
@@ -23,15 +24,17 @@ class BaseDiffusion:
         :param beta_end: β end
         :param img_size: Image size
         :param device: Device type
+        :param schedule_name: Prepare the noise schedule name
         """
         self.noise_steps = noise_steps
         self.beta_start = beta_start
         self.beta_end = beta_end
         self.img_size = img_size
         self.device = device
+        self.schedule_name = schedule_name
 
         # Noise steps
-        self.beta = self.prepare_noise_schedule().to(self.device)
+        self.beta = self.prepare_noise_schedule(schedule_name=self.schedule_name).to(self.device)
         # Formula: α = 1 - β
         self.alpha = 1. - self.beta
         # The cumulative sum of α.
