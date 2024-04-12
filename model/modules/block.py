@@ -90,6 +90,39 @@ class UpBlock(nn.Module):
         return x + emb
 
 
+class UpBlockV2(UpBlock):
+    """
+    Upsample Block v2
+    """
+
+    def __init__(self, in_channels, out_channels, emb_channels=256, act="silu"):
+        """
+        Initialize the upsample block v2
+        :param in_channels: Input channels
+        :param out_channels: Output channels
+        :param emb_channels: Embed channels
+        :param act: Activation function
+        """
+        super().__init__(in_channels, out_channels, emb_channels, act)
+        self.mid_channels = int(in_channels / 2)
+        self.up = nn.ConvTranspose2d(in_channels=self.mid_channels, out_channels=self.mid_channels, kernel_size=2,
+                                     stride=2)
+
+    def forward(self, x, skip_x, time):
+        """
+        UpBlock forward
+        :param x: Input
+        :param skip_x: Merged input
+        :param time: Time
+        :return: x + emb
+        """
+        x = self.up(x)
+        x = torch.cat([skip_x, x], dim=1)
+        x = self.conv(x)
+        emb = self.emb_layer(time)[:, :, None, None].repeat(1, 1, x.shape[-2], x.shape[-1])
+        return x + emb
+
+
 class CSPDarkDownBlock(nn.Module):
     def __init__(self, in_channels, out_channels, emb_channels=256, n=1, act="silu"):
         super().__init__()

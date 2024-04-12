@@ -312,7 +312,7 @@ if __name__ == "__main__":
     # Option: ddpm/ddim/plms
     parser.add_argument("--sample", type=str, default="ddpm", choices=sample_choices)
     # Set network
-    # Option: unet/cspdarkunet
+    # Option: unet/cspdarkunet/unetv2
     parser.add_argument("--network", type=str, default="unet", choices=network_choices)
     # File name for initializing the model (required)
     parser.add_argument("--run_name", type=str, default="df")
