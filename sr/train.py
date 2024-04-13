@@ -328,7 +328,7 @@ if __name__ == "__main__":
                         default="/your/path/Diffusion-Model/datasets/dir/val")
     # Enable automatic mixed precision training (needed)
     # Effectively reducing GPU memory usage may lead to lower training accuracy and results.
-    parser.add_argument("--amp", type=bool, default=False)
+    parser.add_argument("--amp", default=False, action="store_true")
     # Set optimizer (needed)
     # Option: adam/adamw/sgd
     parser.add_argument("--optim", type=str, default="sgd")
@@ -346,7 +346,7 @@ if __name__ == "__main__":
     # Saving path (required)
     parser.add_argument("--result_path", type=str, default="/your/path/Diffusion-Model/results")
     # Whether to save weight each training (recommend)
-    parser.add_argument("--save_model_interval", type=bool, default=True)
+    parser.add_argument("--save_model_interval", default=False, action="store_true")
     # Start epoch for saving models (needed)
     # This option saves disk space. If not set, the default is '-1'. If set,
     # it starts saving models from the specified epoch. It needs to be used with '--save_model_interval'
@@ -359,10 +359,10 @@ if __name__ == "__main__":
     # we cannot set any loading epoch points because we did not save the model.
     # We save the 'ckpt_last.pt' file every training, so we need to use the last saved model for interrupted training
     # If you do not know what epoch the checkpoint is, rename this checkpoint is 'ckpt_last'.pt
-    parser.add_argument("--resume", type=bool, default=False)
+    parser.add_argument("--resume", default=False, action="store_true")
     parser.add_argument("--start_epoch", type=int, default=None)
     # Enable use pretrain model (needed)
-    parser.add_argument("--pretrain", type=bool, default=False)
+    parser.add_argument("--pretrain", default=False, action="store_true")
     # Pretrain model load path (needed)
     parser.add_argument("--pretrain_path", type=str, default="")
     # Set the use GPU in normal training (required)
@@ -370,7 +370,7 @@ if __name__ == "__main__":
 
     # =================================Enable distributed training (if applicable)=================================
     # Enable distributed training (needed)
-    parser.add_argument("--distributed", type=bool, default=False)
+    parser.add_argument("--distributed", default=False, action="store_true")
     # Set the main GPU (required)
     # Default GPU is '0'
     parser.add_argument("--main_gpu", type=int, default=0)

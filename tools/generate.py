@@ -112,7 +112,7 @@ if __name__ == "__main__":
     # Use ema model
     # If set to false, the pt file of the ordinary model will be used
     # If true, the pt file of the ema model will be used
-    parser.add_argument("--use_ema", type=bool, default=False)
+    parser.add_argument("--use_ema", default=False, action="store_true")
     # Weight path (required)
     parser.add_argument("--weight_path", type=str, default="/your/path/Defect-Diffusion-Model/weight/model.pt")
     # Saving path (required)
@@ -137,7 +137,7 @@ if __name__ == "__main__":
     # [Note] The conditional settings are consistent with the loaded model training settings.
     # [Warn] Compatible with older versions, version <= 1.1.1
     # [Warn] Version <= 1.1.1 need to be equal to model's network, version > 1.1.1 can set whatever you want
-    parser.add_argument("--conditional", type=bool, default=True)
+    parser.add_argument("--conditional", default=False, action="store_true")
     # Set network
     # Option: unet/cspdarkunet
     # [Warn] Compatible with older versions, version <= 1.1.1
