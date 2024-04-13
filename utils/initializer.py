@@ -15,6 +15,7 @@ import coloredlogs
 from torch.cuda.amp import GradScaler
 
 from model.networks.unet import UNet
+from model.networks.unetv2 import UNetV2
 from model.networks.cspdarkunet import CSPDarkUnet
 from model.networks.sr.srv1 import SRv1
 from model.samples.ddim import DDIMDiffusion
@@ -87,6 +88,8 @@ def network_initializer(network, device):
     """
     if network == "unet":
         Network = UNet
+    elif network == "unetv2":
+        Network = UNetV2
     elif network == "cspdarkunet":
         Network = CSPDarkUnet
     else:

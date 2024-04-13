@@ -10,7 +10,7 @@
 # Support option
 bool_choices = [True, False]
 sample_choices = ["ddpm", "ddim", "plms"]
-network_choices = ["unet", "cspdarkunet"]
+network_choices = ["unet", "cspdarkunet", "unetv2"]
 optim_choices = ["adam", "adamw", "sgd"]
 act_choices = ["gelu", "silu", "relu", "relu6", "lrelu"]
 lr_func_choices = ["linear", "cosine", "warmup_cosine"]

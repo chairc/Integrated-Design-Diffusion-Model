@@ -90,9 +90,13 @@ class DDIMDiffusion(BaseDiffusion):
                         # Formula: input + weight * (end - input)
                         predicted_noise = torch.lerp(unconditional_predicted_noise, predicted_noise, cfg_scale)
                 # Calculation formula
+                # Division would cause the value to be too large or too small, and it needs to be constrained
+                # https://github.com/ermongroup/ddim/blob/main/functions/denoising.py#L54C12-L54C54
                 x0_t = torch.clamp((x - (predicted_noise * torch.sqrt((1 - alpha_t)))) / torch.sqrt(alpha_t), -1, 1)
+                # Sigma
                 c1 = self.eta * torch.sqrt((1 - alpha_t / alpha_prev) * (1 - alpha_prev) / (1 - alpha_t))
                 c2 = torch.sqrt((1 - alpha_prev) - c1 ** 2)
+                # Predicted x0 + direction pointing to xt + sigma * predicted noise
                 x = torch.sqrt(alpha_prev) * x0_t + c2 * predicted_noise + c1 * noise
         model.train()
         # Return the value to the range of 0 and 1
