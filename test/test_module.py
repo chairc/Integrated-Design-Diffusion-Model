@@ -60,28 +60,21 @@ class TestModule(unittest.TestCase):
         Test noising
         :return: None
         """
-        # Parameter settings
-        parser = argparse.ArgumentParser()
-        parser.add_argument("--batch_size", type=int, default=1)
-        parser.add_argument("--num_workers", type=int, default=2)
-        # Input image size
-        parser.add_argument("--image_size", type=int, default=640)
-        parser.add_argument("--dataset_path", type=str, default="./noising_test")
-
-        args = parser.parse_args()
-        logger.info(msg=f"Input params: {args}")
-
         # Start test
         logger.info(msg="Start noising noising_test.")
-        dataset_path = args.dataset_path
+        image_size = 64
+        batch_size = 1
+        num_workers = 2
+        dataset_path = "./noising_test"
         save_path = os.path.join(dataset_path, "noise")
         # You need to clear all files under the 'noise' folder first
         delete_files(path=save_path)
-        dataloader = get_dataset(args=args)
+        dataloader = get_dataset(image_size=image_size, dataset_path=dataset_path, batch_size=batch_size,
+                                 num_workers=num_workers)
         # Recreate the folder
         os.makedirs(name=save_path, exist_ok=True)
         # Diffusion model initialization
-        diffusion = sample_initializer(sample="ddpm", image_size=args.image_size, device="cpu")
+        diffusion = sample_initializer(sample="ddpm", image_size=image_size, device="cpu")
         # Get image and noise tensor
         image = next(iter(dataloader))[0]
         time = torch.Tensor([0, 50, 125, 225, 350, 500, 675, 999]).long()
