@@ -20,6 +20,7 @@ from torch.utils.data import DataLoader, DistributedSampler
 
 from config.choices import RANDOM_RESIZED_CROP_SCALE, MEAN, STD
 from sr.dataset import SRDataset
+from utils.check import check_path_is_exist
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
@@ -93,7 +94,7 @@ def save_one_image_in_images(images, path, generate_name, image_size=None, image
         count += 1
 
 
-def get_dataset(args, distributed=False):
+def get_dataset(image_size=64, dataset_path=None, batch_size=2, num_workers=0, distributed=False):
     """
     Get dataset
 
@@ -134,16 +135,21 @@ def get_dataset(args, distributed=False):
     |                        |                     |           |
     +------------------------+                     +-----------+
 
-    :param args: Parameters
+    :param image_size: Image size
+    :param dataset_path: Dataset path
+    :param batch_size: Batch size
+    :param num_workers: Number of workers
     :param distributed: Whether to distribute training
     :return: dataloader
     """
+    check_path_is_exist(path=dataset_path)
+    # Data augmentation
     transforms = torchvision.transforms.Compose([
-        # Resize input size
+        # Resize input size, input type is (height, width)
         # torchvision.transforms.Resize(80), args.image_size + 1/4 * args.image_size
-        torchvision.transforms.Resize(size=int(args.image_size + args.image_size / 4)),
+        torchvision.transforms.Resize(size=int(image_size + image_size / 4)),
         # Random adjustment cropping
-        torchvision.transforms.RandomResizedCrop(size=args.image_size, scale=RANDOM_RESIZED_CROP_SCALE),
+        torchvision.transforms.RandomResizedCrop(size=image_size, scale=RANDOM_RESIZED_CROP_SCALE),
         # To Tensor Format
         torchvision.transforms.ToTensor(),
         # For standardization, the mean and standard deviation
@@ -152,14 +158,13 @@ def get_dataset(args, distributed=False):
     ])
     # Load the folder data under the current path,
     # and automatically divide the labels according to the dataset under each file name
-    dataset = torchvision.datasets.ImageFolder(root=args.dataset_path, transform=transforms)
+    dataset = torchvision.datasets.ImageFolder(root=dataset_path, transform=transforms)
     if distributed:
         sampler = DistributedSampler(dataset)
-        dataloader = DataLoader(dataset=dataset, batch_size=args.batch_size, shuffle=False,
-                                num_workers=args.num_workers,
+        dataloader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers,
                                 pin_memory=True, sampler=sampler)
     else:
-        dataloader = DataLoader(dataset=dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers,
+        dataloader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers,
                                 pin_memory=True)
     return dataloader
 
