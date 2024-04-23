@@ -6,3 +6,4 @@ torch==1.13.0+cu116
 torch_summary==1.4.5
 torchvision==0.14.0+cu116
 tqdm==4.65.0
+pytorch_fid==0.3.0
