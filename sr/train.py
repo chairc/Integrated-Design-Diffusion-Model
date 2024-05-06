@@ -26,9 +26,10 @@ sys.path.append(os.path.dirname(sys.path[0]))
 from model.modules.ema import EMA
 from utils.initializer import device_initializer, seed_initializer, sr_network_initializer, optimizer_initializer, \
     lr_initializer, amp_initializer, loss_initializer
-from utils.utils import save_images, get_sr_dataset, setup_logging, save_train_logging, check_and_create_dir
+from utils.utils import save_images, setup_logging, save_train_logging, check_and_create_dir
 from utils.checkpoint import load_ckpt, save_ckpt
 from sr.interface import post_image
+from sr.dataset import get_sr_dataset
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")

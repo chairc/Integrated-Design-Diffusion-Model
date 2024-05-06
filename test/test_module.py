@@ -19,7 +19,8 @@ from torchvision.utils import save_image
 from torchsummary import summary
 from matplotlib import pyplot as plt
 
-from utils.utils import get_dataset, delete_files
+from utils.dataset import get_dataset
+from utils.utils import delete_files
 from utils.initializer import device_initializer, network_initializer, sample_initializer, generate_initializer
 from utils.lr_scheduler import set_cosine_lr
 from utils.checkpoint import separate_ckpt_weights

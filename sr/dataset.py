@@ -10,7 +10,7 @@ import os
 import torchvision
 
 from PIL import Image
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader, DistributedSampler
 
 from config.choices import MEAN, STD
 
@@ -79,3 +79,15 @@ def convert_3_channels(image):
     if len(image.split()) != 3:
         image = image.convert("RGB")
     return image
+
+
+def get_sr_dataset(image_size, dataset_path, batch_size, num_workers, distributed=False):
+    dataset = SRDataset(image_size=image_size, dataset_path=dataset_path)
+    if distributed:
+        sampler = DistributedSampler(dataset)
+        dataloader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=False,
+                                num_workers=num_workers, pin_memory=True, sampler=sampler)
+    else:
+        dataloader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers,
+                                pin_memory=True)
+    return dataloader
