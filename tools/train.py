@@ -25,9 +25,10 @@ sys.path.append(os.path.dirname(sys.path[0]))
 from config.choices import sample_choices, network_choices, optim_choices, act_choices, lr_func_choices, \
     image_format_choices, noise_schedule_choices
 from model.modules.ema import EMA
+from utils.dataset import get_dataset
 from utils.initializer import device_initializer, seed_initializer, network_initializer, optimizer_initializer, \
     sample_initializer, lr_initializer, amp_initializer, classes_initializer
-from utils.utils import plot_images, save_images, get_dataset, setup_logging, save_train_logging
+from utils.utils import plot_images, save_images, setup_logging, save_train_logging
 from utils.checkpoint import load_ckpt, save_ckpt
 
 logger = logging.getLogger(__name__)

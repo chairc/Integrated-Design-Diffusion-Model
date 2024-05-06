@@ -16,11 +16,6 @@ import torchvision
 
 from PIL import Image
 from matplotlib import pyplot as plt
-from torch.utils.data import DataLoader, DistributedSampler
-
-from config.choices import RANDOM_RESIZED_CROP_SCALE, MEAN, STD
-from sr.dataset import SRDataset
-from utils.check import check_path_is_exist
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
@@ -92,93 +87,6 @@ def save_one_image_in_images(images, path, generate_name, image_size=None, image
             im = im.resize(size=(image_size, image_size), resample=Image.ANTIALIAS)
             im.save(fp=os.path.join(path, f"{generate_name}_{image_size}_{count}.{image_format}"))
         count += 1
-
-
-def get_dataset(image_size=64, dataset_path=None, batch_size=2, num_workers=0, distributed=False):
-    """
-    Get dataset
-
-    Automatically divide labels torchvision.datasets.ImageFolder(args.dataset_path, transform=transforms)
-    If the dataset is as follow:
-        dataset_path/class_1/image_1.jpg
-        dataset_path/class_1/image_2.jpg
-        ...
-        dataset_path/class_2/image_1.jpg
-        dataset_path/class_2/image_2.jpg
-        ...
-
-    'dataset_path' is the root directory of the dataset, 'class_1', 'class_2', etc. are different categories in
-    the dataset, and each category contains several image files.
-
-    Use the 'ImageFolder' class to conveniently load image datasets with this folder structure,
-    and automatically assign corresponding labels to each image.
-
-    You can specify the root directory where the dataset is located by passing the 'dataset_path' parameter,
-    and perform operations such as image preprocessing and label conversion through other optional parameters.
-
-    About Distributed Training:
-    +------------------------+                     +-----------+
-    |DistributedSampler      |                     |DataLoader |
-    |                        |     2 indices       |           |
-    |    Some strategy       +-------------------> |           |
-    |                        |                     |           |
-    |-------------+----------|                     |           |
-                  ^                                |           |  4 data  +-------+
-                  |                                |       -------------->+ train |
-                1 | length                         |           |          +-------+
-                  |                                |           |
-    +-------------+----------+                     |           |
-    |DataSet                 |                     |           |
-    |        +---------+     |      3 Load         |           |
-    |        |  Data   +-------------------------> |           |
-    |        +---------+     |                     |           |
-    |                        |                     |           |
-    +------------------------+                     +-----------+
-
-    :param image_size: Image size
-    :param dataset_path: Dataset path
-    :param batch_size: Batch size
-    :param num_workers: Number of workers
-    :param distributed: Whether to distribute training
-    :return: dataloader
-    """
-    check_path_is_exist(path=dataset_path)
-    # Data augmentation
-    transforms = torchvision.transforms.Compose([
-        # Resize input size, input type is (height, width)
-        # torchvision.transforms.Resize(80), args.image_size + 1/4 * args.image_size
-        torchvision.transforms.Resize(size=int(image_size + image_size / 4)),
-        # Random adjustment cropping
-        torchvision.transforms.RandomResizedCrop(size=image_size, scale=RANDOM_RESIZED_CROP_SCALE),
-        # To Tensor Format
-        torchvision.transforms.ToTensor(),
-        # For standardization, the mean and standard deviation
-        # Refer to the initialization of ImageNet
-        torchvision.transforms.Normalize(mean=MEAN, std=STD)
-    ])
-    # Load the folder data under the current path,
-    # and automatically divide the labels according to the dataset under each file name
-    dataset = torchvision.datasets.ImageFolder(root=dataset_path, transform=transforms)
-    if distributed:
-        sampler = DistributedSampler(dataset)
-        dataloader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers,
-                                pin_memory=True, sampler=sampler)
-    else:
-        dataloader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers,
-                                pin_memory=True)
-    return dataloader
-
-
-def get_sr_dataset(image_size, dataset_path, batch_size, num_workers, distributed=False):
-    dataset = SRDataset(image_size=image_size, dataset_path=dataset_path)
-    if distributed:
-        sampler = DistributedSampler(dataset)
-        dataloader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=False,
-                                num_workers=num_workers, pin_memory=True, sampler=sampler)
-    else:
-        dataloader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers,
-                                pin_memory=True)
-    return dataloader
 
 
 def setup_logging(save_path, run_name):
