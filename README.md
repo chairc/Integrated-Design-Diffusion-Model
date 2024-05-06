@@ -4,8 +4,8 @@
     <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model" target="_blank">
         <img src="https://img.shields.io/badge/IDDM-Integrated Design Diffusion Model-blue.svg">
     </a>
-    <a href="https://doi.org/10.5281/zenodo.10866129">
-        <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.10866129.svg" alt="DOI">
+    <a href="https://doi.org/10.5281/zenodo.10866128">
+        <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.10866128.svg" alt="DOI">
     </a>
     <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/blob/main/LICENSE" target="_blank">
         <img src="https://img.shields.io/github/license/chairc/Integrated-Design-Diffusion-Model" />
@@ -84,10 +84,13 @@ Integrated Design Diffusion Model
 │   └── test_module.py
 ├── tools
 │   ├── deploy.py
+│   ├── FID_calculator.py
 │   ├── generate.py
 │   └── train.py
 ├── utils
+│   ├── check.py
 │   ├── checkpoint.py
+│   ├── dataset.py
 │   ├── initializer.py
 │   ├── logger.py
 │   ├── lr_scheduler.py
@@ -289,7 +292,7 @@ The training GPU implements environment for this README is as follows: models ar
 | --distributed         |          | Distributed training          | bool  | Enable distributed training                                 |
 | --main_gpu            |          | Main GPU for distributed      | int   | Set the main GPU for distributed training                   |
 | --world_size          |          | Number of distributed nodes    | int   | Number of distributed nodes, corresponds to the actual number of GPUs or distributed nodes being used |
-| --num_classes          |      ✓      | Number of classes               | int  | Number of classes used for classification                    |
+| --num_classes          |      ✓      | Number of classes               | int  | Number of classes used for classification **(No need to set for models after version 1.1.4)** |
 | --cfg_scale            |      ✓      | Classifier-free guidance weight | int  | Classifier-free guidance interpolation weight for better model generation effects |
 
 
@@ -428,14 +431,14 @@ To be continued.
 If this project is used for experiments in an academic paper, where possible please cite our project appropriately and we appreciate this. The specific citation format can be found at **[this website](https://zenodo.org/records/10866129)**.
 
 ```
-@software{chen_2024_10866129,
+@software{chen_2024_10866128,
   author       = {Chen Yu},
   title        = {IDDM: Integrated Design Diffusion Model},
   month        = mar,
   year         = 2024,
   publisher    = {Zenodo},
-  doi          = {10.5281/zenodo.10866129},
-  url          = {https://doi.org/10.5281/zenodo.10866129}
+  doi          = {10.5281/zenodo.10866128},
+  url          = {https://doi.org/10.5281/zenodo.10866128}
 }
 ```
 
