@@ -5,3 +5,7 @@
     @Author : chairc
     @Site   : https://github.com/chairc
 """
+from .base import BaseDiffusion
+from .ddim import DDIMDiffusion
+from .ddpm import DDPMDiffusion
+from .plms import PLMSDiffusion
