@@ -85,6 +85,7 @@ Integrated Design Diffusion Model
 ├── tools
 │   ├── deploy.py
 │   ├── FID_calculator.py
+│   ├── FID_calculator_plus.py
 │   ├── generate.py
 │   └── train.py
 ├── utils
@@ -114,6 +115,7 @@ Integrated Design Diffusion Model
 - [x] 10. Reconstruct the overall structure of the model (2023-12-06)
 - [x] 11. Write visual webui interface. (2024-01-23)
 - [x] 12. Adding PLMS Sampling Method. (2024-03-12)
+- [x] 13. Adding FID calculator to verify image quality. (2024-05-06)
 
 ### Training
 

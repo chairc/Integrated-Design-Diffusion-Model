@@ -84,6 +84,7 @@ Integrated Design Diffusion Model
 ├── tools
 │   ├── deploy.py
 │   ├── FID_calculator.py
+│   ├── FID_calculator_plus.py
 │   ├── generate.py
 │   └── train.py
 ├── utils
@@ -113,6 +114,7 @@ Integrated Design Diffusion Model
 - [x] 10. 重构model整体结构（2023-12-06）
 - [x] 11. 编写可视化webui界面（2024-01-23）
 - [x] 12. 增加PLMS采样方法（2024-03-12）
+- [x] 13. 增加FID方法验证图像质量（2024-05-06）
 
 ### 训练
 
