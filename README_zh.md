@@ -3,8 +3,8 @@
     <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model" target="_blank">
         <img src="https://img.shields.io/badge/IDDM-Integrated Design Diffusion Model-blue.svg">
     </a>
-    <a href="https://doi.org/10.5281/zenodo.10866129">
-        <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.10866129.svg" alt="DOI">
+    <a href="https://doi.org/10.5281/zenodo.10866128">
+        <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.10866128.svg" alt="DOI">
     </a>
     <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/blob/main/LICENSE" target="_blank">
         <img src="https://img.shields.io/github/license/chairc/Integrated-Design-Diffusion-Model" />
@@ -83,10 +83,13 @@ Integrated Design Diffusion Model
 │   └── test_module.py
 ├── tools
 │   ├── deploy.py
+│   ├── FID_calculator.py
 │   ├── generate.py
 │   └── train.py
 ├── utils
+│   ├── check.py
 │   ├── checkpoint.py
+│   ├── dataset.py
 │   ├── initializer.py
 │   ├── logger.py
 │   ├── lr_scheduler.py
@@ -288,7 +291,7 @@ Integrated Design Diffusion Model
 | --distributed          |          | 分布式训练                       |   bool   | 开启分布式训练                                               |
 | --main_gpu             |          | 分布式训练主显卡                 |   int    | 设置分布式中主显卡                                           |
 | --world_size           |          | 分布式训练的节点等级             |   int    | 分布式训练的节点等级， world_size的值会与实际使用的GPU数量或分布式节点数量相对应 |
-| --num_classes          |    是    | 类别个数                         |   int    | 类别个数，用于区分类别                                       |
+| --num_classes          |    是    | 类别个数                         |   int    | 类别个数，用于区分类别（**1.1.1版本后的模型可不用设置**）             |
 | --cfg_scale            |    是    | classifier-free guidance插值权重 |   int    | classifier-free guidance插值权重，用户更好生成模型效果       |
 
 
@@ -337,10 +340,10 @@ Integrated Design Diffusion Model
 | --num_images    |          | 生成图片个数                     |   int    | 单次生成图片个数                                             |
 | --weight_path   |          | 权重路径                         |   str    | 模型权重路径，网络生成需要加载文件                           |
 | --result_path   |          | 保存路径                         |   str    | 保存路径                                                     |
-| --sample        |          | 采样方式                         |   str    | 设置采样器类别，当前支持ddpm，ddim**（1.1.1版本后的模型可不用设置）** |
-| --network       |          | 训练网络                         |   str    | 设置训练网络，当前支持UNet，CSPDarkUNet**（1.1.1版本后的模型可不用设置）** |
-| --act           |          | 激活函数                         |   str    | 激活函数选择，目前支持gelu、silu、relu、relu6和lrelu。如果不选择，会产生马赛克现象**（1.1.1版本后的模型可不用设置）** |
-| --num_classes   |    是    | 类别个数                         |   int    | 类别个数，用于区分类别**（1.1.1版本后的模型可不用设置）**    |
+| --sample        |          | 采样方式                         |   str    | 设置采样器类别，当前支持ddpm，ddim（**1.1.1版本后的模型可不用设置**） |
+| --network       |          | 训练网络                         |   str    | 设置训练网络，当前支持UNet，CSPDarkUNet（**1.1.1版本后的模型可不用设置**） |
+| --act           |          | 激活函数                         |   str    | 激活函数选择，目前支持gelu、silu、relu、relu6和lrelu。如果不选择，会产生马赛克现象（**1.1.1版本后的模型可不用设置**） |
+| --num_classes   |    是    | 类别个数                         |   int    | 类别个数，用于区分类别（**1.1.1版本后的模型可不用设置**）    |
 | --class_name    |    是    | 类别名称                         |   int    | 类别序号，用于对指定类别生成。如果输入为-1，则模型为每类输出一张图片 |
 | --cfg_scale     |    是    | classifier-free guidance插值权重 |   int    | classifier-free guidance插值权重，用户更好生成模型效果       |
 
@@ -427,14 +430,14 @@ Integrated Design Diffusion Model
 如果在学术论文中使用该项目进行实验，在可能的情况下，请适当引用我们的项目，为此我们表示感谢。具体引用格式可访问[**此网站**](https://zenodo.org/records/10866129。
 
 ```
-@software{chen_2024_10866129,
+@software{chen_2024_10866128,
   author       = {Chen Yu},
   title        = {IDDM: Integrated Design Diffusion Model},
   month        = mar,
   year         = 2024,
   publisher    = {Zenodo},
-  doi          = {10.5281/zenodo.10866129},
-  url          = {https://doi.org/10.5281/zenodo.10866129}
+  doi          = {10.5281/zenodo.10866128},
+  url          = {https://doi.org/10.5281/zenodo.10866128}
 }
 ```
 
