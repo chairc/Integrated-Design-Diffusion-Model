@@ -430,7 +430,7 @@ To be continued.
 
 ### About Citation
 
-If this project is used for experiments in an academic paper, where possible please cite our project appropriately and we appreciate this. The specific citation format can be found at **[this website](https://zenodo.org/records/10866129)**.
+If this project is used for experiments in an academic paper, where possible please cite our project appropriately and we appreciate this. The specific citation format can be found at **[this website](https://zenodo.org/records/10866128)**.
 
 ```
 @software{chen_2024_10866128,
