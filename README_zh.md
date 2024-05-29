@@ -423,9 +423,40 @@ Integrated Design Diffusion Model
 
 ![model_499_ema](assets/neu160_0.jpg)![model_499_ema](assets/neu160_1.jpg)![model_499_ema](assets/neu160_2.jpg)![model_499_ema](assets/neu160_3.jpg)![model_499_ema](assets/neu160_4.jpg)![model_499_ema](assets/neu160_5.jpg)
 
-### 部署
+### 评估
 
-未完待续
+1. 数据准备阶段，使用`generate.py`生成数据集，数据集生成量应该与训练集的数量、尺寸相似（**注意**：评估时所需要的训练集应为进行了`resize`后的结果，即为训练时的`image_size`大小。例如，训练集的路径为`/your/path/datasets/landscape`，图片尺寸为**256**；生成集的路径为`/your/path/generate/landscape`，尺寸为64，使用`resize`方法将训练集路径中的图片转为**64**，此时新的评估用训练集路径为`/your/new/path/datasets/landscape`）。
+
+2. 打开`FID_calculator.py`或`FID_calculator_plus.py`文件进行评估。`FID_calculator.py`为**简单评估**；`FID_calculator_plus.py`为**自定义评估**，可设置多种参数。
+
+3. 若打开文件为`FID_calculator.py`，设置`generated_image_folder`为`/your/path/generate/landscape`，`dataset_image_folder`为`/your/new/path/datasets/landscape`，**右键运行即可**。
+
+4. 若打开文件为`FID_calculator_plus.py`，设置必要参数，例如`path`，`--batch_size`，`--num-workers`，`--dims`，`--save_stats`，`--use_gpu`参数，若不设置参数则使用默认设置。我们有两种参数设置方法，其一是直接对`FID_calculator_plus.py`文件`if __name__ == "__main__":`中的`parser`进行设置；其二是在控制台在`/your/path/Defect-Diffiusion-Model/tools`路径下输入以下命令：  
+
+   **仅进行评估操作**
+
+   ```bash
+   python FID_calculator_plus.py /your/path/generate/landscape /your/new/path/datasets/landscape --batch_size 8 --num-workers 2 --dims 2048 --use_gpu 0
+   ```
+
+   **生成npz存档**（**一般用不到**）
+   
+   ```bash
+   python FID_calculator_plus.py /your/input/path /your/output/path --save_stats
+   ```
+
+#### 评估参数
+
+| **参数名称**  | 参数使用方法      | 参数类型 | 参数解释                                                     |
+| ------------- | ----------------- | :------: | ------------------------------------------------------------ |
+| path          | 路径              |   str    | 输入2个路径，评估模式下为生成集路径和训练集路径；npz模式下为输入路径和输出路径 |
+| --batch_size  | 训练批次          |   int    | 训练批次大小                                                 |
+| --num_workers | 加载进程数量      |   int    | 用于数据加载的子进程数量，大量占用CPU和内存，但可以加快训练速度 |
+| --dims        | 维度              |   str    | 要使用的 Inception 功能的维度                                |
+| --save_stats  | 保存存档          |   str    | 从样本目录生成 npz 存档                                      |
+| --use_gpu     | 设置运行指定的GPU |   int    | 一般训练中设置指定的运行GPU，输入为GPU的编号                 |
+
+
 
 ### 关于引用
 
