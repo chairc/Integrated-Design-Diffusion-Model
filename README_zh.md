@@ -452,8 +452,8 @@ Integrated Design Diffusion Model
 | path          | 路径              |   str    | 输入2个路径，评估模式下为生成集路径和训练集路径；npz模式下为输入路径和输出路径 |
 | --batch_size  | 训练批次          |   int    | 训练批次大小                                                 |
 | --num_workers | 加载进程数量      |   int    | 用于数据加载的子进程数量，大量占用CPU和内存，但可以加快训练速度 |
-| --dims        | 维度              |   str    | 要使用的 Inception 功能的维度                                |
-| --save_stats  | 保存存档          |   str    | 从样本目录生成 npz 存档                                      |
+| --dims        | 维度              |   int    | 要使用的 Inception 功能的维度                                |
+| --save_stats  | 保存存档          |   bool   | 从样本目录生成 npz 存档                                      |
 | --use_gpu     | 设置运行指定的GPU |   int    | 一般训练中设置指定的运行GPU，输入为GPU的编号                 |
 
 

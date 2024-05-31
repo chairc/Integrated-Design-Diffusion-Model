@@ -453,8 +453,8 @@ Of course, based on the 64×64 U-Net model, we generate 160×160 `NEU-DET` image
 | path               | Path                        |      str       | Input two paths: the generated set path and the training set path in evaluation mode; input path and output path in npz mode |
 | --batch_size       | Training batch size         |      int       | Size of each training batch                                  |
 | --num_workers      | Number of loading processes |      int       | Number of subprocesses used for data loading. It consumes a large amount of CPU and memory but can speed up training |
-| --dims             | Dimensions                  |      str       | The dimensions of the Inception features to use              |
-| --save_stats       | Save stats                  |      str       | Generate npz archives from the sample directory              |
+| --dims             | Dimensions                  |      int       | The dimensions of the Inception features to use              |
+| --save_stats       | Save stats                  |      bool      | Generate npz archives from the sample directory              |
 | --use_gpu          | Specify GPU                 |      int       | Generally used to set the specific GPU for training, input the GPU number |
 
 ### About Citation
