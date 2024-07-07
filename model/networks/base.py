@@ -34,7 +34,6 @@ class BaseNet(nn.Module):
         self.init_channel(channel)
         self.time_channel = time_channel
         self.num_classes = num_classes
-        self.image_size = image_size
         self.image_size = None
         self.init_image_size(image_size=image_size)
         self.device = device
@@ -54,7 +53,7 @@ class BaseNet(nn.Module):
         :param channel: Channel
         :return: global self.channel
         """
-        if channel is None:
+        if channel is None or not isinstance(channel, list):
             self.channel = [32, 64, 128, 256, 512, 1024]
         else:
             self.channel = channel
