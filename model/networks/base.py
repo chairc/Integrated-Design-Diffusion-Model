@@ -14,7 +14,7 @@ class BaseNet(nn.Module):
     Base Network
     """
 
-    def __init__(self, in_channel=3, out_channel=3, channel=None, time_channel=256, num_classes=None, image_size=64,
+    def __init__(self, in_channel=3, out_channel=3, channel=None, time_channel=256, num_classes=None, image_size=None,
                  device="cpu", act="silu"):
         """
         Initialize the Base network
@@ -34,9 +34,14 @@ class BaseNet(nn.Module):
         self.init_channel(channel)
         self.time_channel = time_channel
         self.num_classes = num_classes
-        self.image_size = image_size
+        self.image_size = None
+        self.init_image_size(image_size=image_size)
         self.device = device
         self.act = act
+
+        # Init image size list
+        self.image_size_list = []
+        self.init_image_size_list()
 
         if self.num_classes is not None:
             self.label_emb = nn.Embedding(num_embeddings=self.num_classes, embedding_dim=self.time_channel)
@@ -48,7 +53,7 @@ class BaseNet(nn.Module):
         :param channel: Channel
         :return: global self.channel
         """
-        if channel is None:
+        if channel is None or not isinstance(channel, list):
             self.channel = [32, 64, 128, 256, 512, 1024]
         else:
             self.channel = channel
@@ -66,3 +71,28 @@ class BaseNet(nn.Module):
         pos_enc_b = torch.cos(input=inv_freq_value)
         pos_enc = torch.cat(tensors=[pos_enc_a, pos_enc_b], dim=-1)
         return pos_enc
+
+    def init_image_size(self, image_size):
+        """
+        Init image size
+        :param image_size: Image size
+        """
+        if image_size is None:
+            self.image_size = [64, 64]
+        else:
+            self.image_size = image_size
+
+    def init_image_size_list(self):
+        """
+        Init image size list
+        :return: global self.image_size_list
+        """
+        # Create image size list
+        try:
+            h, w = self.image_size
+            new_image_size_list = [[h, w], [h / 2, w / 2], [h / 4, w / 4], [h / 8, w / 8], [h / 16, w / 16],
+                                   [h / 32, w / 32]]
+            self.image_size_list = [[int(size_h), int(size_w)] for size_h, size_w in new_image_size_list]
+        except Exception:
+            raise IndexError("The image size is set too small and the preprocessing exceeds the index range. "
+                             "It is recommended that the image length and width be set to no less than 32.")

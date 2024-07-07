@@ -19,10 +19,12 @@ from torchvision.utils import save_image
 from torchsummary import summary
 from matplotlib import pyplot as plt
 
-from utils.dataset import get_dataset
+from config.choices import parse_image_size_type
+from utils.dataset import get_dataset, set_resize_images_size
 from utils.utils import delete_files
 from utils.initializer import device_initializer, network_initializer, sample_initializer, generate_initializer
 from utils.lr_scheduler import set_cosine_lr
+from utils.check import check_image_size
 from utils.checkpoint import separate_ckpt_weights
 
 logger = logging.getLogger(__name__)
@@ -213,6 +215,63 @@ class TestModule(unittest.TestCase):
         torch.save(obj=new_ckpt_state, f=os.path.join(root_ckpt_path, "new_ckpt.pt"))
         logger.info(
             msg=f"Parser parameters: {(ckpt_state['start_epoch'], len(ckpt_state['model']), len(ckpt_state['ema_model']), len(ckpt_state['optimizer']))}")
+
+    def test_resize_images_size(self):
+        """
+        Test resize images size
+        :return: None
+        """
+        divisor = 4
+        image_size1 = 64
+        image_size2 = [64, 32]
+        image_size3 = (64, 32)
+        res1 = set_resize_images_size(image_size=image_size1, divisor=divisor)
+        res2 = set_resize_images_size(image_size=image_size2, divisor=divisor)
+        res3 = set_resize_images_size(image_size=image_size3, divisor=divisor)
+        logger.info(msg=res1)
+        logger.info(msg=res2)
+        logger.info(msg=res3)
+        assert res1 == 80
+        assert res2 == [80, 40]
+        assert res3 == (80, 40)
+
+    def test_parse_image_size_type(self):
+        """
+        Test parse image size type
+        """
+        image_size1 = "64"
+        image_size2 = "[64,32]"
+        image_size3 = "(64,32)"
+        res1 = parse_image_size_type(image_size1)
+        res2 = parse_image_size_type(image_size2)
+        res3 = parse_image_size_type(image_size3)
+        logger.info(msg=res1)
+        logger.info(msg=res2)
+        logger.info(msg=res3)
+        assert res1 == 64
+        assert res2 == [64, 32]
+        assert res3 == (64, 32)
+
+    def test_check_image_size(self):
+        """
+        Test check image size
+        """
+        image_size1 = 64
+        image_size2 = [64, 32]
+        image_size3 = (64, 32)
+        image_size4 = None
+        res1 = check_image_size(image_size=image_size1)
+        res2 = check_image_size(image_size=image_size2)
+        res3 = check_image_size(image_size=image_size3)
+        res4 = check_image_size(image_size=image_size4)
+        logger.info(msg=res1)
+        logger.info(msg=res2)
+        logger.info(msg=res3)
+        logger.info(msg=res4)
+        assert res1 == [64, 64]
+        assert res2 == [64, 32]
+        assert res3 == [64, 32]
+        assert res4 == [64, 64]
 
 
 if __name__ == "__main__":

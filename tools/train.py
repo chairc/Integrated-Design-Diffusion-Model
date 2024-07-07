@@ -23,8 +23,9 @@ from tqdm import tqdm
 
 sys.path.append(os.path.dirname(sys.path[0]))
 from config.choices import sample_choices, network_choices, optim_choices, act_choices, lr_func_choices, \
-    image_format_choices, noise_schedule_choices
+    image_format_choices, noise_schedule_choices, parse_image_size_type
 from model.modules.ema import EMA
+from utils.check import check_image_size
 from utils.dataset import get_dataset
 from utils.initializer import device_initializer, seed_initializer, network_initializer, optimizer_initializer, \
     sample_initializer, lr_initializer, amp_initializer, classes_initializer
@@ -68,7 +69,7 @@ def train(rank=None, args=None):
     # Network
     network = args.network
     # Input image size
-    image_size = args.image_size
+    image_size = check_image_size(image_size=args.image_size)
     # Select optimizer
     optim = args.optim
     # Select activation function
@@ -346,7 +347,9 @@ if __name__ == "__main__":
     # It may consume a significant amount of CPU and memory, but it can speed up the training process.
     parser.add_argument("--num_workers", type=int, default=0)
     # Input image size (required)
-    parser.add_argument("--image_size", type=int, default=64)
+    # Image size option: int or [height, width]
+    # You can set 64, [64,64] or (64,64)
+    parser.add_argument("--image_size", type=parse_image_size_type, default=64)
     # Dataset path (required)
     # Conditional dataset
     # e.g: cifar10, Each category is stored in a separate folder, and the main folder represents the path.

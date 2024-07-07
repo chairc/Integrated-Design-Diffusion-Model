@@ -84,7 +84,7 @@ def save_one_image_in_images(images, path, generate_name, image_size=None, image
             logger.info(msg=f"Image is resizing {image_size}.")
             # Resize
             # TODO: Super-resolution algorithm replacement
-            im = im.resize(size=(image_size, image_size), resample=Image.ANTIALIAS)
+            im = im.resize(size=image_size, resample=Image.LANCZOS)
             im.save(fp=os.path.join(path, f"{generate_name}_{image_size}_{count}.{image_format}"))
         count += 1
 

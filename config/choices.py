@@ -5,6 +5,13 @@
     @Author : chairc
     @Site   : https://github.com/chairc
 """
+import ast
+import logging
+
+import coloredlogs
+
+logger = logging.getLogger(__name__)
+coloredlogs.install(level="INFO")
 
 # Choice settings
 # Support option
@@ -25,3 +32,36 @@ RANDOM_RESIZED_CROP_SCALE = (0.8, 1.0)
 MEAN = (0.485, 0.456, 0.406)
 # Std in datasets
 STD = (0.229, 0.224, 0.225)
+
+
+# Function
+def parse_image_size_type(image_size_str):
+    """
+    Parse image size string and return image size type
+    :param image_size_str: Image size string
+    :return: Image size type
+    """
+    # Try converting input string to integer
+    logger.info(msg=f"[Note]: Input image size string is {image_size_str}.")
+    try:
+        image_size_int = int(image_size_str)
+        if isinstance(image_size_int, int):
+            image_size_int_list = [image_size_int, image_size_int]
+            logger.info(msg=f"[Note]: Integer {image_size_str} converted to list {image_size_int_list}.")
+            return image_size_int_list
+    except ValueError:
+        # If conversion to integer is not possible, try parsing to list or tuple
+        parts = image_size_str.strip("[]()").split(",")
+        # Check the split item is digit and length is 2
+        if all(item.isdigit() for item in parts) and len(parts) == 2:
+            parsed = ast.literal_eval(node_or_string=image_size_str)
+            if isinstance(parsed, list) or isinstance(parsed, tuple):
+                # Try converting to a list of integers
+                image_size_list_and_tuple = list(map(int, parts))
+                logger.info(msg=f"[Note]: {image_size_str} converted to list {image_size_list_and_tuple}.")
+                return image_size_list_and_tuple
+            else:
+                pass
+        else:
+            # Throws an error if part is not a number
+            raise TypeError(f"Invalid '--image_size' format: {image_size_str}")

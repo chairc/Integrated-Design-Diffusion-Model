@@ -236,7 +236,9 @@ def generate_initializer(ckpt_path, args, device):
         :param args_param: Argparse parameter
         :return: return_param
         """
+        logger.info(msg=f"[{device}]: Input parameter is {args_param}.")
         if dict_params.get(param) is not None:
+            logger.info(msg=f"[{device}]: Model parameter is {dict_params[param]}.")
             logger.info(msg=f"[{device}]: Parameter {param} is exist.")
             if dict_params[param] is not None:
                 logger.info(msg=f"[{device}]: Parameter {param} value is not None.")

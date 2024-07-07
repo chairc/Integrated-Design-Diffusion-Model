@@ -8,12 +8,13 @@
 import torchvision
 
 from torch.utils.data import DataLoader, DistributedSampler
+from typing import Union
 
 from config.choices import RANDOM_RESIZED_CROP_SCALE, MEAN, STD
 from utils.check import check_path_is_exist
 
 
-def get_dataset(image_size=64, dataset_path=None, batch_size=2, num_workers=0, distributed=False):
+def get_dataset(image_size: Union[int, list, tuple], dataset_path=None, batch_size=2, num_workers=0, distributed=False):
     """
     Get dataset
 
@@ -65,8 +66,8 @@ def get_dataset(image_size=64, dataset_path=None, batch_size=2, num_workers=0, d
     # Data augmentation
     transforms = torchvision.transforms.Compose([
         # Resize input size, input type is (height, width)
-        # torchvision.transforms.Resize(80), args.image_size + 1/4 * args.image_size
-        torchvision.transforms.Resize(size=int(image_size + image_size / 4)),
+        # torchvision.transforms.Resize(), image_size + 1/4 * image_size
+        torchvision.transforms.Resize(size=set_resize_images_size(image_size=image_size, divisor=4)),
         # Random adjustment cropping
         torchvision.transforms.RandomResizedCrop(size=image_size, scale=RANDOM_RESIZED_CROP_SCALE),
         # To Tensor Format
@@ -86,3 +87,22 @@ def get_dataset(image_size=64, dataset_path=None, batch_size=2, num_workers=0, d
         dataloader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers,
                                 pin_memory=True)
     return dataloader
+
+
+def set_resize_images_size(image_size: Union[int, list, tuple], divisor=4):
+    """
+    Set resized image size
+    :param image_size: Image size
+    :param divisor: Divisor
+    :return: image_size
+    """
+    if isinstance(image_size, (int, list, tuple)):
+        if type(image_size) is int:
+            image_size = int(image_size + image_size / divisor)
+        elif type(image_size) is list:
+            image_size = [int(x + x / divisor) for x in image_size]
+        else:
+            image_size = tuple([int(x + x / divisor) for x in image_size])
+        return image_size
+    else:
+        raise TypeError("image_size must be int, list or tuple.")

@@ -19,7 +19,7 @@ class UNet(BaseNet):
     UNet
     """
 
-    def __init__(self, in_channel=3, out_channel=3, channel=None, time_channel=256, num_classes=None, image_size=64,
+    def __init__(self, in_channel=3, out_channel=3, channel=None, time_channel=256, num_classes=None, image_size=None,
                  device="cpu", act="silu"):
         """
         Initialize the UNet network
@@ -43,19 +43,19 @@ class UNet(BaseNet):
         self.down1 = DownBlock(in_channels=self.channel[1], out_channels=self.channel[2], act=self.act)
         # channel: 128
         # size: size / 2
-        self.sa1 = SelfAttention(channels=self.channel[2], size=int(self.image_size / 2), act=self.act)
+        self.sa1 = SelfAttention(channels=self.channel[2], size=self.image_size_list[1], act=self.act)
         # channel: 128 -> 256
         # size: size / 4
         self.down2 = DownBlock(in_channels=self.channel[2], out_channels=self.channel[3], act=self.act)
         # channel: 256
         # size: size / 4
-        self.sa2 = SelfAttention(channels=self.channel[3], size=int(self.image_size / 4), act=self.act)
+        self.sa2 = SelfAttention(channels=self.channel[3], size=self.image_size_list[2], act=self.act)
         # channel: 256 -> 256
         # size: size / 8
         self.down3 = DownBlock(in_channels=self.channel[3], out_channels=self.channel[3], act=self.act)
         # channel: 256
         # size: size / 8
-        self.sa3 = SelfAttention(channels=self.channel[3], size=int(self.image_size / 8), act=self.act)
+        self.sa3 = SelfAttention(channels=self.channel[3], size=self.image_size_list[3], act=self.act)
 
         # channel: 256 -> 512
         # size: size / 8
@@ -72,19 +72,19 @@ class UNet(BaseNet):
         self.up1 = UpBlock(in_channels=self.channel[4], out_channels=self.channel[2], act=self.act)
         # channel: 128
         # size: size / 4
-        self.sa4 = SelfAttention(channels=self.channel[2], size=int(self.image_size / 4), act=self.act)
+        self.sa4 = SelfAttention(channels=self.channel[2], size=self.image_size_list[2], act=self.act)
         # channel: 256 -> 64   in_channels: up2(256) = sa4(128) + sa1(128)
         # size: size / 2
         self.up2 = UpBlock(in_channels=self.channel[3], out_channels=self.channel[1], act=self.act)
         # channel: 128
         # size: size / 2
-        self.sa5 = SelfAttention(channels=self.channel[1], size=int(self.image_size / 2), act=self.act)
+        self.sa5 = SelfAttention(channels=self.channel[1], size=self.image_size_list[1], act=self.act)
         # channel: 128 -> 64   in_channels: up3(128) = sa5(64) + inc(64)
         # size: size
         self.up3 = UpBlock(in_channels=self.channel[2], out_channels=self.channel[1], act=self.act)
         # channel: 128
         # size: size
-        self.sa6 = SelfAttention(channels=self.channel[1], size=int(self.image_size), act=self.act)
+        self.sa6 = SelfAttention(channels=self.channel[1], size=self.image_size_list[0], act=self.act)
 
         # channel: 64 -> 3
         # size: size
