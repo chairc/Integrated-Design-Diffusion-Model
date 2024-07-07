@@ -15,7 +15,7 @@ class BaseDiffusion:
     Base diffusion class
     """
 
-    def __init__(self, noise_steps=1000, beta_start=1e-4, beta_end=2e-2, img_size=256, device="cpu",
+    def __init__(self, noise_steps=1000, beta_start=1e-4, beta_end=2e-2, img_size=None, device="cpu",
                  schedule_name="linear"):
         """
         Diffusion model base class
@@ -29,9 +29,12 @@ class BaseDiffusion:
         self.noise_steps = noise_steps
         self.beta_start = beta_start
         self.beta_end = beta_end
-        self.img_size = img_size
+        self.img_size = None
         self.device = device
         self.schedule_name = schedule_name
+
+        # Init image size
+        self.init_sample_image_size(img_size=img_size)
 
         # Noise steps
         self.beta = self.prepare_noise_schedule(schedule_name=self.schedule_name).to(self.device)
@@ -110,3 +113,14 @@ class BaseDiffusion:
         # Generate a tensor of integers with the specified shape (n,)
         # where each element is randomly chosen between low and high (contains low, does not contain high)
         return torch.randint(low=1, high=self.noise_steps, size=(n,))
+
+    def init_sample_image_size(self, img_size):
+        """
+        Initialize sample image size
+        :param img_size: Image size
+        :return: Integer tensor of shape [image_size_h, image_size_w]
+        """
+        if img_size is None:
+            self.img_size = [64, 64]
+        else:
+            self.img_size = img_size

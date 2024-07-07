@@ -17,7 +17,7 @@ class UNetV2(UNet):
     Replace nn.Upsample with nn.ConvTranspose2d
     """
 
-    def __init__(self, in_channel=3, out_channel=3, channel=None, time_channel=256, num_classes=None, image_size=64,
+    def __init__(self, in_channel=3, out_channel=3, channel=None, time_channel=256, num_classes=None, image_size=None,
                  device="cpu", act="silu"):
         """
         Initialize the UNetV2 network

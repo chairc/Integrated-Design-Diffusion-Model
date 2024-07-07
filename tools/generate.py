@@ -15,7 +15,8 @@ import logging
 import coloredlogs
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from config.choices import sample_choices, network_choices, act_choices, image_format_choices
+from config.choices import sample_choices, network_choices, act_choices, image_format_choices, parse_image_size_type
+from utils.check import check_image_size
 from utils.initializer import device_initializer, network_initializer, sample_initializer, generate_initializer
 from utils.utils import plot_images, save_images, save_one_image_in_images, check_and_create_dir
 from utils.checkpoint import load_ckpt
@@ -39,6 +40,8 @@ def generate(args):
     # Enable conditional generation, sample type, network, image size, number of classes and select activation function
     conditional, network, image_size, num_classes, act = generate_initializer(ckpt_path=weight_path, args=args,
                                                                               device=device)
+    # Check image size format
+    image_size = check_image_size(image_size=image_size)
     # Generation name
     generate_name = args.generate_name
     # Sample
@@ -101,7 +104,7 @@ if __name__ == "__main__":
     # Input image size (required)
     # [Warn] Compatible with older versions
     # [Warn] Version <= 1.1.1 need to be equal to model's image size, version > 1.1.1 can set whatever you want
-    parser.add_argument("--image_size", type=int, default=64)
+    parser.add_argument("--image_size", type=parse_image_size_type, default=64)
     # Generated image format
     # Recommend to use png for better generation quality.
     # Option: jpg/png

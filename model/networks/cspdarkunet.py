@@ -15,7 +15,7 @@ from model.modules.conv import BaseConv
 
 
 class CSPDarkUnet(BaseNet):
-    def __init__(self, in_channel=3, out_channel=3, channel=None, time_channel=256, num_classes=None, image_size=64,
+    def __init__(self, in_channel=3, out_channel=3, channel=None, time_channel=256, num_classes=None, image_size=None,
                  device="cpu", act="silu"):
         super().__init__(in_channel, out_channel, channel, time_channel, num_classes, image_size, device, act)
 
@@ -29,50 +29,50 @@ class CSPDarkUnet(BaseNet):
         self.down1 = CSPDarkDownBlock(in_channels=self.channel[0], out_channels=self.channel[1], n=1, act=self.act)
         # channel: 64
         # size: size / 2
-        self.sa1 = SelfAttention(channels=self.channel[1], size=int(self.image_size / 2), act=self.act)
+        self.sa1 = SelfAttention(channels=self.channel[1], size=self.image_size_list[1], act=self.act)
         # channel: 3 -> 64
         # size: size / 4
         self.down2 = CSPDarkDownBlock(in_channels=self.channel[1], out_channels=self.channel[2], n=3, act=self.act)
         # channel: 128
         # size: size / 4
-        self.sa2 = SelfAttention(channels=self.channel[2], size=int(self.image_size / 4), act=self.act)
+        self.sa2 = SelfAttention(channels=self.channel[2], size=self.image_size_list[2], act=self.act)
         # channel: 3 -> 64
         # size: size / 8
         self.down3 = CSPDarkDownBlock(in_channels=self.channel[2], out_channels=self.channel[3], n=3, act=self.act)
         # channel: 256
         # size: size / 8
-        self.sa3 = SelfAttention(channels=self.channel[3], size=int(self.image_size / 8), act=self.act)
+        self.sa3 = SelfAttention(channels=self.channel[3], size=self.image_size_list[3], act=self.act)
         # channel: 3 -> 64
         # size: size / 16
         self.down4 = CSPDarkDownBlock(in_channels=self.channel[3], out_channels=self.channel[4], n=1, act=self.act)
         # channel: 512
         # size: size / 16
-        self.sa4 = SelfAttention(channels=self.channel[4], size=int(self.image_size / 16), act=self.act)
+        self.sa4 = SelfAttention(channels=self.channel[4], size=self.image_size_list[4], act=self.act)
 
         # channel: 512 -> 256
         # size: size / 8
         self.up1 = CSPDarkUpBlock(in_channels=self.channel[4], out_channels=self.channel[3], n=3, act=self.act)
         # channel: 256
         # size: size / 8
-        self.sa5 = SelfAttention(channels=self.channel[3], size=int(self.image_size / 8), act=self.act)
+        self.sa5 = SelfAttention(channels=self.channel[3], size=self.image_size_list[3], act=self.act)
         # channel: 256 -> 128
         # size: size / 4
         self.up2 = CSPDarkUpBlock(in_channels=self.channel[3], out_channels=self.channel[2], n=3, act=self.act)
         # channel: 128
         # size: size / 4
-        self.sa6 = SelfAttention(channels=self.channel[2], size=int(self.image_size / 4), act=self.act)
+        self.sa6 = SelfAttention(channels=self.channel[2], size=self.image_size_list[2], act=self.act)
         # channel: 128 -> 64
         # size: size / 2
         self.up3 = CSPDarkUpBlock(in_channels=self.channel[2], out_channels=self.channel[1], n=3, act=self.act)
         # channel: 64
         # size: size / 2
-        self.sa7 = SelfAttention(channels=self.channel[1], size=int(self.image_size / 2), act=self.act)
+        self.sa7 = SelfAttention(channels=self.channel[1], size=self.image_size_list[1], act=self.act)
         # channel: 64 -> 32
         # size: size
         self.up4 = CSPDarkUpBlock(in_channels=self.channel[1], out_channels=self.channel[0], n=3, act=self.act)
         # channel: 32
         # size: size
-        self.sa8 = SelfAttention(channels=self.channel[0], size=int(self.image_size), act=self.act)
+        self.sa8 = SelfAttention(channels=self.channel[0], size=self.image_size_list[0], act=self.act)
 
         # channel: 32 -> 3
         # size: size

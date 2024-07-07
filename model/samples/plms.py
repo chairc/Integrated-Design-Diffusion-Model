@@ -22,7 +22,7 @@ class PLMSDiffusion(BaseDiffusion):
     PLMS class
     """
 
-    def __init__(self, noise_steps=1000, sample_steps=100, beta_start=1e-4, beta_end=2e-2, img_size=256, device="cpu",
+    def __init__(self, noise_steps=1000, sample_steps=100, beta_start=1e-4, beta_end=2e-2, img_size=None, device="cpu",
                  schedule_name="linear"):
         """
         The implement of PLMS, like DDIM
@@ -60,8 +60,8 @@ class PLMSDiffusion(BaseDiffusion):
         logger.info(msg=f"PLMS Sampling {n} new images....")
         model.eval()
         with torch.no_grad():
-            # Input dim: [n, 3, img_size, img_size]
-            x = torch.randn((n, 3, self.img_size, self.img_size)).to(self.device)
+            # Input dim: [n, 3, img_size_h, img_size_w]
+            x = torch.randn((n, 3, self.img_size[0], self.img_size[1])).to(self.device)
             # Old eps
             old_eps = []
             # The list of current time and previous time
