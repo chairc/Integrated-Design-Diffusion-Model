@@ -9,8 +9,6 @@ import os
 import logging
 import coloredlogs
 
-import torch
-
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
 
