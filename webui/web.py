@@ -24,7 +24,8 @@ from tqdm import tqdm
 
 sys.path.append(os.path.dirname(sys.path[0]))
 from config.choices import bool_choices, sample_choices, network_choices, optim_choices, act_choices, lr_func_choices, \
-    image_format_choices, RANDOM_RESIZED_CROP_SCALE, MEAN, STD
+    image_format_choices
+from config.setting import RANDOM_RESIZED_CROP_SCALE, MEAN, STD
 from model.modules.ema import EMA
 from utils.initializer import device_initializer, seed_initializer, network_initializer, optimizer_initializer, \
     sample_initializer, lr_initializer, amp_initializer, classes_initializer

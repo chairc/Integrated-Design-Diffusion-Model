@@ -12,7 +12,7 @@ import torchvision
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader, DistributedSampler
 
-from config.choices import MEAN, STD
+from config.setting import MEAN, STD
 
 
 class SRDataset(Dataset):

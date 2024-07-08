@@ -13,7 +13,7 @@ import torch
 import torchvision
 import logging
 
-from config.choices import MEAN, STD
+from config.setting import MEAN, STD
 from utils.checkpoint import load_ckpt
 from utils.initializer import sr_network_initializer, device_initializer
 from utils.utils import check_and_create_dir

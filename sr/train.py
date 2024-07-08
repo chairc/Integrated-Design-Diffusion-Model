@@ -23,6 +23,7 @@ from torch.cuda.amp import autocast
 from tqdm import tqdm
 
 sys.path.append(os.path.dirname(sys.path[0]))
+from config.setting import MASTER_ADDR, MASTER_PORT, EMA_BETA
 from model.modules.ema import EMA
 from utils.initializer import device_initializer, seed_initializer, sr_network_initializer, optimizer_initializer, \
     lr_initializer, amp_initializer, loss_initializer
@@ -76,8 +77,8 @@ def train(rank=None, args=None):
         distributed = True
         world_size = args.world_size
         # Set address and port
-        os.environ["MASTER_ADDR"] = "localhost"
-        os.environ["MASTER_PORT"] = "12346"
+        os.environ["MASTER_ADDR"] = MASTER_ADDR
+        os.environ["MASTER_PORT"] = MASTER_PORT
         # The total number of processes is equal to the number of graphics cards
         dist.init_process_group(backend="nccl" if torch.cuda.is_available() else "gloo", rank=rank,
                                 world_size=world_size)
@@ -161,7 +162,7 @@ def train(rank=None, args=None):
     len_train_dataloader = len(train_dataloader)
     len_val_dataloader = len(val_dataloader)
     # Exponential Moving Average (EMA) may not be as dominant for single class as for multi class
-    ema = EMA(beta=0.995)
+    ema = EMA(beta=EMA_BETA)
     # EMA model
     ema_model = copy.deepcopy(model).eval().requires_grad_(False)
 

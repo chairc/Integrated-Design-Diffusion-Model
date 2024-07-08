@@ -10,7 +10,7 @@ import torchvision
 from torch.utils.data import DataLoader, DistributedSampler
 from typing import Union
 
-from config.choices import RANDOM_RESIZED_CROP_SCALE, MEAN, STD
+from config.setting import RANDOM_RESIZED_CROP_SCALE, MEAN, STD
 from utils.check import check_path_is_exist
 
 
