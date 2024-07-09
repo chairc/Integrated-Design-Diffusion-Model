@@ -87,7 +87,8 @@ def generate(args):
         plot_images(images=x)
     else:
         save_images(images=x, path=os.path.join(result_path, f"{generate_name}.{image_format}"))
-        save_one_image_in_images(images=x, path=result_path, generate_name=generate_name, image_size=expand_flag, image_format=image_format)
+        save_one_image_in_images(images=x, path=result_path, generate_name=generate_name, image_size=expand_flag,
+                                 image_format=image_format)
         plot_images(images=x)
     logger.info(msg="Finish generation.")
 
