@@ -128,6 +128,10 @@ def loss_initializer(loss_name, device):
         loss_function = nn.MSELoss()
     elif loss_name == "l1":
         loss_function = nn.L1Loss()
+    elif loss_name == "huber":
+        loss_function = nn.HuberLoss()
+    elif loss_name == "smooth_l1":
+        loss_function = nn.SmoothL1Loss()
     else:
         loss_function = nn.MSELoss()
         logger.warning(msg=f"[{device}]: Setting loss function error, we has been automatically set to mse loss.")
