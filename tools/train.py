@@ -23,13 +23,13 @@ from tqdm import tqdm
 
 sys.path.append(os.path.dirname(sys.path[0]))
 from config.choices import sample_choices, network_choices, optim_choices, act_choices, lr_func_choices, \
-    image_format_choices, noise_schedule_choices, parse_image_size_type
+    image_format_choices, noise_schedule_choices, parse_image_size_type, loss_func_choices
 from config.setting import MASTER_ADDR, MASTER_PORT, EMA_BETA
 from model.modules.ema import EMA
 from utils.check import check_image_size
 from utils.dataset import get_dataset
 from utils.initializer import device_initializer, seed_initializer, network_initializer, optimizer_initializer, \
-    sample_initializer, lr_initializer, amp_initializer, classes_initializer
+    sample_initializer, lr_initializer, amp_initializer, loss_initializer, classes_initializer
 from utils.utils import plot_images, save_images, setup_logging, save_train_logging
 from utils.checkpoint import load_ckpt, save_ckpt
 
@@ -73,6 +73,8 @@ def train(rank=None, args=None):
     image_size = check_image_size(image_size=args.image_size)
     # Select optimizer
     optim = args.optim
+    # Loss function
+    loss_name = args.loss
     # Select activation function
     act = args.act
     # Learning rate
@@ -179,7 +181,7 @@ def train(rank=None, args=None):
     # Set harf-precision
     scaler = amp_initializer(amp=amp, device=device)
     # Loss function
-    mse = nn.MSELoss()
+    loss_func = loss_initializer(loss_name=loss_name, device=device)
     # Initialize the diffusion model
     diffusion = sample_initializer(sample=sample, image_size=image_size, device=device, schedule_name=noise_schedule)
     # Exponential Moving Average (EMA) may not be as dominant for single class as for multi class
@@ -232,7 +234,7 @@ def train(rank=None, args=None):
                     predicted_noise = model(x_time, time, labels)
                 # To calculate the MSE loss
                 # You need to use the standard normal distribution of x at time t and the predicted noise
-                loss = mse(noise, predicted_noise)
+                loss = loss_func(noise, predicted_noise)
             # The optimizer clears the gradient of the model parameters
             optimizer.zero_grad()
             # Update loss and optimizer
@@ -363,6 +365,9 @@ if __name__ == "__main__":
     # Set optimizer (needed)
     # Option: adam/adamw/sgd
     parser.add_argument("--optim", type=str, default="adamw", choices=optim_choices)
+    # Set loss function (needed)
+    # Option: mse/l1/huber/smooth_l1
+    parser.add_argument("--loss", type=str, default="mse", choices=loss_func_choices)
     # Set activation function (needed)
     # Option: gelu/silu/relu/relu6/lrelu
     parser.add_argument("--act", type=str, default="gelu", choices=act_choices)

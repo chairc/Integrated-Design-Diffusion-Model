@@ -23,6 +23,7 @@ from torch.cuda.amp import autocast
 from tqdm import tqdm
 
 sys.path.append(os.path.dirname(sys.path[0]))
+from config.choices import loss_func_choices, sr_network_choices, optim_choices
 from config.setting import MASTER_ADDR, MASTER_PORT, EMA_BETA
 from model.modules.ema import EMA
 from utils.initializer import device_initializer, seed_initializer, sr_network_initializer, optimizer_initializer, \
@@ -307,7 +308,7 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=0)
     # Set network
     # Option: srv1
-    parser.add_argument("--network", type=str, default="srv1")
+    parser.add_argument("--network", type=str, default="srv1", choices=sr_network_choices)
     # File name for initializing the model (required)
     parser.add_argument("--run_name", type=str, default="sr")
     # Total epoch for training (required)
@@ -333,10 +334,10 @@ if __name__ == "__main__":
     parser.add_argument("--amp", default=False, action="store_true")
     # Set optimizer (needed)
     # Option: adam/adamw/sgd
-    parser.add_argument("--optim", type=str, default="sgd")
+    parser.add_argument("--optim", type=str, default="sgd", choices=optim_choices)
     # Set loss function (needed)
-    # Option: mse/l1
-    parser.add_argument("--loss", type=str, default="mse")
+    # Option: mse/l1/huber/smooth_l1
+    parser.add_argument("--loss", type=str, default="mse", choices=loss_func_choices)
     # Set activation function (needed)
     # Option: gelu/silu/relu/relu6/lrelu
     parser.add_argument("--act", type=str, default="silu")
