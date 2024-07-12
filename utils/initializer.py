@@ -135,7 +135,7 @@ def loss_initializer(loss_name, device):
     else:
         loss_function = nn.MSELoss()
         logger.warning(msg=f"[{device}]: Setting loss function error, we has been automatically set to mse loss.")
-    logger.info(msg=f"[{device}]: This super resolution loss function is {loss_name}")
+    logger.info(msg=f"[{device}]: This loss function is {loss_name}")
     return loss_function
 
 
