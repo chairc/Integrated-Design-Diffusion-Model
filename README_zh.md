@@ -45,6 +45,7 @@
 Integrated Design Diffusion Model
 ├── config
 │   ├── choices.py
+│   ├── setting.py
 │   └── version.py
 ├── datasets
 │   └── dataset_demo
@@ -274,6 +275,7 @@ Integrated Design Diffusion Model
 | --dataset_path         |          | 数据集路径                       |   str    | 有条件数据集，例如cifar10，每个类别一个文件夹，路径为主文件夹；无条件数据集，所有图放在一个文件夹，路径为图片文件夹 |
 | --amp                  |          | 混合精度训练                     |   bool   | 开启混合精度训练，有效减少显存使用，但无法保证训练精度和训练结果 |
 | --optim                |          | 优化器                           |   str    | 优化器选择，目前支持adam和adamw                              |
+| --loss                 |          | 损失函数                         |   str    | 损失函数选择，目前支持MSELoss、L1Loss、HuberLoss和moothL1Loss |
 | --act                  |          | 激活函数                         |   str    | 激活函数选择，目前支持gelu、silu、relu、relu6和lrelu         |
 | --lr                   |          | 学习率                           |  float   | 初始化学习率                                                 |
 | --lr_func              |          | 学习率方法                       |   str    | 设置学习率方法，当前支持linear、cosine和warmup_cosine        |
