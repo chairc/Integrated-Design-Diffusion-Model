@@ -46,6 +46,7 @@ If you have any questions, please check [**the existing issues**](https://github
 Integrated Design Diffusion Model
 ├── config
 │   ├── choices.py
+│   ├── setting.py
 │   └── version.py
 ├── datasets
 │   └── dataset_demo
@@ -275,6 +276,7 @@ The training GPU implements environment for this README is as follows: models ar
 | --dataset_path         |             | Dataset path                    | str  | Path to the conditional dataset, such as CIFAR-10, with each class in a separate folder, or the path to the unconditional dataset with all images in one folder |
 | --amp                 |             | Automatic mixed precision training | bool | Enable automatic mixed precision training. It effectively reduces GPU memory usage but may affect training accuracy and results |
 | --optim                |             | Optimizer                       | str  | Optimizer selection. Currently supports Adam and AdamW       |
+| --loss                 |             | Loss function                   | str  | Loss selection. Currently supports MSELoss, L1Loss, HuberLoss and SmoothL1Loss             |
 | --act | | Activation function | str | Activation function selection. Currently supports gelu, silu, relu, relu6 and lrelu |
 | --lr                   |             | Learning rate                   | float | Initial learning rate. |
 | --lr_func | | Learning rate schedule | str | Setting learning rate schedule, currently supporting linear, cosine, and warmup_cosine. |
