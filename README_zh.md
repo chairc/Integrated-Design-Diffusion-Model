@@ -157,7 +157,7 @@ Integrated Design Diffusion Model
 
    设置`--result_path`参数为`/你的/本地/或/远程服务器/文件/地址/results`；
 
-   设置`--num_classes`参数为`10`，这是你的类别总数；
+   设置`--num_classes`参数为`10`，这是你的类别总数（**1.1.4版本后的模型可不用设置**）；
 
    设置更多参数（自定义），如果报`CUDA out of memory`错误，将`--batch_size`、`--num_workers`调小；
 
@@ -187,7 +187,7 @@ Integrated Design Diffusion Model
    **有条件训练命令**
 
    ```bash
-   python train.py --sample ddpm --conditional --run_name df --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path /your/dataset/path --result_path /your/save/path
+   python train.py --sample ddpm --conditional --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
    **无条件训练命令**
 
@@ -200,12 +200,12 @@ Integrated Design Diffusion Model
 
    ```bash
    # 此处为输入--start_epoch参数，使用当前编号权重
-   python train.py --resume --start_epoch 10 --sample ddpm --conditional --run_name df --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path /your/dataset/path --result_path /your/save/path
+   python train.py --resume --start_epoch 10 --sample ddpm --conditional --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
    
    ```bash
    # 此处为不输入--start_epoch参数，默认使用last权重
-   python train.py --resume --sample ddpm --conditional --run_name df --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path /your/dataset/path --result_path /your/save/path
+   python train.py --resume --sample ddpm --conditional --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
    **无条件恢复训练命令**
 
@@ -241,7 +241,7 @@ Integrated Design Diffusion Model
    **有条件训练命令**
 
    ```bash
-   python train.py --sample ddpm --conditional --run_name df --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path /your/dataset/path --result_path /your/save/path --distributed --main_gpu 0 --world_size 2
+   python train.py --sample ddpm --conditional --run_name df --epochs 300 --batch_size 16 --image_size 64  --dataset_path /your/dataset/path --result_path /your/save/path --distributed --main_gpu 0 --world_size 2
    ```
 
    **无条件训练命令**
@@ -295,7 +295,7 @@ Integrated Design Diffusion Model
 | --distributed          |          | 分布式训练                       |   bool   | 开启分布式训练                                               |
 | --main_gpu             |          | 分布式训练主显卡                 |   int    | 设置分布式中主显卡                                           |
 | --world_size           |          | 分布式训练的节点等级             |   int    | 分布式训练的节点等级， world_size的值会与实际使用的GPU数量或分布式节点数量相对应 |
-| --num_classes          |    是    | 类别个数                         |   int    | 类别个数，用于区分类别（**1.1.1版本后的模型可不用设置**）             |
+| --num_classes          |    是    | 类别个数                         |   int    | 类别个数，用于区分类别（**1.1.4版本后的模型可不用设置**）             |
 | --cfg_scale            |    是    | classifier-free guidance插值权重 |   int    | classifier-free guidance插值权重，用户更好生成模型效果       |
 
 
@@ -305,7 +305,7 @@ Integrated Design Diffusion Model
 
 1. 打开`generate.py`文件，找到`--weight_path`参数，将参数中的路径修改为模型权重路径，例如`/your/path/weight/model.pt`
 
-2. 设置必要参数，例如`--conditional`，`--generate_name`，`--num_images`，`--num_classes`，`--class_name`，`--image_size`，`--result_path`等参数，若不设置参数则使用默认设置。我们有两种参数设置方法，其一是直接对`generate.py`文件`if __name__ == "__main__":`中的`parser`进行设置；其二是在控制台在`/your/path/Defect-Diffiusion-Model/tools`路径下输入以下命令：  
+2. 设置必要参数，例如`--conditional`，`--generate_name`，`--num_images`，`--num_classes`（**1.1.4版本后的模型可不用设置**），`--class_name`，`--image_size`，`--result_path`等参数，若不设置参数则使用默认设置。我们有两种参数设置方法，其一是直接对`generate.py`文件`if __name__ == "__main__":`中的`parser`进行设置；其二是在控制台在`/your/path/Defect-Diffiusion-Model/tools`路径下输入以下命令：  
    **有条件生成命令（1.1.1版本以上）**
 
    ```bash
@@ -320,7 +320,7 @@ Integrated Design Diffusion Model
    **有条件生成命令（1.1.1版本及以下）**
    
    ```bash
-   python generate.py --conditional --generate_name df --num_images 8 --num_classes 10 --class_name 0 --image_size 64 --weight_path /your/path/weight/model.pt --sample ddpm --network unet --act gelu 
+   python generate.py --conditional --generate_name df --num_images 8 --class_name 0 --image_size 64 --weight_path /your/path/weight/model.pt --sample ddpm --network unet --act gelu 
    ```
    
    **无条件生成命令（1.1.1版本及以下）**
@@ -347,7 +347,7 @@ Integrated Design Diffusion Model
 | --sample        |          | 采样方式                         |   str    | 设置采样器类别，当前支持ddpm，ddim（**1.1.1版本后的模型可不用设置**） |
 | --network       |          | 训练网络                         |   str    | 设置训练网络，当前支持UNet，CSPDarkUNet（**1.1.1版本后的模型可不用设置**） |
 | --act           |          | 激活函数                         |   str    | 激活函数选择，目前支持gelu、silu、relu、relu6和lrelu。如果不选择，会产生马赛克现象（**1.1.1版本后的模型可不用设置**） |
-| --num_classes   |    是    | 类别个数                         |   int    | 类别个数，用于区分类别（**1.1.1版本后的模型可不用设置**）    |
+| --num_classes   |    是    | 类别个数                         |   int    | 类别个数，用于区分类别（**1.1.4版本后的模型可不用设置**）    |
 | --class_name    |    是    | 类别名称                         |   int    | 类别序号，用于对指定类别生成。如果输入为-1，则模型为每类输出一张图片 |
 | --cfg_scale     |    是    | classifier-free guidance插值权重 |   int    | classifier-free guidance插值权重，用户更好生成模型效果       |
 

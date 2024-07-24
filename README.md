@@ -159,7 +159,7 @@ The training GPU implements environment for this README is as follows: models ar
 
    Set the `--result_path` parameter to the file path on your local or remote server where you want to save the results.
 
-   Set the `--num_classes` parameter to `10` (this is the total number of your classes).
+   Set the `--num_classes` parameter to `10` (this is the total number of your classes. **No need to set for models after version 1.1.4**).
 
    Set any other custom parameters as needed. If the error `CUDA out of memory` is shown in your terminal, turn down `--batch_size` and `num_workers`.
 
@@ -189,7 +189,7 @@ The training GPU implements environment for this README is as follows: models ar
    **Conditional Training Command**
 
    ```bash
-   python train.py --sample ddpm --conditional --run_name df --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path /your/dataset/path --result_path /your/save/path
+   python train.py --sample ddpm --conditional --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
    **Unconditional Training Command**
 
@@ -202,12 +202,12 @@ The training GPU implements environment for this README is as follows: models ar
 
    ```bash
    # This is using --start_epoch, default use current epoch checkpoint
-   python train.py --resume --start_epoch 10 --sample ddpm --conditional --run_name df --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path /your/dataset/path --result_path /your/save/path
+   python train.py --resume --start_epoch 10 --sample ddpm --conditional --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
    
    ```bash
    # This is not using --start_epoch, default use last checkpoint 
-   python train.py --resume --sample ddpm --conditional --run_name df --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path /your/dataset/path --result_path /your/save/path
+   python train.py --resume --sample ddpm --conditional --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
    **Unconditional Resume Training Command**
 
@@ -245,7 +245,7 @@ The training GPU implements environment for this README is as follows: models ar
    **Conditional Distributed Training Command**
 
    ```bash
-   python train.py --sample ddpm --conditional --run_name df --epochs 300 --batch_size 16 --image_size 64 --num_classes 10 --dataset_path /your/dataset/path --result_path /your/save/path --distributed --main_gpu 0 --world_size 2
+   python train.py --sample ddpm --conditional --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path --distributed --main_gpu 0 --world_size 2
    ```
 
    **Unconditional Distributed Training Command**
@@ -305,7 +305,7 @@ The training GPU implements environment for this README is as follows: models ar
 
 1. Open the `generate.py` file and locate the `--weight_path` parameter. Modify the path in the parameter to the path of your model weights, for example `/your/path/weight/model.pt`.
 
-2. Set the necessary parameters such as `--conditional`, `--generate_name`, `--num_images`, `--num_classes`, `--class_name`, `--image_size`, `--result_path`, etc. If no parameters are set, the default settings will be used. There are two ways to set the parameters: one is to directly modify the `parser` in the `if __name__ == "__main__":` section of the `generate.py` file, and the other is to use the following commands in the console while in the `/your/path/Defect-Diffusion-Model/tools` directory:
+2. Set the necessary parameters such as `--conditional`, `--generate_name`, `--num_images`, `--num_classes`(**No need to set for models after version 1.1.4**), `--class_name`, `--image_size`, `--result_path`, etc. If no parameters are set, the default settings will be used. There are two ways to set the parameters: one is to directly modify the `parser` in the `if __name__ == "__main__":` section of the `generate.py` file, and the other is to use the following commands in the console while in the `/your/path/Defect-Diffusion-Model/tools` directory:
 
    **Conditional Generation Command (version > 1.1.1)**
 
@@ -322,7 +322,7 @@ The training GPU implements environment for this README is as follows: models ar
    **Conditional Generation Command (version <= 1.1.1)**
 
    ```bash
-   python generate.py --conditional --generate_name df --num_images 8 --num_classes 10 --class_name 0 --image_size 64 --weight_path /your/path/weight/model.pt --sample ddpm --network unet --act gelu 
+   python generate.py --conditional --generate_name df --num_images 8 --class_name 0 --image_size 64 --weight_path /your/path/weight/model.pt --sample ddpm --network unet --act gelu 
    ```
 
    **Unconditional Generation Command (version <= 1.1.1)**
