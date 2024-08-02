@@ -180,7 +180,7 @@ class GradioWebui:
                     return
                 # The images are all resized in dataloader
                 images = images.to(device)
-                # Generates a tensor of size images.shape[0] * images.shape[0] randomly sampled time steps
+                # Generates a tensor of size images.shape[0] randomly sampled time steps
                 time = diffusion.sample_time_steps(images.shape[0]).to(device)
                 # Add noise, return as x value at time t and standard normal distribution
                 x_time, noise = diffusion.noise_images(x=images, time=time)
