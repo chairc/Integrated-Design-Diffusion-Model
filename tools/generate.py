@@ -61,7 +61,11 @@ def generate(args):
     # Initialize the diffusion model
     diffusion = sample_initializer(sample=sample, image_size=image_size, device=device)
     # Is it necessary to expand the image?
-    expand_flag = args.image_size if image_size is not args.image_size else None
+    input_image_size = check_image_size(image_size=args.image_size)
+    if image_size == input_image_size:
+        new_image_size = None
+    else:
+        new_image_size = input_image_size
     # Initialize model
     if conditional:
         # Generation class name
@@ -87,7 +91,7 @@ def generate(args):
         plot_images(images=x)
     else:
         save_images(images=x, path=os.path.join(result_path, f"{generate_name}.{image_format}"))
-        save_one_image_in_images(images=x, path=result_path, generate_name=generate_name, image_size=expand_flag,
+        save_one_image_in_images(images=x, path=result_path, generate_name=generate_name, image_size=new_image_size,
                                  image_format=image_format)
         plot_images(images=x)
     logger.info(msg="Finish generation.")
