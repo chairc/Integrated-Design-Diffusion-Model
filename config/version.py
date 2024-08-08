@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
 
 # IDDM version
-__version__ = ["0.0.1", "1.0.0", "1.0.1", "1.0.2", "1.1.0-stable", "1.1.1", "1.1.2-stable", "1.1.3", "1.1.4", "1.1.5"]
+__version__ = ["0.0.1", "1.0.0", "1.0.1", "1.0.2", "1.1.0-stable", "1.1.1", "1.1.2-stable", "1.1.3", "1.1.4", "1.1.5",
+               "1.1.6"]
 
 
 def get_versions():
