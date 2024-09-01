@@ -9,6 +9,8 @@ import os
 import logging
 import coloredlogs
 
+import torch
+
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
 
@@ -21,6 +23,19 @@ def check_and_create_dir(path):
     """
     logger.info(msg=f"Check and create folder '{path}'.")
     os.makedirs(name=path, exist_ok=True)
+
+
+def check_is_nan(tensor):
+    """
+    Check the tensor is nan
+    :param tensor: Tensor
+    :return: True or False
+    """
+    if torch.isnan(input=tensor).any():
+        logger.error(msg="The output tensor is nan.")
+        return True
+    else:
+        return False
 
 
 def check_path_is_exist(path):

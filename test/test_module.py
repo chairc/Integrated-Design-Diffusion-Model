@@ -24,7 +24,7 @@ from utils.dataset import get_dataset, set_resize_images_size
 from utils.utils import delete_files
 from utils.initializer import device_initializer, network_initializer, sample_initializer, generate_initializer
 from utils.lr_scheduler import set_cosine_lr
-from utils.check import check_image_size
+from utils.check import check_is_nan, check_image_size
 from utils.checkpoint import separate_ckpt_weights
 
 logger = logging.getLogger(__name__)
@@ -215,6 +215,18 @@ class TestModule(unittest.TestCase):
         torch.save(obj=new_ckpt_state, f=os.path.join(root_ckpt_path, "new_ckpt.pt"))
         logger.info(
             msg=f"Parser parameters: {(ckpt_state['start_epoch'], len(ckpt_state['model']), len(ckpt_state['ema_model']), len(ckpt_state['optimizer']))}")
+
+    def test_nan(self):
+        """
+        Test nan
+        :return: None
+        """
+        nan = torch.tensor(float("nan"))
+        correct_tensor = torch.tensor(1)
+        correct_tensor_list = torch.tensor([1, 0.5, 4])
+        assert check_is_nan(tensor=nan)
+        assert not check_is_nan(tensor=correct_tensor)
+        assert not check_is_nan(tensor=correct_tensor_list)
 
     def test_resize_images_size(self):
         """
