@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+"""
+    @Date   : 2024/4/22 18:07
+    @Author : egoist945402376
+    @Site   : https://github.com/chairc
+"""
 import subprocess
 
 
