@@ -257,9 +257,6 @@ def train(rank=None, args=None):
 
         # Saving and validating models in the main process
         if save_models:
-            # Val
-            # model.eval()
-
             # Saving model, set the checkpoint name
             save_name = f"ckpt_{str(epoch).zfill(3)}"
             # Init ckpt params

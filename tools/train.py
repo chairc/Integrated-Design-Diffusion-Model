@@ -265,7 +265,7 @@ def train(rank=None, args=None):
                 # Enable visualization
                 if vis:
                     # images.shape[0] is the number of images in the current batch
-                    n = num_vis if num_vis > 0 else images.shape[0]
+                    n = num_vis if num_vis > 0 else batch_size
                     sampled_images = diffusion.sample(model=model, n=n)
                     save_images(images=sampled_images,
                                 path=os.path.join(results_vis_dir, f"{save_name}.{image_format}"))

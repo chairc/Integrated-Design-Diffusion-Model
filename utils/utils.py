@@ -43,7 +43,7 @@ def plot_one_image_in_images(images, fig_size=(64, 64)):
     plt.figure(figsize=fig_size)
     for i in images.cpu():
         plt.imshow(X=i)
-        plt.imshow()
+        plt.show()
 
 
 def save_images(images, path, **kwargs):
