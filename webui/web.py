@@ -102,18 +102,6 @@ class GradioWebui:
         results_dir = results_logging[1]
         results_vis_dir = results_logging[2]
         results_tb_dir = results_logging[3]
-        # Dataloader
-        transforms = torchvision.transforms.Compose([
-            # Resize input size
-            # torchvision.transforms.Resize(80), image_size + 1/4 * image_size
-            torchvision.transforms.Resize(size=int(image_size + image_size / 4)),
-            # Random adjustment cropping
-            torchvision.transforms.RandomResizedCrop(size=image_size, scale=RANDOM_RESIZED_CROP_SCALE),
-            # To Tensor Format
-            torchvision.transforms.ToTensor(),
-            # For standardization, the mean and standard deviation
-            torchvision.transforms.Normalize(mean=MEAN, std=STD)
-        ])
         # Load the folder data under the current path,
         # and automatically divide the labels according to the dataset under each file name
         dataloader = get_dataset(image_size=image_size, dataset_path=dataset_path, batch_size=batch_size,
