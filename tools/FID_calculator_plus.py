@@ -16,6 +16,7 @@ from pytorch_fid.fid_score import save_fid_stats, calculate_fid_given_paths
 from pytorch_fid.inception import InceptionV3
 
 sys.path.append(os.path.dirname(sys.path[0]))
+from config.version import get_version_banner
 from utils.initializer import device_initializer
 
 logger = logging.getLogger(__name__)
@@ -68,4 +69,6 @@ if __name__ == "__main__":
     # Set the use GPU in normal training (required)
     parser.add_argument("--use_gpu", type=int, default=0)
     args = parser.parse_args()
+    # Get version banner
+    get_version_banner()
     main(args)

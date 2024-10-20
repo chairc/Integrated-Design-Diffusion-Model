@@ -16,6 +16,7 @@ import coloredlogs
 
 sys.path.append(os.path.dirname(sys.path[0]))
 from config.choices import sample_choices, network_choices, act_choices, image_format_choices, parse_image_size_type
+from config.version import get_version_banner
 from utils.check import check_image_size
 from utils.initializer import device_initializer, network_initializer, sample_initializer, generate_initializer
 from utils.utils import plot_images, save_images, save_one_image_in_images, check_and_create_dir
@@ -165,4 +166,6 @@ if __name__ == "__main__":
     parser.add_argument("--num_classes", type=int, default=10)
 
     args = parser.parse_args()
+    # Get version banner
+    get_version_banner()
     generate(args)
