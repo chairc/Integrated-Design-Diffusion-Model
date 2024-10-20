@@ -25,6 +25,7 @@ from tqdm import tqdm
 sys.path.append(os.path.dirname(sys.path[0]))
 from config.choices import loss_func_choices, sr_network_choices, optim_choices
 from config.setting import MASTER_ADDR, MASTER_PORT, EMA_BETA
+from config.version import get_version_banner
 from model.modules.ema import EMA
 from utils.initializer import device_initializer, seed_initializer, sr_network_initializer, optimizer_initializer, \
     lr_initializer, amp_initializer, loss_initializer
@@ -379,5 +380,6 @@ if __name__ == "__main__":
     parser.add_argument("--world_size", type=int, default=2)
 
     args = parser.parse_args()
-
+    # Get version banner
+    get_version_banner()
     main(args)

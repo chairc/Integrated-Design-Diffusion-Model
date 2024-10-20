@@ -16,6 +16,7 @@ import coloredlogs
 from PIL import Image
 
 sys.path.append(os.path.dirname(sys.path[0]))
+from config.version import get_version_banner
 from sr.interface import inference, load_sr_model
 from utils.initializer import device_initializer
 from utils.utils import plot_images, save_images, check_and_create_dir
@@ -81,4 +82,6 @@ if __name__ == "__main__":
     parser.add_argument("--result_path", type=str, default="/your/path/Diffusion-Model/result")
 
     args = parser.parse_args()
+    # Get version banner
+    get_version_banner()
     lr2hr(args)

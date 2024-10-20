@@ -57,7 +57,21 @@ def check_version_is_latest(current_version):
     return False
 
 
+def get_version_banner():
+    """
+    Get version banner.
+    """
+    with open(file="../config/banner.txt", mode="r", encoding="utf-8") as banner_file:
+        contents = banner_file.read()
+        print(contents)
+        print(f"===============IDDM version: {get_latest_version()}===============\n"
+              "Project Author : chairc\n"
+              "Project GitHub : https://github.com/chairc/Integrated-Design-Diffusion-Model")
+    banner_file.close()
+
+
 if __name__ == "__main__":
     get_versions()
     get_latest_version()
     get_old_versions()
+    get_version_banner()
