@@ -10,14 +10,13 @@ import torch.nn as nn
 
 from model.networks.base import BaseNet
 from model.modules.attention import SelfAttention
-from model.modules.block import CSPDarkDownBlock,CSPDarkUpBlock
+from model.modules.block import CSPDarkDownBlock, CSPDarkUpBlock
 from model.modules.conv import BaseConv
 
 
 class CSPDarkUnet(BaseNet):
-    def __init__(self, in_channel=3, out_channel=3, channel=None, time_channel=256, num_classes=None, image_size=None,
-                 device="cpu", act="silu"):
-        super().__init__(in_channel, out_channel, channel, time_channel, num_classes, image_size, device, act)
+    def __init__(self, **kwargs):
+        super(CSPDarkUnet, self).__init__(**kwargs)
 
         # channel: 3 -> 32
         # size: size

@@ -17,8 +17,7 @@ class UNetV2(UNet):
     Replace nn.Upsample with nn.ConvTranspose2d
     """
 
-    def __init__(self, in_channel=3, out_channel=3, channel=None, time_channel=256, num_classes=None, image_size=None,
-                 device="cpu", act="silu"):
+    def __init__(self, **kwargs):
         """
         Initialize the UNetV2 network
         :param in_channel: Input channel
@@ -30,7 +29,7 @@ class UNetV2(UNet):
         :param device: Device type
         :param act: Activation function
         """
-        super().__init__(in_channel, out_channel, channel, time_channel, num_classes, image_size, device, act)
+        super(UNetV2, self).__init__(**kwargs)
 
         # channel: 512 -> 128   in_channels: up1(512) = down3(256) + bot3(256)
         # size: size / 4

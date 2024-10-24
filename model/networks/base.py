@@ -8,14 +8,16 @@
 import torch
 import torch.nn as nn
 
+from config.setting import IMAGE_CHANNEL, TIME_CHANNEL, CHANNEL_LIST
+
 
 class BaseNet(nn.Module):
     """
     Base Network
     """
 
-    def __init__(self, in_channel=3, out_channel=3, channel=None, time_channel=256, num_classes=None, image_size=None,
-                 device="cpu", act="silu"):
+    def __init__(self, in_channel=IMAGE_CHANNEL, out_channel=IMAGE_CHANNEL, channel=None, time_channel=TIME_CHANNEL,
+                 num_classes=None, image_size=None, device="cpu", act="silu"):
         """
         Initialize the Base network
         :param in_channel: Input channel
@@ -31,7 +33,7 @@ class BaseNet(nn.Module):
         self.in_channel = in_channel
         self.out_channel = out_channel
         self.channel = None
-        self.init_channel(channel)
+        self.init_channel(channel=channel)
         self.time_channel = time_channel
         self.num_classes = num_classes
         self.image_size = None
@@ -54,7 +56,7 @@ class BaseNet(nn.Module):
         :return: global self.channel
         """
         if channel is None or not isinstance(channel, list):
-            self.channel = [32, 64, 128, 256, 512, 1024]
+            self.channel = CHANNEL_LIST
         else:
             self.channel = channel
 
