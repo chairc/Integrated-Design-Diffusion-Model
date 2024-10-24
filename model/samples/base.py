@@ -9,6 +9,8 @@ import math
 
 import torch
 
+from config.setting import DEFAULT_IMAGE_SIZE
+
 
 class BaseDiffusion:
     """
@@ -121,6 +123,6 @@ class BaseDiffusion:
         :return: Integer tensor of shape [image_size_h, image_size_w]
         """
         if img_size is None:
-            self.img_size = [64, 64]
+            self.img_size = DEFAULT_IMAGE_SIZE
         else:
             self.img_size = img_size

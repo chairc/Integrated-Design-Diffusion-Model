@@ -8,7 +8,7 @@
 import torch
 import torch.nn as nn
 
-from config.setting import IMAGE_CHANNEL, TIME_CHANNEL, CHANNEL_LIST
+from config.setting import IMAGE_CHANNEL, TIME_CHANNEL, CHANNEL_LIST, DEFAULT_IMAGE_SIZE
 
 
 class BaseNet(nn.Module):
@@ -80,7 +80,7 @@ class BaseNet(nn.Module):
         :param image_size: Image size
         """
         if image_size is None:
-            self.image_size = [64, 64]
+            self.image_size = DEFAULT_IMAGE_SIZE
         else:
             self.image_size = image_size
 

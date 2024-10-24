@@ -11,6 +11,8 @@ import coloredlogs
 
 import torch
 
+from config.setting import DEFAULT_IMAGE_SIZE
+
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
 
@@ -55,7 +57,7 @@ def check_image_size(image_size):
     :return: list
     """
     if image_size is None:
-        return [64, 64]
+        return DEFAULT_IMAGE_SIZE
     elif isinstance(image_size, int):
         return [image_size, image_size]
     elif isinstance(image_size, tuple) or isinstance(image_size, list):
