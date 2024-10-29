@@ -8,20 +8,28 @@
 import torch
 import torch.nn as nn
 
+from config.setting import SR_IMAGE_CHANNEL
 from model.modules.block import ResidualDenseBlock
 
 
 class SRv1(nn.Module):
     """
     Super resolution v1
+    Residual Dense Network
     """
 
-    def __init__(self, in_channel=3, out_channel=3, channel=None, n=6, scale=4, act="silu"):
+    def __init__(self, in_channel=SR_IMAGE_CHANNEL, out_channel=SR_IMAGE_CHANNEL, channel=None, n=6, scale=4,
+                 act="silu"):
         """
         The implement of RDN
         Paper: Residual Dense Network for Image Super-Resolution
         URL: https://arxiv.org/abs/1802.08797
-
+        :param in_channel: Input channel
+        :param out_channel: Output channel
+        :param channel: Middle channel
+        :param n: Number of Residual Blocks
+        :param scale: Scale of Residual Blocks
+        :param act: Activation function
         """
         super().__init__()
         # Default
