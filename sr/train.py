@@ -192,6 +192,7 @@ def train(rank=None, args=None):
             hr_images = hr_images.to(device)
             # Enable Automatic mixed precision training
             # Automatic mixed precision training
+            # Note: If your Pytorch version > 2.4.1, with torch.amp.autocast("cuda", enabled=amp):
             with autocast(enabled=amp):
                 output = model(lr_images)
                 # To calculate the MSE loss
