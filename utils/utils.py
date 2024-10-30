@@ -117,9 +117,9 @@ def delete_files(path):
     :param path: Path
     :return: None
     """
-    if os.path.exists(path=path):
-        if os.path.isfile(path=path):
-            os.remove(path=path)
+    if os.path.exists(path):
+        if os.path.isfile(path):
+            os.remove(path)
         else:
             shutil.rmtree(path=path)
         logger.info(msg=f"Folder '{path}' deleted.")

@@ -46,7 +46,8 @@ def check_path_is_exist(path):
     :param path: Path
     :return: None
     """
-    if not os.path.exists(path=path):
+    # Pytorch version > 2.0.0 error: TypeError: nt._path_exists() takes no keyword arguments
+    if not os.path.exists(path):
         raise FileNotFoundError(f"The path '{path}' does not exist.")
 
 
