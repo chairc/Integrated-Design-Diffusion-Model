@@ -220,6 +220,7 @@ def train(rank=None, args=None):
             x_time, noise = diffusion.noise_images(x=images, time=time)
             # Enable Automatic mixed precision training
             # Automatic mixed precision training
+            # Note: If your Pytorch version > 2.4.1, with torch.amp.autocast("cuda", enabled=amp):
             with autocast(enabled=amp):
                 # Unconditional training
                 if not conditional:
