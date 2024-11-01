@@ -24,7 +24,7 @@ DEFAULT_IMAGE_SIZE = [64, 64]
 
 # model.networks.sr
 SR_IMAGE_TYPE = "RGB"
-SR_IMAGE_CHANNEL = image_type_choices[IMAGE_TYPE]
+SR_IMAGE_CHANNEL = image_type_choices[SR_IMAGE_TYPE]
 
 # Data processing
 # ****** torchvision.transforms.Compose ******
