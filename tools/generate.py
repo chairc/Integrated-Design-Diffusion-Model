@@ -39,7 +39,12 @@ def generate(args):
     # Run device initializer
     device = device_initializer()
     # Enable conditional generation, sample type, network, image size, number of classes and select activation function
-    conditional, network, image_size, num_classes, act = generate_initializer(ckpt_path=weight_path, args=args,
+    conditional, network, image_size, num_classes, act = generate_initializer(ckpt_path=weight_path,
+                                                                              conditional=args.conditional,
+                                                                              image_size=args.image_size,
+                                                                              sample=args.sample, network=args.network,
+                                                                              act=args.act,
+                                                                              num_classes=args.num_classes,
                                                                               device=device)
     # Check image size format
     image_size = check_image_size(image_size=image_size)

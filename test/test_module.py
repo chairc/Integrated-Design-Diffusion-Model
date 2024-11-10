@@ -189,7 +189,9 @@ class TestModule(unittest.TestCase):
         args = parser.parse_args()
         device = device_initializer()
         ckpt_path = "/your/test/model/path/test.pt"
-        results = generate_initializer(ckpt_path=ckpt_path, args=args, device=device)
+        results = generate_initializer(ckpt_path=ckpt_path, conditional=args.conditional, image_size=args.image_size,
+                                       sample=args.sample, network=args.network, act=args.act,
+                                       num_classes=args.num_classes, device=device)
         logger.info(
             msg=f"Parser parameters: {(args.conditional, args.sample, args.network, args.image_size, args.num_classes, args.act)}")
         logger.info(msg=f"Return parameters: {results}")
