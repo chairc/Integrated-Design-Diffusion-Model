@@ -61,13 +61,19 @@ def get_version_banner():
     """
     Get version banner.
     """
-    with open(file="../config/banner.txt", mode="r", encoding="utf-8") as banner_file:
-        contents = banner_file.read()
-        print(contents)
-        print(f"===============IDDM version: {get_latest_version()}===============\n"
-              "Project Author : chairc\n"
-              "Project GitHub : https://github.com/chairc/Integrated-Design-Diffusion-Model")
-    banner_file.close()
+    print(" _____                   _\n"
+          "|  __ \                 (_)\n"
+          "| |__) |   _ _ __  _ __  _ _ __   __ _\n"
+          "|  _  / | | | '_ \| '_ \| | '_ \ / _` |\n"
+          "| | \ \ |_| | | | | | | | | | | | (_| |  _   _   _\n"
+          "|_|  \_\__,_|_| |_|_| |_|_|_| |_|\__, | (_) (_) (_)\n"
+          "                  __/ |\n"
+          "                  |___/\n"
+          "                      Are you OK?\n"
+          )
+    print(f"===============IDDM version: {get_latest_version()}===============\n"
+          "Project Author : chairc\n"
+          "Project GitHub : https://github.com/chairc/Integrated-Design-Diffusion-Model")
 
 
 if __name__ == "__main__":
