@@ -95,6 +95,7 @@ Integrated Design Diffusion Model
 │   ├── initializer.py
 │   ├── logger.py
 │   ├── lr_scheduler.py
+│   ├── processing.py
 │   └── utils.py
 ├── webui
 │   └──web.py
@@ -116,6 +117,7 @@ Integrated Design Diffusion Model
 - [x] 11. 编写可视化webui界面（2024-01-23）
 - [x] 12. 增加PLMS采样方法（2024-03-12）
 - [x] 13. 增加FID方法验证图像质量（2024-05-06）
+- [x] 14. 增加生成图像Socket部署（2024-11-12）
 
 ### 训练
 

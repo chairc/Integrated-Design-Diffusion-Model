@@ -223,12 +223,17 @@ def amp_initializer(amp, device):
     return GradScaler(enabled=amp)
 
 
-def generate_initializer(ckpt_path, args, device):
+def generate_initializer(ckpt_path, conditional, network, image_size, num_classes, act, device, **kwargs):
     """
     Check the parameters in checkpoint before generate
     :param ckpt_path: Checkpoint path
-    :param args: Generating model parameters
+    :param conditional: Conditional
+    :param network: Network
+    :param image_size: Image size
+    :param num_classes: Number of classes
+    :param act: Activation function
     :param device: GPU or CPU
+    :param kwargs: Additional arguments
     :return: [conditional, sample, network, image_size, num_classes, act]
     """
 
@@ -259,11 +264,11 @@ def generate_initializer(ckpt_path, args, device):
     # Load checkpoint before generate
     ckpt_state = torch.load(f=ckpt_path, map_location=device)
     # Valid
-    conditional = check_param_in_dict(param="conditional", dict_params=ckpt_state, args_param=args.conditional)
-    network = check_param_in_dict(param="network", dict_params=ckpt_state, args_param=args.network)
-    image_size = check_param_in_dict(param="image_size", dict_params=ckpt_state, args_param=args.image_size)
-    num_classes = check_param_in_dict(param="num_classes", dict_params=ckpt_state, args_param=args.num_classes)
-    act = check_param_in_dict(param="act", dict_params=ckpt_state, args_param=args.act)
+    conditional = check_param_in_dict(param="conditional", dict_params=ckpt_state, args_param=conditional)
+    network = check_param_in_dict(param="network", dict_params=ckpt_state, args_param=network)
+    image_size = check_param_in_dict(param="image_size", dict_params=ckpt_state, args_param=image_size)
+    num_classes = check_param_in_dict(param="num_classes", dict_params=ckpt_state, args_param=num_classes)
+    act = check_param_in_dict(param="act", dict_params=ckpt_state, args_param=act)
     logger.info(msg=f"[{device}]: Successfully checked parameters.")
     return conditional, network, image_size, num_classes, act
 
