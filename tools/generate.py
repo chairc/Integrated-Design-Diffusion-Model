@@ -26,84 +26,106 @@ logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
 
 
-def generate(args):
+class Generator:
     """
-    Generating
-    :param args: Input parameters
-    :return: None
+    Diffusion model generator
     """
-    logger.info(msg="Start generation.")
-    logger.info(msg=f"Input params: {args}")
-    # Weight path
-    weight_path = args.weight_path
-    # Run device initializer
-    device = device_initializer()
-    # Enable conditional generation, sample type, network, image size, number of classes and select activation function
-    conditional, network, image_size, num_classes, act = generate_initializer(ckpt_path=weight_path,
-                                                                              conditional=args.conditional,
-                                                                              image_size=args.image_size,
-                                                                              sample=args.sample, network=args.network,
-                                                                              act=args.act,
-                                                                              num_classes=args.num_classes,
-                                                                              device=device)
-    # Check image size format
-    image_size = check_image_size(image_size=image_size)
-    # Generation name
-    generate_name = args.generate_name
-    # Sample
-    sample = args.sample
-    # Number of images
-    num_images = args.num_images
-    # Use ema
-    use_ema = args.use_ema
-    # Format of images
-    image_format = args.image_format
-    # Saving path
-    result_path = os.path.join(args.result_path, str(time.time()))
-    # Check and create result path
-    check_and_create_dir(result_path)
-    # Network
-    Network = network_initializer(network=network, device=device)
-    # Initialize the diffusion model
-    diffusion = sample_initializer(sample=sample, image_size=image_size, device=device)
-    # Is it necessary to expand the image?
-    input_image_size = check_image_size(image_size=args.image_size)
-    if image_size == input_image_size:
-        new_image_size = None
-    else:
-        new_image_size = input_image_size
-    # Initialize model
-    if conditional:
-        # Generation class name
-        class_name = args.class_name
-        # classifier-free guidance interpolation weight
-        cfg_scale = args.cfg_scale
-        model = Network(num_classes=num_classes, device=device, image_size=image_size, act=act).to(device)
-        load_ckpt(ckpt_path=weight_path, model=model, device=device, is_train=False, is_use_ema=use_ema,
-                  conditional=conditional)
-        if class_name == -1:
-            y = torch.arange(num_classes).long().to(device)
-            num_images = num_classes
+    def __init__(self, gen_args, deploy=False):
+        """
+        Generating init
+        :param gen_args: Input parameters
+        :param deploy: App deploy
+        :return: None
+        """
+        self.args = gen_args
+        self.deploy = deploy
+
+        logger.info(msg="Start generation.")
+        logger.info(msg=f"Input params: {self.args}")
+        # Weight path
+        self.weight_path = self.args.weight_path
+        # Run device initializer
+        self.device = device_initializer()
+        # Enable conditional generation, sample type, network, image size,
+        # number of classes and select activation function
+        gen_results = generate_initializer(ckpt_path=self.weight_path, conditional=self.args.conditional,
+                                           image_size=self.args.image_size, sample=self.args.sample,
+                                           network=self.args.network, act=self.args.act,
+                                           num_classes=self.args.num_classes, device=self.device)
+        self.conditional, self.network, self.image_size, self.num_classes, self.act = gen_results
+        # Check image size format
+        self.image_size = check_image_size(image_size=self.image_size)
+        # Generation name
+        self.generate_name = self.args.generate_name
+        # Sample
+        self.sample = self.args.sample
+        # Number of images
+        self.num_images = self.args.num_images
+        # Use ema
+        self.use_ema = self.args.use_ema
+        # Format of images
+        self.image_format = self.args.image_format
+        # Saving path
+        self.result_path = os.path.join(self.args.result_path, str(time.time()))
+        # Check and create result path
+        if not deploy:
+            check_and_create_dir(self.result_path)
+        # Network
+        self.Network = network_initializer(network=self.network, device=self.device)
+        # Initialize the diffusion model
+        self.diffusion = sample_initializer(sample=self.sample, image_size=self.image_size, device=self.device)
+        # Is it necessary to expand the image?
+        self.input_image_size = check_image_size(image_size=self.args.image_size)
+        if self.image_size == self.input_image_size:
+            self.new_image_size = None
         else:
-            y = torch.Tensor([class_name] * num_images).long().to(device)
-        x = diffusion.sample(model=model, n=num_images, labels=y, cfg_scale=cfg_scale)
-    else:
-        model = Network(device=device, image_size=image_size, act=act).to(device)
-        load_ckpt(ckpt_path=weight_path, model=model, device=device, is_train=False, conditional=conditional)
-        x = diffusion.sample(model=model, n=num_images)
-    # If there is no path information, it will only be displayed
-    # If it exists, it will be saved to the specified path and displayed
-    if result_path == "" or result_path is None:
-        plot_images(images=x)
-    else:
-        save_images(images=x, path=os.path.join(result_path, f"{generate_name}.{image_format}"))
-        save_one_image_in_images(images=x, path=result_path, generate_name=generate_name, image_size=new_image_size,
-                                 image_format=image_format)
-        plot_images(images=x)
-    logger.info(msg="Finish generation.")
+            self.new_image_size = self.input_image_size
+        # Initialize model
+        if self.conditional:
+            # Generation class name
+            self.class_name = self.args.class_name
+            # classifier-free guidance interpolation weight
+            self.cfg_scale = self.args.cfg_scale
+            self.model = self.Network(num_classes=self.num_classes, device=self.device, image_size=self.image_size,
+                                      act=self.act).to(self.device)
+            load_ckpt(ckpt_path=self.weight_path, model=self.model, device=self.device, is_train=False,
+                      is_use_ema=self.use_ema, conditional=self.conditional)
+        else:
+            self.model = self.Network(device=self.device, image_size=self.image_size, act=self.act).to(self.device)
+            load_ckpt(ckpt_path=self.weight_path, model=self.model, device=self.device, is_train=False,
+                      conditional=self.conditional)
+
+    def generate(self, index=0):
+        """
+        Generate images
+        :param index: Image index
+        """
+        if self.conditional:
+            if self.class_name == -1:
+                y = torch.arange(self.num_classes).long().to(self.device)
+                self.num_images = self.num_classes
+            else:
+                y = torch.Tensor([self.class_name] * self.num_images).long().to(self.device)
+            x = self.diffusion.sample(model=self.model, n=self.num_images, labels=y, cfg_scale=self.cfg_scale)
+        else:
+            x = self.diffusion.sample(model=self.model, n=self.num_images)
+
+        # If deploy app is true, return the generate results
+        if self.deploy:
+            return x
+
+        if self.result_path == "" or self.result_path is None:
+            plot_images(images=x)
+        else:
+            save_name = f"{self.generate_name}_{index}"
+            save_images(images=x, path=os.path.join(self.result_path, f"{save_name}.{self.image_format}"))
+            save_one_image_in_images(images=x, path=self.result_path, generate_name=save_name,
+                                     image_size=self.new_image_size, image_format=self.image_format)
+            plot_images(images=x)
+        logger.info(msg="Finish generation.")
 
 
-if __name__ == "__main__":
+def init_generate_args():
     # Generating model parameters
     # required: Must be set
     # needed: Set as needed
@@ -170,7 +192,14 @@ if __name__ == "__main__":
     # [Warn] Version <= 1.1.1 need to be equal to model's num classes, version > 1.1.1 can set whatever you want
     parser.add_argument("--num_classes", type=int, default=10)
 
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    # Init generate args
+    args = init_generate_args()
     # Get version banner
     get_version_banner()
-    generate(args)
+    gen_model = Generator(gen_args=args, deploy=False)
+    for i in range(2):
+        gen_model.generate(index=i)
