@@ -14,6 +14,7 @@ import torch
 import unittest
 import logging
 import coloredlogs
+from PIL import Image
 
 from torchvision.utils import save_image
 from torchsummary import summary
@@ -26,6 +27,7 @@ from utils.initializer import device_initializer, network_initializer, sample_in
 from utils.lr_scheduler import set_cosine_lr
 from utils.check import check_is_nan, check_image_size
 from utils.checkpoint import separate_ckpt_weights
+from utils.processing import image_to_base64, base64_to_image
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
@@ -286,6 +288,22 @@ class TestModule(unittest.TestCase):
         assert res2 == [64, 32]
         assert res3 == [64, 32]
         assert res4 == [64, 64]
+
+    def test_image_to_base64_to_image(self):
+        """
+        Test image to base64 to image
+        """
+        root_path = "./noising_test"
+        image_path = os.path.join(root_path, "landscape/noising_test.jpg")
+        save_path = "./image&base64/test_image&base64.jpg"
+        image = Image.open(fp=image_path)
+        base64_stream = image_to_base64(image=image)
+        # logger.info(msg=f"{base64_stream}")
+        re_image = base64_to_image(base64_stream=base64_stream)
+        re_image.save(fp=save_path)
+        for x in range(image.width):
+            for y in range(image.height):
+                assert image.getpixel((x, y)) == re_image.getpixel((x, y))
 
 
 if __name__ == "__main__":
