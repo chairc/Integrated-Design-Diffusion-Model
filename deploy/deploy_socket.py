@@ -14,13 +14,13 @@ import logging
 import threading
 import coloredlogs
 
-import torch
+from torchvision import transforms
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from model.networks.unet import UNet
+from tools.generate import init_generate_args, Generator
 from utils.utils import save_images
-from utils.initializer import device_initializer, sample_initializer
-from utils.checkpoint import load_ckpt
+from utils.processing import image_to_base64
+from config.version import get_version_banner
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
@@ -32,57 +32,56 @@ def generate(parse_json_data):
     :param parse_json_data: Parse send json message
     :return: JSON
     """
-    logger.info(msg="[Client]: Start generation.")
-    re_json = {"image": []}
-    # Get the incoming json value information
-    # Enable conditional generation
-    conditional = parse_json_data["conditional"]
     # Sample type
     sample = parse_json_data["sample"]
     # Image size
     image_size = parse_json_data["image_size"]
     # Number of images
     num_images = parse_json_data["num_images"] if parse_json_data["num_images"] >= 1 else 1
-    # Activation function
-    act = parse_json_data["act"]
     # Weight path
     weight_path = parse_json_data["weight_path"]
-    # Saving path
     result_path = parse_json_data["result_path"]
-    # Run device initializer
-    device = device_initializer()
-    # Initialize the diffusion model
-    diffusion = sample_initializer(sample=sample, image_size=image_size, device=device)
-    # Initialize model
-    if conditional:
-        # Number of classes
-        num_classes = parse_json_data["num_classes"]
-        # Generation class name
-        class_name = parse_json_data["class_name"]
-        # classifier-free guidance interpolation weight
-        cfg_scale = parse_json_data["cfg_scale"]
-        model = UNet(num_classes=num_classes, device=device, image_size=image_size, act=act).to(device)
-        load_ckpt(ckpt_path=weight_path, model=model, device=device, is_train=False)
-        y = torch.Tensor([class_name]).long().to(device)
-    else:
-        model = UNet(device=device, image_size=image_size, act=act).to(device)
-        load_ckpt(ckpt_path=weight_path, model=model, device=device, is_train=False)
-        y = None
-        cfg_scale = None
+    # Return mode, base64 or url
+    re_type = parse_json_data["type"]
+
+    logger.info(msg="[Client]: Start generation.")
+    # Type is url or base64
+    re_json = {"image": [], "type": str(re_type)}
+
+    # Init args
+    args = init_generate_args()
+    args.sample = sample
+    args.image_size = image_size
+    args.weight_path = weight_path
+    args.result_path = result_path
+    # Only generate 1 image per
+    args.num_images = 1
+
+    # Init model
+    model = Generator(gen_args=args, deploy=True)
+
+    logger.info(msg=f"[Client]: A total of {num_images} images are generated.")
     # Generate images by diffusion models
     for i in range(num_images):
+        logger.info(msg=f"[Client]: Current generate {i + 1} of {num_images}.")
         # Generation name
         generate_name = uuid.uuid1()
-        x = diffusion.sample(model=model, n=1, labels=y, cfg_scale=cfg_scale)
-        # TODO: Convert to base64
-        # Save images
-        save_images(images=x, path=os.path.join(result_path, f"{generate_name}.jpg"))
-        # Append return json
-        image_json = {"image_id": str(generate_name),
-                      "image_name": f"{generate_name}.jpg"}
+        x = model.generate(index=i)
+        # Select mode
+        if re_type == "base64":
+            x = transforms.ToPILImage()(x[0])
+            re_x = image_to_base64(image=x)
+        else:
+            # Save images
+            re_x = os.path.join(result_path, f"{generate_name}.png")
+            save_images(images=x, path=re_x)
+        # Append return json in data
+        image_json = {"image_id": str(generate_name), "type": re_type,
+                      "image": str(re_x)}
+
         re_json["image"].append(image_json)
     logger.info(msg="[Client]: Finish generation.")
-    return re_json
+    return json.dumps(re_json, ensure_ascii=False)
 
 
 def main():
@@ -122,6 +121,7 @@ class ServerThreading(threading.Thread):
     """
     ServerThreading class
     """
+
     def __init__(self, client_socket, address, receive_size=1024 * 1024, encoding="utf-8"):
         """
         ServerThreading initialization
@@ -178,4 +178,5 @@ class ServerThreading(threading.Thread):
 
 
 if __name__ == "__main__":
+    get_version_banner()
     main()

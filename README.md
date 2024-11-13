@@ -53,6 +53,9 @@ Integrated Design Diffusion Model
 │       ├── class_1
 │       ├── class_2
 │       └── class_3
+├── deploy
+│   ├── deploy_socket.py
+│   └── deploy_server.py
 ├── model
 │   ├── modules
 │   │   ├── activation.py
@@ -84,7 +87,6 @@ Integrated Design Diffusion Model
 │   │   └── noise
 │   └── test_module.py
 ├── tools
-│   ├── deploy.py
 │   ├── FID_calculator.py
 │   ├── FID_calculator_plus.py
 │   ├── generate.py
@@ -119,6 +121,7 @@ Integrated Design Diffusion Model
 - [x] 12. Adding PLMS Sampling Method. (2024-03-12)
 - [x] 13. Adding FID calculator to verify image quality. (2024-05-06)
 - [x] 14. Adding the deployment of image-generating Sockets
+- [x] 14. Adding the deployment of image-generating Sockets and Web server. (2024-11-13)
 
 ### Training
 

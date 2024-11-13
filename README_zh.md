@@ -52,6 +52,9 @@ Integrated Design Diffusion Model
 │       ├── class_1
 │       ├── class_2
 │       └── class_3
+├── deploy
+│   ├── deploy_socket.py
+│   └── deploy_server.py
 ├── model
 │   ├── modules
 │   │   ├── activation.py
@@ -83,7 +86,6 @@ Integrated Design Diffusion Model
 │   │   └── noise
 │   └── test_module.py
 ├── tools
-│   ├── deploy.py
 │   ├── FID_calculator.py
 │   ├── FID_calculator_plus.py
 │   ├── generate.py
@@ -118,6 +120,7 @@ Integrated Design Diffusion Model
 - [x] 12. 增加PLMS采样方法（2024-03-12）
 - [x] 13. 增加FID方法验证图像质量（2024-05-06）
 - [x] 14. 增加生成图像Socket部署（2024-11-12）
+- [x] 14. 增加生成图像Socket和网站服务部署（2024-11-13）
 
 ### 训练
 
