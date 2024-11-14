@@ -9,6 +9,7 @@ import argparse
 import json
 import os
 import socket
+import requests
 
 import torch
 import unittest
@@ -129,15 +130,15 @@ class TestModule(unittest.TestCase):
         print(net)
         summary(model=net, input_data=[x, t, y])
 
-    def test_send_message(self):
+    def test_send_message_to_socket(self):
         """
-        Test local send message to deploy.py
+        Test local send message to deploy_socket.py
         :return: None
         """
-        test_json = {"conditional": True, "sample": "ddpm", "image_size": 64, "num_images": 2, "act": "gelu",
+        test_json = {"sample": "ddpm", "image_size": 64, "num_images": 2, "type": "base64",
                      "weight_path": "/your/test/model/path/test.pt",
-                     "result_path": "/your/results/deploy",
-                     "num_classes": 6, "class_name": 1, "cfg_scale": 3}
+                     "result_path": "/your/results/deploy", "class_name": 0,
+                     }
         logger.info(msg=f"Test json: {test_json}")
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # host = "127.0.1.1"
@@ -150,6 +151,19 @@ class TestModule(unittest.TestCase):
         client_socket.send("-iccv-over".encode("utf-8"))
         client_socket.close()
         logger.info(msg="Send message successfully!")
+
+    def test_send_message_to_web(self):
+        url = "http://127.0.0.1:12341/api/generate/df"
+        # Define the parameters of the request, using JSON format here
+        data = {
+            "sample": "ddim", "image_size": 64, "num_images": 2, "type": "url",
+            "weight_path": "/your/test/model/path/test.pt",
+            "result_path": "/your/results/deploy", "class_name": 0,
+        }
+
+        # Send a POST request
+        response = requests.post(url, json=data)
+        logger.info(msg=f"Get return message => {json.loads(response.content.decode('utf-8'))}")
 
     def test_separate_ckpt_weights(self):
         """
