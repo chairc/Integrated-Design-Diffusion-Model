@@ -120,7 +120,6 @@ Integrated Design Diffusion Model
 - [x] 11. Write visual webui interface. (2024-01-23)
 - [x] 12. Adding PLMS Sampling Method. (2024-03-12)
 - [x] 13. Adding FID calculator to verify image quality. (2024-05-06)
-- [x] 14. Adding the deployment of image-generating Sockets
 - [x] 14. Adding the deployment of image-generating Sockets and Web server. (2024-11-13)
 
 ### Training
