@@ -493,4 +493,4 @@ If this project is used for experiments in an academic paper, where possible ple
 
 [@Pytorch](https://pytorch.org/)
 
-<img src="assets/Pycharm.png" alt="Pycharm" style="zoom:25%;" /><img src="assets/Python.png" alt="Python" style="zoom:25%;" /><img src="assets/pytorch.png" alt="pytorch" style="zoom:25%;" />
+![JetBrains logo](assets/jetbrains.svg)
