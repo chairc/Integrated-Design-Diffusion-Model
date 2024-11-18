@@ -70,17 +70,17 @@ def prepare_image(images):
     return images
 
 
-def post_image(images):
+def post_image(images, device="cpu"):
     """
     Post images
     :param images: Images
+    :param device: CPU or GPU
     :return: new_images
     """
-    new_images = torch.empty(size=images.shape, dtype=torch.uint8)
-    for i in range(images.shape[0]):
-        new_image = (images[i].clamp(-1, 1) + 1) / 2
-        new_image = (new_image * 255).to(torch.uint8)
-        new_images[i] = new_image
+    mean_tensor = torch.tensor(data=MEAN).view(1, -1, 1, 1).to(device)
+    std_tensor = torch.tensor(data=STD).view(1, -1, 1, 1).to(device)
+    new_images = images * std_tensor + mean_tensor
+    new_images = (new_images * 255).to(torch.uint8)
     return new_images
 
 
