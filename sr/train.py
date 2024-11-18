@@ -242,9 +242,9 @@ def train(rank=None, args=None):
                                  global_step=epoch * len_val_dataloader + i)
             val_loss_list.append(val_loss.item())
             # Save super resolution image and high resolution image
-            lr_images = post_image(lr_images)
-            sr_images = post_image(output)
-            hr_images = post_image(hr_images)
+            lr_images = post_image(lr_images, device=device)
+            sr_images = post_image(output, device=device)
+            hr_images = post_image(hr_images, device=device)
             image_name = time.time()
             for lr_index, lr_image in enumerate(lr_images):
                 save_images(images=lr_image, path=os.path.join(save_val_vis_dir, f"{i}_{image_name}_{lr_index}_lr.jpg"))
