@@ -13,7 +13,7 @@ import torch
 import torchvision
 import logging
 
-from config.setting import MEAN, STD
+from config.setting import SR_MEAN, SR_STD
 from utils.checkpoint import load_ckpt
 from utils.initializer import sr_network_initializer, device_initializer
 from utils.utils import check_and_create_dir
@@ -64,7 +64,7 @@ def prepare_image(images):
         # To Tensor Format
         torchvision.transforms.ToTensor(),
         # For standardization, the mean and standard deviation
-        torchvision.transforms.Normalize(mean=MEAN, std=STD)
+        torchvision.transforms.Normalize(mean=SR_MEAN, std=SR_STD)
     ])
     images = transforms(images).unsqueeze(dim=0)
     return images
@@ -77,8 +77,8 @@ def post_image(images, device="cpu"):
     :param device: CPU or GPU
     :return: new_images
     """
-    mean_tensor = torch.tensor(data=MEAN).view(1, -1, 1, 1).to(device)
-    std_tensor = torch.tensor(data=STD).view(1, -1, 1, 1).to(device)
+    mean_tensor = torch.tensor(data=SR_MEAN).view(1, -1, 1, 1).to(device)
+    std_tensor = torch.tensor(data=SR_STD).view(1, -1, 1, 1).to(device)
     new_images = images * std_tensor + mean_tensor
     new_images = (new_images * 255).to(torch.uint8)
     return new_images

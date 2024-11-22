@@ -9,7 +9,7 @@ import math
 
 import torch
 
-from config.setting import DEFAULT_IMAGE_SIZE
+from config.setting import DEFAULT_IMAGE_SIZE, IMAGE_CHANNEL
 
 
 class BaseDiffusion:
@@ -34,6 +34,8 @@ class BaseDiffusion:
         self.img_size = None
         self.device = device
         self.schedule_name = schedule_name
+        # Image channel, RGB or GRAY
+        self.image_channel = IMAGE_CHANNEL
 
         # Init image size
         self.init_sample_image_size(img_size=img_size)

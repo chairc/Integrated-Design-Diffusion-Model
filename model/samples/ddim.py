@@ -60,8 +60,8 @@ class DDIMDiffusion(BaseDiffusion):
         logger.info(msg=f"DDIM Sampling {n} new images....")
         model.eval()
         with torch.no_grad():
-            # Input dim: [n, 3, img_size_h, img_size_w]
-            x = torch.randn((n, 3, self.img_size[0], self.img_size[1])).to(self.device)
+            # Input dim: [n, img_channel, img_size_h, img_size_w]
+            x = torch.randn((n, self.image_channel, self.img_size[0], self.img_size[1])).to(self.device)
             # The list of current time and previous time
             for i, p_i in tqdm(self.time_step):
                 # Time step, creating a tensor of size n

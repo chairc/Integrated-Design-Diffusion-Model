@@ -51,8 +51,8 @@ class DDPMDiffusion(BaseDiffusion):
         logger.info(msg=f"DDPM Sampling {n} new images....")
         model.eval()
         with torch.no_grad():
-            # Input dim: [n, 3, img_size_h, img_size_w]
-            x = torch.randn((n, 3, self.img_size[0], self.img_size[1])).to(self.device)
+            # Input dim: [n, img_channel, img_size_h, img_size_w]
+            x = torch.randn((n, self.image_channel, self.img_size[0], self.img_size[1])).to(self.device)
             # 'reversed(range(1, self.noise_steps)' iterates over a sequence of integers in reverse
             for i in tqdm(reversed(range(1, self.noise_steps)), position=0, total=self.noise_steps - 1):
                 # Time step, creating a tensor of size n
