@@ -31,6 +31,11 @@ SR_IMAGE_CHANNEL = image_type_choices[SR_IMAGE_TYPE]
 # RandomResizedCrop
 RANDOM_RESIZED_CROP_SCALE = (0.8, 1.0)
 # Mean in datasets
-MEAN = (0.485, 0.456, 0.406)
+MEAN = (0.5, 0.5, 0.5)
 # Std in datasets
 STD = (0.229, 0.224, 0.225)
+STD = (0.5, 0.5, 0.5)
+# Sr mean in datasets
+SR_MEAN = (0.485, 0.456, 0.406)
+# Sr std in datasets
+SR_STD = (0.229, 0.224, 0.225)
