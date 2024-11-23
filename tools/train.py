@@ -321,7 +321,7 @@ def main(args):
         train(args=args)
 
 
-if __name__ == "__main__":
+def init_train_args():
     # Training model parameters
     # required: Must be set
     # needed: Set as needed
@@ -432,7 +432,11 @@ if __name__ == "__main__":
     # classifier-free guidance interpolation weight, users can better generate model effect (recommend)
     parser.add_argument("--cfg_scale", type=int, default=3)
 
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    args = init_train_args()
     # Get version banner
     get_version_banner()
     main(args)
