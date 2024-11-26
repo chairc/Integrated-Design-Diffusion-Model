@@ -23,7 +23,7 @@ from torch.cuda.amp import autocast
 from tqdm import tqdm
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from config.choices import loss_func_choices, sr_network_choices, optim_choices
+from config.choices import sr_network_choices, optim_choices
 from config.setting import MASTER_ADDR, MASTER_PORT, EMA_BETA
 from config.version import get_version_banner
 from model.modules.ema import EMA
@@ -31,6 +31,7 @@ from utils.initializer import device_initializer, seed_initializer, sr_network_i
     lr_initializer, amp_initializer, loss_initializer
 from utils.utils import save_images, setup_logging, save_train_logging, check_and_create_dir
 from utils.checkpoint import load_ckpt, save_ckpt
+from utils.metrics import compute_psnr, compute_ssim
 from sr.interface import post_image
 from sr.dataset import get_sr_dataset
 
@@ -63,8 +64,8 @@ def train(rank=None, args=None):
     num_workers = args.num_workers
     # Select optimizer
     optim = args.optim
-    # Select activation function
-    loss_func = args.loss
+    # Loss function only mse
+    loss_func = "mse"
     # Select activation function
     act = args.act
     # Learning rate
@@ -115,7 +116,9 @@ def train(rank=None, args=None):
     # Dataloader
     train_dataloader = get_sr_dataset(image_size=image_size, dataset_path=train_dataset_path, batch_size=batch_size,
                                       num_workers=num_workers, distributed=distributed)
-    val_dataloader = get_sr_dataset(image_size=image_size, dataset_path=val_dataset_path, batch_size=batch_size,
+    # Quick eval batch size
+    val_batch_size = batch_size if args.quick_eval else 1
+    val_dataloader = get_sr_dataset(image_size=image_size, dataset_path=val_dataset_path, batch_size=val_batch_size,
                                     num_workers=num_workers, distributed=distributed)
     # Resume training
     resume = args.resume
@@ -141,9 +144,16 @@ def train(rank=None, args=None):
         # Parameter 'ckpt_path' is None in the train mode
         if ckpt_path is None:
             ckpt_path = os.path.join(results_dir, "ckpt_last.pt")
+        # The best model
+        ckpt_best_path = os.path.join(results_dir, "ckpt_best.pt")
+        # Get model state
         start_epoch = load_ckpt(ckpt_path=ckpt_path, model=model, device=device, optimizer=optimizer,
                                 is_distributed=distributed)
+        # Get best ssim and psnr
+        best_ssim, best_psnr = load_ckpt(ckpt_path=ckpt_best_path, device=device, ckpt_type="sr")
         logger.info(msg=f"[{device}]: Successfully load resume model checkpoint.")
+        logger.info(msg=f"[{device}]: The start epoch is {start_epoch}, best ssim is {best_ssim}, "
+                        f"best psnr is {best_psnr}.")
     else:
         # Pretrain mode
         if pretrain:
@@ -151,7 +161,10 @@ def train(rank=None, args=None):
             load_ckpt(ckpt_path=pretrain_path, model=model, device=device, is_pretrain=pretrain,
                       is_distributed=distributed)
             logger.info(msg=f"[{device}]: Successfully load pretrain model checkpoint.")
-        start_epoch = 0
+        # Init
+        start_epoch, best_ssim, best_psnr = 0, 0, 0
+        logger.info(msg=f"[{device}]: The start epoch is {start_epoch}, best ssim is {best_ssim}, "
+                        f"best psnr is {best_psnr}.")
     # Set harf-precision
     scaler = amp_initializer(amp=amp, device=device)
     # Loss function
@@ -180,7 +193,7 @@ def train(rank=None, args=None):
         save_val_vis_dir = os.path.join(results_vis_dir, str(epoch))
         check_and_create_dir(save_val_vis_dir)
         # Initialize images and labels
-        train_loss_list, val_loss_list = [], []
+        train_loss_list, val_loss_list, ssim_list, psnr_list = [], [], [], []
 
         # Train
         model.train()
@@ -241,6 +254,17 @@ def train(rank=None, args=None):
             tb_logger.add_scalar(tag=f"[{device}]: Val loss({loss_func})", scalar_value=val_loss.item(),
                                  global_step=epoch * len_val_dataloader + i)
             val_loss_list.append(val_loss.item())
+
+            # Metric
+            ssim_res = compute_ssim(image_outputs=output, image_sources=hr_images)
+            psnr_res = compute_psnr(mse=val_loss.item())
+            tb_logger.add_scalar(tag=f"[{device}]: SSIM({loss_func})", scalar_value=ssim_res,
+                                 global_step=epoch * len_val_dataloader + i)
+            tb_logger.add_scalar(tag=f"[{device}]: PSNR({loss_func})", scalar_value=psnr_res,
+                                 global_step=epoch * len_val_dataloader + i)
+            ssim_list.append(ssim_res)
+            psnr_list.append(psnr_res)
+
             # Save super resolution image and high resolution image
             lr_images = post_image(lr_images, device=device)
             sr_images = post_image(output, device=device)
@@ -252,9 +276,14 @@ def train(rank=None, args=None):
                 save_images(images=sr_image, path=os.path.join(save_val_vis_dir, f"{i}_{image_name}_{sr_index}_sr.jpg"))
             for hr_index, hr_image in enumerate(hr_images):
                 save_images(images=hr_image, path=os.path.join(save_val_vis_dir, f"{i}_{image_name}_{hr_index}_hr.jpg"))
-        # Loss per epoch
-        tb_logger.add_scalar(tag=f"[{device}]: Val loss", scalar_value=sum(val_loss_list) / len(val_loss_list),
-                             global_step=epoch)
+        # Loss, ssim and psnr per epoch
+        avg_val_loss = sum(val_loss_list) / len(val_loss_list)
+        avg_ssim = sum(ssim_list) / len(ssim_list)
+        avg_psnr = sum(psnr_list) / len(psnr_list)
+        tb_logger.add_scalar(tag=f"[{device}]: Val loss", scalar_value=avg_val_loss, global_step=epoch)
+        tb_logger.add_scalar(tag=f"[{device}]: Avg ssim", scalar_value=avg_ssim, global_step=epoch)
+        tb_logger.add_scalar(tag=f"[{device}]: Avg psnr", scalar_value=avg_psnr, global_step=epoch)
+        logger.info(f"Val loss: {avg_val_loss}, SSIM: {avg_ssim}, PSNR: {avg_psnr}")
         logger.info(msg="Finish val mode.")
 
         # Saving and validating models in the main process
@@ -265,10 +294,18 @@ def train(rank=None, args=None):
             ckpt_model = model.state_dict()
             ckpt_ema_model = ema_model.state_dict()
             ckpt_optimizer = optimizer.state_dict()
+            # Save the best model
+            if (avg_ssim > best_ssim) and (avg_psnr > best_psnr):
+                is_best = True
+                best_ssim = avg_ssim
+                best_psnr = avg_psnr
+            else:
+                is_best = False
             # Save checkpoint
             save_ckpt(epoch=epoch, save_name=save_name, ckpt_model=ckpt_model, ckpt_ema_model=ckpt_ema_model,
                       ckpt_optimizer=ckpt_optimizer, results_dir=results_dir, save_model_interval=save_model_interval,
-                      start_model_interval=start_model_interval, image_size=image_size, network=network, act=act)
+                      save_model_interval_epochs=None, start_model_interval=start_model_interval, image_size=image_size,
+                      network=network, act=act, is_sr=True, is_best=is_best, ssim=avg_ssim, psnr=avg_psnr)
         logger.info(msg=f"[{device}]: Finish epoch {epoch}:")
 
         # Synchronization during distributed training
@@ -331,12 +368,13 @@ if __name__ == "__main__":
     # Enable automatic mixed precision training (needed)
     # Effectively reducing GPU memory usage may lead to lower training accuracy and results.
     parser.add_argument("--amp", default=False, action="store_true")
+    # It is recommended that the batch size of the evaluation data be set to 1,
+    # which can accurately evaluate each picture and reduce the evaluation error of each group of pictures.
+    # If you want to evaluate quickly, set it to batch size.
+    parser.add_argument("--quick_eval", default=False, action="store_true")
     # Set optimizer (needed)
     # Option: adam/adamw/sgd
     parser.add_argument("--optim", type=str, default="sgd", choices=optim_choices)
-    # Set loss function (needed)
-    # Option: mse/l1/huber/smooth_l1
-    parser.add_argument("--loss", type=str, default="mse", choices=loss_func_choices)
     # Set activation function (needed)
     # Option: gelu/silu/relu/relu6/lrelu
     parser.add_argument("--act", type=str, default="silu")
