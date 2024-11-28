@@ -9,10 +9,12 @@ torch_summary==1.4.5
 tqdm==4.65.0
 pytorch_fid==0.3.0
 flask==3.0.3
+tensorboardX==2.6.1
 
-# If that fails use: pip install torch==1.13.0+cu116 torchvision==0.14.0+cu116 -f https://download.pytorch.org/whl/torch_stable.html
+# If you want to download gpu version
+# Please use: pip install torch==1.13.0+cu116 torchvision==0.14.0+cu116 -f https://download.pytorch.org/whl/torch_stable.html
 # About more torch information please click: https://pytorch.org/get-started/previous-versions/#linux-and-windows-25
 # More versions please click: https://pytorch.org/get-started/previous-versions
 # [Note] torch versions must >= 1.9.0
-torch==1.13.0+cu116
-torchvision==0.14.0+cu116
+torch>=1.9.0 # More info: https://pytorch.org/get-started/locally/ (recommended)
+torchvision>=0.10.0 # More info: https://pytorch.org/get-started/locally/ (recommended)
