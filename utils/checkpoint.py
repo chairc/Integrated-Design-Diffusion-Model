@@ -14,12 +14,14 @@ import coloredlogs
 
 from collections import OrderedDict
 
+from utils.check import check_path_is_exist
+
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
 
 
-def load_ckpt(ckpt_path, model, device, optimizer=None, is_train=True, is_pretrain=False, is_distributed=False,
-              is_use_ema=False, conditional=False):
+def load_ckpt(ckpt_path, model=None, device="cpu", optimizer=None, is_train=True, is_pretrain=False,
+              is_distributed=False, is_use_ema=False, conditional=False, ckpt_type="df"):
     """
     Load checkpoint weight files
     :param ckpt_path: Checkpoint path
@@ -31,10 +33,17 @@ def load_ckpt(ckpt_path, model, device, optimizer=None, is_train=True, is_pretra
     :param is_distributed:  Whether to distribute training
     :param is_use_ema:  Whether to use ema model or model
     :param conditional:  Whether conditional training
+    :param ckpt_type: Type of checkpoint
     :return: start_epoch + 1
     """
+    # Check path
+    check_path_is_exist(path=ckpt_path)
     # Load checkpoint
     ckpt_state = torch.load(f=ckpt_path, map_location=device)
+    # Load the best model params as ssim and psnr
+    if ckpt_type == "sr":
+        logger.info(msg=f"[{device}]: Successfully load the best sr checkpoint from {ckpt_path}.")
+        return ckpt_state["ssim"], ckpt_state["psnr"]
     if is_pretrain:
         logger.info(msg=f"[{device}]: Successfully load pretrain checkpoint, path is '{ckpt_path}'.")
     else:
@@ -148,6 +157,16 @@ def save_ckpt(epoch, save_name, ckpt_model, ckpt_ema_model, ckpt_optimizer, resu
         "num_classes": num_classes if conditional else 1, "classes_name": classes_name, "conditional": conditional,
         "image_size": image_size, "sample": sample, "network": network, "act": act,
     }
+    # Check is sr mode
+    if kwargs.get("is_sr", False):
+        best_ssim, best_psnr = kwargs.get("ssim"), kwargs.get("psnr")
+        ckpt_state["ssim"] = best_ssim
+        ckpt_state["psnr"] = best_psnr
+        # Check is the best sr model?
+        if kwargs.get("is_best", False):
+            last_filename = os.path.join(results_dir, f"ckpt_best.pt")
+            torch.save(obj=ckpt_state, f=last_filename)
+            logger.info(msg=f"Save the ckpt_best.pt, best ssim is {best_ssim}, best psnr is {best_psnr}")
     # Save last checkpoint, it must be done
     last_filename = os.path.join(results_dir, f"ckpt_last.pt")
     torch.save(obj=ckpt_state, f=last_filename)
