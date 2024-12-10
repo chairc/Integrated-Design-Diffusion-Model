@@ -7,6 +7,9 @@
 """
 from config.choices import image_type_choices
 
+# Temp files download path
+DOWNLOAD_FILE_TEMP_PATH = "../.temp/download_files"
+
 # Train
 MASTER_ADDR = "localhost"
 MASTER_PORT = "12345"

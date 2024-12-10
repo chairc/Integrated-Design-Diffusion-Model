@@ -11,6 +11,8 @@ import coloredlogs
 
 import torch
 
+from urllib.parse import urlparse
+
 from config.setting import DEFAULT_IMAGE_SIZE
 
 logger = logging.getLogger(__name__)
@@ -69,3 +71,36 @@ def check_image_size(image_size):
             raise ValueError(f"Invalid 'image_size' tuple and list format: {image_size}")
     else:
         raise TypeError(f"Invalid 'image_size' format: {image_size}")
+
+
+def check_url(url=""):
+    """
+    Check the url is valid
+    :param url: Url
+    """
+    try:
+        # Parse URL
+        parsed_url = urlparse(url)
+        # Check that all parts of the parsed URL make sense
+        # Here we mainly check whether the network location part (netloc) is empty
+        # And whether the URL scheme is a common network protocol (such as http, https, etc.)
+        if all([parsed_url.scheme, parsed_url.netloc]):
+            file_name = parsed_url.path.split("/")[-1]
+            logger.info(msg=f"The URL: {url} is legal.")
+            return file_name
+        else:
+            raise ValueError(f"Invalid 'url' format: {url}")
+    except ValueError:
+        # If a Value Error exception is thrown when parsing the URL, it means that the URL format is illegal.
+        raise ValueError("Invalid 'url' format.")
+
+
+def check_pretrain_path(pretrain_path):
+    """
+    Check the pretrain path is valid
+    :param pretrain_path: Pretrain path
+    :return: Boolean
+    """
+    if pretrain_path is None or not os.path.exists(pretrain_path):
+        return True
+    return False

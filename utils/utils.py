@@ -11,11 +11,17 @@ import shutil
 import time
 
 import coloredlogs
+import requests
 import torch
 import torchvision
 
 from PIL import Image
 from matplotlib import pyplot as plt
+from tqdm import tqdm
+
+from config.model_list import pretrain_model_choices
+from config.setting import DOWNLOAD_FILE_TEMP_PATH
+from utils.check import check_url
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
@@ -148,3 +154,89 @@ def check_and_create_dir(path):
     """
     logger.info(msg=f"Check and create folder '{path}'.")
     os.makedirs(name=path, exist_ok=True)
+
+
+def download_files(url_list=None, save_path=None):
+    """
+    Downloads files
+    :param url_list: url list
+    :param save_path: Save path
+    """
+    # Temp download path
+    if save_path is None:
+        download_file_temp_path = DOWNLOAD_FILE_TEMP_PATH
+    else:
+        download_file_temp_path = save_path
+    # Check and create
+    check_and_create_dir(path=download_file_temp_path)
+    # Check url list
+    for url in url_list:
+        logger.info(msg=f"Current download url is {url}")
+        file_name = check_url(url=url)
+
+        # Send the request with stream=True
+        with requests.get(url, stream=True) as response:
+            # Check for HTTP errors
+            response.raise_for_status()
+            # Get the total size of the file (if possible)
+            total_size_in_bytes = int(response.headers.get("content-length", 0))
+            block_size = 1024  # 1KB for each read
+            progress_bar = tqdm(total=total_size_in_bytes, unit="B", unit_scale=True, desc=f"Downloading {file_name}")
+
+            # Open the file in binary write mode
+            with open(os.path.join(download_file_temp_path, file_name), "wb") as file:
+                for data in response.iter_content(block_size):
+                    # Write the data to the file
+                    file.write(data)
+                    # Update the progress bar
+                    progress_bar.update(len(data))
+            # Close the progress bar
+            progress_bar.close()
+            logger.info(msg=f"Current {url} is download successfully.")
+    logger.info(msg="Everything is downloaded.")
+
+
+def download_model_pretrain_model(pretrain_type="df", network="unet", image_size=64, **kwargs):
+    """
+    Download pre-trained model in GitHub repository
+    :param pretrain_type: Type of pre-trained model
+    :param network: Network
+    :param image_size: Image size
+    :param kwargs: Other parameters
+    :return new_pretrain_path
+    """
+    # Check image size
+    if isinstance(image_size, int):
+        image_size = str(image_size)
+    else:
+        raise ValueError("Official pretrain model's image size must be int, such as 64 or 120.")
+    # Download diffusion pretrain model
+    if pretrain_type == "df":
+        df_type = kwargs.get("df_type", "default")
+        conditional_type = "conditional" if kwargs.get("df_type", True) else "unconditional"
+        # Download pretrain model
+        if df_type == "default":
+            pretrain_model_url = pretrain_model_choices[pretrain_type][df_type][network][conditional_type][image_size]
+        # Download sample model.
+        # If use cifar-10 dataset, you can set cifar10 pretrain model
+        elif df_type == "exp":
+            model_name = kwargs.get("model_name", "cifar10")
+            pretrain_model_url = pretrain_model_choices[pretrain_type][df_type][network][conditional_type][image_size][
+                model_name]
+        else:
+            raise TypeError(f"Diffusion model type '{df_type}' is not supported.")
+    # Download super resolution pretrain model
+    elif pretrain_type == "sr":
+        act = kwargs.get("act", "silu")
+        pretrain_model_url = pretrain_model_choices[pretrain_type][network][act][image_size]
+    else:
+        raise TypeError(f"Pretrain type '{pretrain_type}' is not supported.")
+
+    # Download model
+    download_files(url_list=[pretrain_model_url])
+    logger.info(msg=f"Current pretrain model path '{pretrain_model_url}' is download successfully.")
+    # Get file name
+    parts = pretrain_model_url.split("/")
+    filename = parts[-1]
+    new_pretrain_path = os.path.join(DOWNLOAD_FILE_TEMP_PATH, filename)
+    return new_pretrain_path
