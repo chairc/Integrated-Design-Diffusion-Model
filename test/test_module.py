@@ -23,7 +23,7 @@ from matplotlib import pyplot as plt
 
 from config.choices import parse_image_size_type
 from utils.dataset import get_dataset, set_resize_images_size
-from utils.utils import delete_files
+from utils.utils import delete_files, download_files, download_model_pretrain_model
 from utils.initializer import device_initializer, network_initializer, sample_initializer, generate_initializer
 from utils.lr_scheduler import set_cosine_lr
 from utils.check import check_is_nan, check_image_size
@@ -318,6 +318,22 @@ class TestModule(unittest.TestCase):
         for x in range(image.width):
             for y in range(image.height):
                 assert image.getpixel((x, y)) == re_image.getpixel((x, y))
+
+    def test_download_files(self):
+        """
+        Test download files
+        """
+        url = ["https://github.com/chairc/Integrated-Design-Diffusion-Model/archive/refs/tags/v1.1.6.zip"]
+        url_list = ["https://github.com/chairc/Integrated-Design-Diffusion-Model/archive/refs/tags/v1.1.6.zip",
+                    "https://github.com/chairc/Integrated-Design-Diffusion-Model/archive/refs/tags/v1.1.6.tar.gz"]
+        download_files(url_list=url)
+        download_files(url_list=url_list)
+
+    def test_download_pretrain_model(self):
+        """
+        Test download pretrain model
+        """
+        download_model_pretrain_model(pretrain_type="df", network="unet", conditional=True, image_size=64)
 
 
 if __name__ == "__main__":
