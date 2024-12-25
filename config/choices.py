@@ -24,6 +24,7 @@ lr_func_choices = ["linear", "cosine", "warmup_cosine"]
 image_format_choices = ["png", "jpg", "jpeg", "webp", "tif"]
 noise_schedule_choices = ["linear", "cosine", "sqrt_linear", "sqrt"]
 loss_func_choices = ["mse", "l1", "huber", "smooth_l1"]
+sr_loss_func_choices = ["mse"]
 sr_network_choices = ["srv1"]
 
 image_type_choices = {"RGB": 3, "GRAY": 1}
