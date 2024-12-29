@@ -28,17 +28,24 @@
     <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/forks" target="_blank">
         <img alt="GitHub forks" src="https://img.shields.io/github/forks/chairc/Integrated-Design-Diffusion-Model?color=eb6ea5">
     </a>
+    <a href="https://gitee.com/chairc/Integrated-Design-Diffusion-Model">
+        <img src="https://gitee.com/chairc/Integrated-Design-Diffusion-Model/badge/star.svg?theme=blue" />
+    </a>
+    <a href="https://gitee.com/chairc/Integrated-Design-Diffusion-Model">
+        <img src="https://gitee.com/chairc/Integrated-Design-Diffusion-Model/badge/fork.svg?theme=blue" />
+    </a>
 </div>
-
 [中文文档](README_zh.md)
 
-### About the Model
+
+
+### 0 About the Model
 
 This diffusion model is based on the classic DDPM (Denoising Diffusion Probabilistic Models), DDIM (Denoising Diffusion Implicit Models) and PLMS (Pseudo Numerical Methods for Diffusion Models on Manifolds) presented in the papers "[Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)", "[Denoising Diffusion Implicit Models](https://arxiv.org/abs/2010.02502)" and "[Pseudo Numerical Methods for Diffusion Models on Manifolds](https://openreview.net/forum?id=PlKWVd2yBkY)".
 
 We named this project IDDM: Integrated Design Diffusion Model. It aims to reproduce the model, write trainers and generators, and improve and optimize certain algorithms and network structures. This repository is **actively maintained**.
 
-If you have any questions, please check [**the existing issues**](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues/9) first. If the issue persists, feel free to open a new one for assistance, or you can contact me via email at chenyu1998424@gmail.com or chairc1998@163.com.
+If you have any questions, please check [**the existing issues**](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues/9) first. If the issue persists, feel free to open a new one for assistance, or you can contact me via email at chenyu1998424@gmail.com or chairc1998@163.com. **If you think my project is interesting, please give me a ⭐⭐⭐Star⭐⭐⭐ :)**
 
 **Repository Structure**
 
@@ -46,6 +53,7 @@ If you have any questions, please check [**the existing issues**](https://github
 Integrated Design Diffusion Model
 ├── config
 │   ├── choices.py
+│   ├── model_list.py
 │   ├── setting.py
 │   └── version.py
 ├── datasets
@@ -70,11 +78,15 @@ Integrated Design Diffusion Model
 │   │   ├── base.py
 │   │   ├── cspdarkunet.py
 │   │   └── unet.py
-│   └── samples
+│   ├── samples
+│   │   ├── base.py
+│   │   ├── ddim.py
+│   │   ├── ddpm.py
+│   │   └── plms.py
+│   └── trainers
 │       ├── base.py
-│       ├── ddim.py
-│       ├── ddpm.py
-│       └── plms.py
+│       ├── dm.py
+│       └── sr.py
 ├── results
 ├── sr
 │   ├── dataset.py
@@ -98,37 +110,49 @@ Integrated Design Diffusion Model
 │   ├── initializer.py
 │   ├── logger.py
 │   ├── lr_scheduler.py
+│   ├── metrics.py
 │   ├── processing.py
 │   └── utils.py
 ├── webui
 │   └──web.py
-└── weight
+└── weights
 ```
 
-### Next Steps
 
-- [x] 1. Implement cosine learning rate optimization. (2023-07-31)
-- [x] 2. Use a more advanced U-Net network model. (2023-11-09)
-- [x] 3. Generate larger-sized images. (2023-11-09)
-- [x] 4. Implement multi-GPU distributed training. (2023-07-15)
-- [x] 5. Enable fast deployment and API on cloud servers. (2023-08-28)
-- [x] 6. Adding DDIM Sampling Method. (2023-08-03)
-- [x] 7. Support other image generation. (2023-09-16)
-- [x] 8. Low-resolution generated images for super-resolution enhancement.[~~Super resolution model, the effect is uncertain.~~] (2024-02-18)
-- [ ] 9. Use Latent Diffusion and reduce GPU memory usage
-- [x] 10. Reconstruct the overall structure of the model (2023-12-06)
-- [x] 11. Write visual webui interface. (2024-01-23)
-- [x] 12. Adding PLMS Sampling Method. (2024-03-12)
-- [x] 13. Adding FID calculator to verify image quality. (2024-05-06)
-- [x] 14. Adding the deployment of image-generating Sockets and Web server. (2024-11-13)
 
-### Training
+### 1 Next Steps
 
-#### Note
+- [x] [2023-07-15] Adding implement multi-GPU distributed training.
+- [x] [2023-07-31] Adding implement cosine learning rate optimization.
+- [x] [2023-08-03] Adding DDIM Sampling Method.
+- [x] [2023-08-28] Adding fast deployment and API on cloud servers.
+- [x] [2023-09-16] Support other image generation.
+- [x] [2023-11-09] Adding a more advanced U-Net network model.
+- [x] [2023-11-09] Support generate larger-sized images.
+- [x] [2023-12-06] Reconstruct the overall structure of the model.
+- [x] [2024-01-23] Adding visual webui training interface.
+- [x] [2024-02-18] Support low-resolution generated images for super-resolution enhancement.[~~Super resolution model, the effect is uncertain~~]
+- [x] [2024-03-12] Adding PLMS Sampling Method.
+- [x] [2024-05-06] Adding FID calculator to verify image quality.
+- [x] [2024-06-11] Adding visual webui generate interface.
+- [x] [2024-07-07] Support custom images length and width input.
+- [x] [2024-11-13] Adding the deployment of image-generating Sockets and Web server.
+- [x] [2024-11-26] Adding PSNR and SSIM calculators to verify super resolution image quality.
+- [x] [2024-12-10] Adding pretrain model download.
+- [x] [2024-12-25] Reconstruct the overall structure of the trainer.
+- [ ] [Maybe 2025-01-31] Adding the deployment of Docker and image.
+- [ ] [To be determined] Reconstruct the project by Baidu PaddlePaddle.
+- [ ] [To be determined] ~~Use Latent Diffusion and reduce GPU memory usage~~
 
-The training GPU implements environment for this README is as follows: models are trained and tested with the NVIDIA RTX 3060 GPU with 6GB memory, NVIDIA RTX 2080Ti GPU with 11GB memory and NVIDIA RTX 6000 (×2) GPU with 24GB (total 48GB, distributed training) memory. **The above GPUs can all be trained normally**.
 
-#### Start Your First Training (Using cifar10 as an Example, Single GPU Mode)
+
+### 2 Training
+
+**Note before training**
+
+The training GPU implements environment for this README is as follows: models are trained and tested with the NVIDIA RTX 3060 GPU with 6GB memory, NVIDIA RTX 2080Ti GPU with 11GB memory and NVIDIA RTX 6000 (×2) GPU with 22GB (total 44GB, distributed training) memory. **The above GPUs can all be trained normally**.
+
+#### 2.1 Start Your First Training (Using cifar10 as an Example, Single GPU Mode)
 
 1. **Import the Dataset**
 
@@ -183,7 +207,9 @@ The training GPU implements environment for this README is as follows: models ar
 
 **↓↓↓↓↓↓↓↓↓↓The following is an explanation of various training methods and detailed training parameters↓↓↓↓↓↓↓↓↓↓**
 
-#### Normal Training
+#### 2.2 Normal Training
+
+##### 2.2.1 Command Training
 
 1. Take the `landscape` dataset as an example and place the dataset files in the `datasets` folder. The overall path of the dataset should be `/your/path/datasets/landscape`, the images path should be `/your/path/datasets/landscape/images`, and the image files should be located at `/your/path/datasets/landscape/images/*.jpg`.
 
@@ -238,7 +264,45 @@ The training GPU implements environment for this README is as follows: models ar
    python train.py --pretrain --pretrain_path /your/pretrain/path/model.pt --sample ddpm --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
 
-#### Distributed Training
+##### 2.2.2 Python Training
+
+```python
+from model.trainers.dm import DMTrainer
+from tools.train import init_train_args
+
+# Function 1
+# Initialize arguments
+args = init_train_args()
+# Customize your parameters, or you can configure them by entering the init_train_args method
+setattr(args, "conditional", True)  # True for conditional training, False for non-conditional training
+setattr(args, "sample", "ddpm")  # Sampler
+setattr(args, "network", "unet")  # Deep learning network
+setattr(args, "epochs", 300)  # Number of iterations
+setattr(args, "image_size", 64)  # Image size
+setattr(args, "result_path", "/your/dataset/path/")  # Dataset path
+setattr(args, "result_path", "/your/save/path/")  # Result path
+setattr(args, "vis", True)  # Enable visualization
+# ...
+# OR use args["parameter_name"] = "your setting"
+# Start training
+DMTrainer(args=args).train()
+
+# Function 2
+args = init_train_args()
+# Input args and update some params
+DMTrainer(args=args, dataset_path="/your/dataset/path/").train()
+
+# Function 3
+DMTrainer(
+    conditional=True, sample="ddpm", dataset_path="/your/dataset/path/",
+    network="unet", epochs=300, image_size=64, result_path="/your/save/path/",
+    vis=True, # Any params...
+).train()
+```
+
+#### 2.3 Distributed Training
+
+##### 2.3.1 Command Training
 
 1. The basic configuration is similar to regular training, but note that enabling distributed training requires setting `--distributed`. To prevent arbitrary use of distributed training, we have several conditions for enabling distributed training, such as `args.distributed`, `torch.cuda.device_count() > 1`, and `torch.cuda.is_available()`.
 
@@ -262,7 +326,66 @@ The training GPU implements environment for this README is as follows: models ar
 
 ![IDDM Distributed Training](assets/IDDM_training.png)
 
-#### Training Parameters
+##### 2.3.2 Python Training
+
+```python
+from torch import multiprocessing as mp
+from model.trainers.dm import DMTrainer
+from tools.train import init_train_args
+
+# Function 1
+# Initialize arguments
+args = init_train_args()
+gpus = torch.cuda.device_count()
+# Customize your parameters, or you can configure them by entering the init_train_args method
+setattr(args, "distributed", True)  # Enable distributed training
+setattr(args, "world_size", 2)  # Number of distributed nodes
+setattr(args, "conditional", True)  # True for conditional training, False for non-conditional training
+setattr(args, "sample", "ddpm")  # Sampler
+setattr(args, "network", "unet")  # Deep learning network
+setattr(args, "epochs", 300)  # Number of iterations
+setattr(args, "image_size", 64)  # Image size
+setattr(args, "result_path", "/your/dataset/path/")  # Dataset path
+setattr(args, "result_path", "/your/save/path/")  # Result path
+setattr(args, "vis", True)  # Enable visualization
+# ...
+# OR use args["parameter_name"] = "your setting"
+# Start training
+mp.spawn(DMTrainer(args=args, dataset_path="/your/dataset/path/").train, nprocs=gpus)
+
+# Function 2
+args = init_train_args()
+# Input args and update some params
+mp.spawn(DMTrainer(args=args, dataset_path="/your/dataset/path/").train, nprocs=gpus)
+
+# Function 3
+mp.spawn(DMTrainer(
+    conditional=True, sample="ddpm", dataset_path="/your/dataset/path/",
+    network="unet", epochs=300, image_size=64, result_path="/your/save/path/",
+    vis=True, # Any params...
+).train, nprocs=gpus)
+```
+
+#### 2.4 Model Repositories
+
+**Note**: The model repo will continue to update pre-trained models.
+
+##### 2.4.1 Diffusion Model Pre-training Model
+
+|          Model Name           | Conditional |   Datasets    | Model Size |                        Download Link                         |
+| :---------------------------: | :---------: | :-----------: | :--------: | :----------------------------------------------------------: |
+|   `celebahq-120-weight.pt`    |      ✓      |   CelebA-HQ   |  120×120   | [Download](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/celebahq-120-weight.pt) |
+| `animate-ganyu-120-weight.pt` |      ✓      | Animate-ganyu |  120×120   | [Download](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/animate-ganyu-120-weight.pt) |
+|      `neu-120-weight.pt`      |      ✓      |    NEU-DET    |  120×120   | [Download](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/cifar10-64-weight.pt) |
+|    `neu-cls-64-weight.pt`     |      ✓      |    NEU-CLS    |   64×64    | [Download](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.7/neu-cls-64-weight.pt) |
+|     `cifar-64-weight.pt`      |      ✓      |   Cifar-10    |   64×64    | [Download](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/cifar10-64-weight.pt) |
+|  `animate-face-64-weight.pt`  |      ✓      | Animate-face  |   64×64    | [Download](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/animate-face-64-weight.pt) |
+
+##### 2.4.2 Super Resolution Pre-trained Model
+
+Coming soon :-)
+
+#### 2.5 Training Parameters
 
 **Parameter Explanation**
 
@@ -305,7 +428,11 @@ The training GPU implements environment for this README is as follows: models ar
 
 
 
-### Generation
+### 3 Generation
+
+#### 3.1 Start Your First Generation
+
+##### 3.1.1 Command Generation
 
 1. Open the `generate.py` file and locate the `--weight_path` parameter. Modify the path in the parameter to the path of your model weights, for example `/your/path/weight/model.pt`.
 
@@ -337,7 +464,26 @@ The training GPU implements environment for this README is as follows: models ar
 
 3. Wait for the generation process to complete.
 
-#### Generation Parameters
+##### 3.1.2 Python generation
+
+```python
+from tools.generate import Generator, init_generate_args
+
+# Initialize generation arguments, or you can configure them by entering the init_generate_args method
+args = init_generate_args()
+# Customize your parameters
+args["weight_path"] = "/your/model/path/model.pt"
+args["result_path"] = "/your/save/path/"
+# ...
+# args["parameter_name"] = "your setting"
+gen_model = Generator(gen_args=args, deploy=False)
+# Number of generations
+num_images = 2
+for i in range(num_images):
+    gen_model.generate(index=i)
+```
+
+#### 3.2 Generation Parameters
 
 **Parameter Explanation**
 
@@ -350,6 +496,7 @@ The training GPU implements environment for this README is as follows: models ar
 | --num_images    |             | Number of generated images      | int  | Number of images to generate                                 |
 | --weight_path   |             | Path to model weights           | str  | Path to the model weights file, required for network generation |
 | --result_path   |             | Save path                       | str  | Path to save the generated images                            |
+| --use_gpu       |             | Set the use GPU                 | int  | Set the use GPU in generate, input is GPU's id               |
 | --sample        |             | Sampling method                 | str  | Set the sampling method type, currently supporting DDPM and DDIM. **(No need to set for models after version 1.1.1)** |
 | --network       |             | Training network                | str  | Set the training network, currently supporting UNet, CSPDarkUNet. **(No need to set for models after version 1.1.1)** |
 | --act           |             | Activation function             | str  | Activation function selection. Currently supports gelu, silu, relu, relu6 and lrelu. If you do not set the same activation function as the model, mosaic phenomenon will occur. **(No need to set for models after version 1.1.1)** |
@@ -357,80 +504,43 @@ The training GPU implements environment for this README is as follows: models ar
 | --class_name    |      ✓      | Class name                      | int  | Index of the class to generate images. if class name is `-1`, the model would output one image per class. |
 | --cfg_scale     |      ✓      | Classifier-free guidance weight | int  | Weight for classifier-free guidance interpolation, for better generation model performance |
 
-### Result
 
-We conducted training on the following four datasets using the `DDPM` sampler with an image size of `64*64`. we also enabled `conditional`, using the `gelu` activation function, `linear` learning function and  setting learning rate to `3e-4`. The datasets are `cifar10`, `NEUDET`, `NRSD-MN`, and `WOOD` in `300` epochs. The results are shown in the following figure:
 
-#### cifar10
+### 4 Result
 
-![cifar_244_ema](assets/cifar_244_ema.jpg)
+We conducted training on the following 5 datasets using the `DDPM` sampler with an image size of `64*64`. we also enabled `conditional`, using the `gelu` activation function, `linear` learning function and  setting learning rate to `3e-4`. The datasets are `cifar10`, `NEUDET`, `NRSD-MN`, `WOOD` and `Animate face` in `300` epochs. The results are shown in the following figure:
 
-![cifar_294_ema](assets/cifar_294_ema.jpg)
+#### 4.1 cifar10 dataset
 
-#### NEUDET
+![cifar_244_ema](assets/cifar_244_ema.jpg)![cifar_294_ema](assets/cifar_294_ema.jpg)
 
-![neudet_290_ema](assets/neudet_290_ema.jpg)
+#### 4.2 NEU-DET dataset
 
-![neudet_270_ema](assets/neudet_270_ema.jpg)
+![neudet_290_ema](assets/neudet_290_ema.jpg)![neudet_270_ema](assets/neudet_270_ema.jpg)![neudet_276_ema](assets/neudet_276_ema.jpg)![neudet_265_ema](assets/neudet_265_ema.jpg)![neudet_240_ema](assets/neudet_240_ema.jpg)![neudet_244_ema](assets/neudet_244_ema.jpg)![neudet_245_ema](assets/neudet_245_ema.jpg)![neudet_298_ema](assets/neudet_298_ema.jpg)
 
-![neudet_276_ema](assets/neudet_276_ema.jpg)
+#### 4.3 NRSD dataset
 
-![neudet_265_ema](assets/neudet_265_ema.jpg)
+![nrsd_180_ema](assets/nrsd_180_ema.jpg)![nrsd_188_ema](assets/nrsd_188_ema.jpg)![nrsd_194_ema](assets/nrsd_194_ema.jpg)![nrsd_203_ema](assets/nrsd_203_ema.jpg)![nrsd_210_ema](assets/nrsd_210_ema.jpg)![nrsd_217_ema](assets/nrsd_217_ema.jpg)![nrsd_218_ema](assets/nrsd_218_ema.jpg)![nrsd_248_ema](assets/nrsd_248_ema.jpg)![nrsd_276_ema](assets/nrsd_276_ema.jpg)![nrsd_285_ema](assets/nrsd_285_ema.jpg)![nrsd_295_ema](assets/nrsd_295_ema.jpg)![nrsd_298_ema](assets/nrsd_298_ema.jpg)
 
-![neudet_240_ema](assets/neudet_240_ema.jpg)
-
-![neudet_244_ema](assets/neudet_244_ema.jpg)
-
-![neudet_298_ema](assets/neudet_298_ema.jpg)
-
-#### NRSD
-
-![nrsd_180_ema](assets/nrsd_180_ema.jpg)
-
-![nrsd_188_ema](assets/nrsd_188_ema.jpg)
-
-![nrsd_194_ema](assets/nrsd_194_ema.jpg)
-
-![nrsd_203_ema](assets/nrsd_203_ema.jpg)
-
-![nrsd_210_ema](assets/nrsd_210_ema.jpg)
-
-![nrsd_217_ema](assets/nrsd_217_ema.jpg)
-
-![nrsd_218_ema](assets/nrsd_218_ema.jpg)
-
-![nrsd_248_ema](assets/nrsd_248_ema.jpg)
-
-![nrsd_276_ema](assets/nrsd_276_ema.jpg)
-
-![nrsd_285_ema](assets/nrsd_285_ema.jpg)
-
-![nrsd_298_ema](assets/nrsd_298_ema.jpg)
-
-#### WOOD
+#### 4.4 WOOD dataset
 
 ![wood_495](assets/wood_495.jpg)
 
-#### Animate face (~~JUST FOR FUN~~)
+#### 4.5 Animate face dataset (~~JUST FOR FUN~~)
 
-![model_428_ema](assets/animate_face_428_ema.jpg)
+![model_428_ema](assets/animate_face_428_ema.jpg)![model_440_ema](assets/animate_face_440_ema.jpg)![model_488_ema](assets/animate_face_488_ema.jpg)![model_497_ema](assets/animate_face_497_ema.jpg)![model_499_ema](assets/animate_face_499_ema.jpg)![model_459_ema](assets/animate_face_459_ema.jpg)
 
-![model_488_ema](assets/animate_face_488_ema.jpg)
-
-![model_497_ema](assets/animate_face_497_ema.jpg)
-
-![model_499_ema](assets/animate_face_499_ema.jpg)
-
-![model_459_ema](assets/animate_face_459_ema.jpg)
-
-#### Base on the 64×64 model to generate 160×160 (every size) images
+#### 4.6 Base on the 64×64 model to generate 160×160 (every size) images (Industrial surface defect generation only)
 
 Of course, based on the 64×64 U-Net model, we generate 160×160 `NEU-DET` images in the `generate.py` file (single output, each image occupies 21GB of GPU memory). **Attention this [[issues]](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues/9#issuecomment-1886422210)**! If it's an image with defect textures where the features are not clear, generating a large size directly might not have these issues, such as in NRSD or NEU datasets. However, if the image contains a background with specific distinctive features, you may need to use super-resolution or resizing to increase the size, for example, in Cifar10, CelebA-HQ, etc. **If you really need large-sized images, you can directly train with large pixel images if there is enough GPU memory.** Detailed images are as follows:
 
 ![model_499_ema](assets/neu160_0.jpg)![model_499_ema](assets/neu160_1.jpg)![model_499_ema](assets/neu160_2.jpg)![model_499_ema](assets/neu160_3.jpg)![model_499_ema](assets/neu160_4.jpg)![model_499_ema](assets/neu160_5.jpg)
 
 
-### Evaluation
+
+### 5 Evaluation
+
+#### 5.1 Start Your First Evaluation
 
 1. During the data preparation stage, use `generate.py` to create the dataset. The amount and size of the generated dataset should be similar to the training set (**Note**: The training set required for evaluation should be resized to the size used during training, which is the `image_size`. For example, if the training set path is `/your/path/datasets/landscape` with an image size of **256**, and the generated set path is `/your/path/generate/landscape` with a size of 64, use the `resize` method to convert the images in the training set path to **64**. The new evaluation training set path will be `/your/new/path/datasets/landscape`).
 
@@ -452,7 +562,7 @@ Of course, based on the 64×64 U-Net model, we generate 160×160 `NEU-DET` image
    python FID_calculator_plus.py /your/input/path /your/output/path --save_stats
    ```
 
-#### Evaluation Parameters
+#### 5.2 Evaluation Parameters
 
 | **Parameter Name** | Usage                       | Parameter Type | Explanation                                                  |
 | ------------------ | --------------------------- | :------------: | ------------------------------------------------------------ |
@@ -463,7 +573,9 @@ Of course, based on the 64×64 U-Net model, we generate 160×160 `NEU-DET` image
 | --save_stats       | Save stats                  |      bool      | Generate npz archives from the sample directory              |
 | --use_gpu          | Specify GPU                 |      int       | Generally used to set the specific GPU for training, input the GPU number |
 
-### About Citation
+
+
+### 6 About Citation
 
 If this project is used for experiments in an academic paper, where possible please cite our project appropriately and we appreciate this. The specific citation format can be found at **[this website](https://zenodo.org/records/10866128)**.
 
@@ -479,7 +591,11 @@ If this project is used for experiments in an academic paper, where possible ple
 }
 ```
 
-### Acknowledgements
+**Citation detail**: ![image-20241124174339833](assets/image-citation.png)
+
+
+
+### 7 Acknowledgements
 
 **People**：
 
@@ -488,9 +604,5 @@ If this project is used for experiments in an academic paper, where possible ple
 **Organization**：
 
 [@JetBrains](https://www.jetbrains.com/)
-
-[@Python](https://www.python.org/)
-
-[@Pytorch](https://pytorch.org/)
 
 ![JetBrains logo](assets/jetbrains.svg)

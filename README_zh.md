@@ -27,17 +27,25 @@
     <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/forks" target="_blank">
         <img alt="GitHub forks" src="https://img.shields.io/github/forks/chairc/Integrated-Design-Diffusion-Model?color=eb6ea5">
     </a>
+    <a href="https://gitee.com/chairc/Integrated-Design-Diffusion-Model">
+        <img src="https://gitee.com/chairc/Integrated-Design-Diffusion-Model/badge/star.svg?theme=blue" />
+    </a>
+    <a href="https://gitee.com/chairc/Integrated-Design-Diffusion-Model">
+        <img src="https://gitee.com/chairc/Integrated-Design-Diffusion-Model/badge/fork.svg?theme=blue" />
+    </a>
 </div>
 
 [English Document](README.md)
 
-### 关于模型
+
+
+### 0 关于模型
 
 该扩散模型为经典的ddpm、ddim和plms，来源于论文《**[Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)**》、《**[Denoising Diffusion Implicit Models](https://arxiv.org/abs/2010.02502)**》和《**[Pseudo Numerical Methods for Diffusion Models on Manifolds](https://openreview.net/forum?id=PlKWVd2yBkY)**》。
 
 我们将此项目命名为IDDM: Integrated Design Diffusion Model，中文名为集成设计扩散模型。在此项目中进行模型复现、训练器和生成器编写、部分算法和网络结构的改进与优化，该仓库**持续维护**。
 
-如果有任何问题，请先到此[**issue**](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues/9)进行问题查询，若无法解决可以加入我们的QQ群：949120343、开启新issue提问或联系我的邮箱：chenyu1998424@gmail.com/chairc1998@163.com
+如果有任何问题，请先到此[**issue**](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues/9)进行问题查询，若无法解决可以加入我们的QQ群：949120343、开启新issue提问或联系我的邮箱：chenyu1998424@gmail.com/chairc1998@163.com。**如果你认为我的项目有意思请给我点一颗⭐⭐⭐Star⭐⭐⭐吧。**
 
 **本仓库整体结构**
 
@@ -45,6 +53,7 @@
 Integrated Design Diffusion Model
 ├── config
 │   ├── choices.py
+│   ├── model_list.py
 │   ├── setting.py
 │   └── version.py
 ├── datasets
@@ -69,11 +78,15 @@ Integrated Design Diffusion Model
 │   │   ├── base.py
 │   │   ├── cspdarkunet.py
 │   │   └── unet.py
-│   └── samples
+│   ├── samples
+│   │   ├── base.py
+│   │   ├── ddim.py
+│   │   ├── ddpm.py
+│   │   └── plms.py
+│   └── trainers
 │       ├── base.py
-│       ├── ddim.py
-│       ├── ddpm.py
-│       └── plms.py
+│       ├── dm.py
+│       └── sr.py
 ├── results
 ├── sr
 │   ├── dataset.py
@@ -97,37 +110,49 @@ Integrated Design Diffusion Model
 │   ├── initializer.py
 │   ├── logger.py
 │   ├── lr_scheduler.py
+│   ├── metrics.py
 │   ├── processing.py
 │   └── utils.py
 ├── webui
 │   └──web.py
-└── weight
+└── weights
 ```
 
-### 接下来要做
 
-- [x] 1. 新增cosine学习率优化（2023-07-31）
-- [x] 2. 使用效果更优的U-Net网络模型（2023-11-09）
-- [x] 3. 更大尺寸的生成图像（2023-11-09）
-- [x] 4. 多卡分布式训练（2023-07-15）
-- [x] 5. 云服务器快速部署和接口（2023-08-28）
-- [x] 6. 增加DDIM采样方法（2023-08-03）
-- [x] 7. 支持其它图像生成（2023-09-16）
-- [x] 8. 低分辨率生成图像进行超分辨率增强[~~超分模型效果待定~~]（2024-02-18）
-- [ ] 9. 使用Latent方式降低显存消耗
-- [x] 10. 重构model整体结构（2023-12-06）
-- [x] 11. 编写可视化webui界面（2024-01-23）
-- [x] 12. 增加PLMS采样方法（2024-03-12）
-- [x] 13. 增加FID方法验证图像质量（2024-05-06）
-- [x] 14. 增加生成图像Socket和网站服务部署（2024-11-13）
 
-### 训练
+### 1 接下来要做
 
-#### 注意
+- [x] [2023-07-15] 增加多卡分布式训练
+- [x] [2023-07-31] 增加cosine学习率优化
+- [x] [2023-08-03] 增加DDIM采样方法
+- [x] [2023-08-28] 云服务器快速部署和接口
+- [x] [2023-09-16] 支持其它图像生成
+- [x] [2023-11-09] 增加效果更优的U-Net网络模型
+- [x] [2023-11-09] 支持更大尺寸的生成图像
+- [x] [2023-12-06] 重构model整体结构
+- [x] [2024-01-23] 增加可视化webui训练界面
+- [x] [2024-02-18] 支持低分辨率生成图像进行超分辨率增强[~~超分模型效果待定~~]
+- [x] [2024-03-12] 增加PLMS采样方法
+- [x] [2024-05-06] 增加FID方法验证图像质量
+- [x] [2024-06-11] 增加可视化webui生成界面
+- [x] [2024-07-07] 支持自定义图像长宽输入
+- [x] [2024-11-13] 增加生成图像Socket和网站服务部署
+- [x] [2024-11-26] 增加PSNR和SSIM方法验证超分图像质量
+- [x] [2024-12-10] 增加预训练模型下载
+- [x] [2024-12-25] 重构训练器结构
+- [ ] [预计2025-01-31] 增加Docker部署与镜像
+- [ ] [待定] 重构项目利用百度飞桨框架
+- [ ] [待定] ~~使用Latent方式降低显存消耗~~
 
-本自README的训练GPU环境如下：使用具有6GB显存的NVIDIA RTX 3060显卡、具有11GB显存的NVIDIA RTX 2080Ti显卡和具有24GB（总计48GB，分布式训练）显存的NVIDIA RTX 6000（×2）显卡对模型进行训练和测试。**上述GPU均可正常训练**。
 
-#### 开始你的第一个训练（以cifar10为例，模式单卡）
+
+### 2 训练
+
+**训练前需注意**
+
+本自README的训练GPU环境如下：使用具有6GB显存的NVIDIA RTX 3060显卡、具有11GB显存的NVIDIA RTX 2080Ti显卡和具有22GB（总计44GB，分布式训练）显存的NVIDIA RTX 6000（×2）显卡对模型进行训练和测试。**上述GPU均可正常训练**。
+
+#### 2.1 开始你的第一个训练（以cifar10为例，模式单卡）
 
 1. **导入数据集** 
 
@@ -181,7 +206,9 @@ Integrated Design Diffusion Model
 
 **↓↓↓↓↓↓↓↓↓↓下方为多种训练方式、训练详细参数讲解↓↓↓↓↓↓↓↓↓↓**
 
-#### 普通训练
+#### 2.2 普通训练
+
+##### 2.2.1 命令训练
 
 1. 以`landscape`数据集为例，将数据集文件放入`datasets`文件夹中，该数据集的总路径如下`/your/path/datasets/landscape`，图片存放在`/your/path/datasets/landscape/images`，数据集图片路径如下`/your/path/datasets/landscape/images/*.jpg`
 
@@ -234,7 +261,45 @@ Integrated Design Diffusion Model
    python train.py --pretrain --pretrain_path /your/pretrain/path/model.pt --sample ddpm --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
 
-#### 分布式训练
+##### 2.2.2 Python脚本训练
+
+```python
+from model.trainers.dm import DMTrainer
+from tools.train import init_train_args
+
+# 方法一
+# 初始化参数
+args = init_train_args()
+# 自定义你的参数，也可以进入init_train_args方法配置
+setattr(args, "conditional", True) # True为条件训练，False为非条件训练
+setattr(args, "sample", "ddpm") # 采样器
+setattr(args, "network", "unet") # 深度学习网络
+setattr(args, "epochs", 300) # 迭代次数
+setattr(args, "image_size", 64) # 图像大小
+setattr(args, "dataset_path", "/你/的/数/据/集/路/径/") # 数据集保存路径
+setattr(args, "result_path", "/你/的/保/存/路/径/") # 结果保存路径
+setattr(args, "vis", True) # 开启可视化
+# ...
+# 或者使用args["参数名称"] = "你的设置"
+# 开启训练
+DMTrainer(args=args).train()
+
+# 方法二
+args = init_train_args()
+# 输入args，修改指定参数输入
+DMTrainer(args=args, dataset_path="/你/的/数/据/集").train()
+
+# 方法三
+DMTrainer(
+    conditional=True, sample="ddpm", dataset_path="/你/的/数/据/集/路/径/",
+    network="unet", epochs=300, image_size=64, result_path="/你/的/保/存/路/径/",
+    vis=True, # 任意参数...
+).train()
+```
+
+#### 2.3 分布式训练
+
+##### 2.3.1 命令训练
 
 1. 基本配置与普通训练相似，值得注意的是开启分布式训练需要设置`--distributed`。为了防止随意设置分布式训练，我们为开启分布式训练设置了几个基本条件，例如`args.distributed`、`torch.cuda.device_count() > 1`和`torch.cuda.is_available()`。
 
@@ -258,10 +323,66 @@ Integrated Design Diffusion Model
 
 ![IDDM分布式训练过程](assets/IDDM_training.png)
 
+##### 2.3.2 Python脚本训练
 
+```python
+from torch import multiprocessing as mp
+from model.trainers.dm import DMTrainer
+from tools.train import init_train_args
 
-#### 训练参数
+# 方法一
+# 初始化参数
+args = init_train_args()
+gpus = torch.cuda.device_count()
+# 自定义你的参数，也可以进入init_train_args方法配置
+setattr(args, "distributed", True)  # 开启分布式训练
+setattr(args, "world_size", 2)  # 训练结点个数
+setattr(args, "conditional", True) # True为条件训练，False为非条件训练
+setattr(args, "sample", "ddpm") # 采样器
+setattr(args, "network", "unet") # 深度学习网络
+setattr(args, "epochs", 300) # 迭代次数
+setattr(args, "image_size", 64) # 图像大小
+setattr(args, "dataset_path", "/你/的/数/据/集/路/径/") # 数据集保存路径
+setattr(args, "result_path", "/你/的/保/存/路/径/") # 结果保存路径
+setattr(args, "vis", True) # 开启可视化
+# ...
+# 或者使用args["参数名称"] = "你的设置"
+# 开启训练
+mp.spawn(DMTrainer(args=args).train, nprocs=gpus)
 
+# 方法二
+args = init_train_args()
+# 输入args，修改指定参数输入
+mp.spawn(DMTrainer(args=args, dataset_path="/你/的/数/据/集").train, nprocs=gpus)
+
+# 方法三
+mp.spawn(DMTrainer(
+    conditional=True, sample="ddpm", dataset_path="/你/的/数/据/集/路/径/",
+    network="unet", epochs=300, image_size=64, result_path="/你/的/保/存/路/径/",
+    vis=True, # 任意参数...
+).train, nprocs=gpus)
+```
+
+#### 2.4 模型库
+
+**注意**：模型库将持续更新预训练模型。
+
+##### 2.4.1 扩散模型预训练模型
+
+|           模型名称            | 是否条件训练 |    数据集     | 模型大小 |                           下载链接                           |
+| :---------------------------: | :----------: | :-----------: | :------: | :----------------------------------------------------------: |
+|   `celebahq-120-weight.pt`    |      ✓       |   CelebA-HQ   | 120×120  | [模型下载](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/celebahq-120-weight.pt) |
+| `animate-ganyu-120-weight.pt` |      ✓       | Animate-ganyu | 120×120  | [模型下载](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/animate-ganyu-120-weight.pt) |
+|      `neu-120-weight.pt`      |      ✓       |    NEU-DET    | 120×120  | [模型下载](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/cifar10-64-weight.pt) |
+|    `neu-cls-64-weight.pt`     |      ✓       |    NEU-CLS    |  64×64   | [模型下载](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.7/neu-cls-64-weight.pt) |
+|     `cifar-64-weight.pt`      |      ✓       |   Cifar-10    |  64×64   | [模型下载](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/cifar10-64-weight.pt) |
+|  `animate-face-64-weight.pt`  |      ✓       | Animate-face  |  64×64   | [模型下载](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/animate-face-64-weight.pt) |
+
+##### 2.4.2 超分辨率预训练模型
+
+很快就来:-)
+
+#### 2.5 训练参数
 
 **参数讲解**
 
@@ -304,8 +425,11 @@ Integrated Design Diffusion Model
 
 
 
+### 3 生成
 
-### 生成
+#### 3.1 开始你的第一个生成
+
+##### 3.1.1 命令生成
 
 1. 打开`generate.py`文件，找到`--weight_path`参数，将参数中的路径修改为模型权重路径，例如`/your/path/weight/model.pt`
 
@@ -335,7 +459,26 @@ Integrated Design Diffusion Model
    
 3. 等待生成即可
 
-#### 生成参数
+##### 3.1.2 Python脚本生成
+
+```python
+from tools.generate import Generator, init_generate_args
+
+# 初始化生成参数，也可以进入init_generate_args方法配置
+args = init_generate_args()
+# 自定义你的参数
+args["weight_path"] = "/你/的/模/型/路/径/model.pt"
+args["result_path"] = "/你/的/保/存/路/径/"
+# ...
+# args["参数名称"] = "你的设置"
+gen_model = Generator(gen_args=args, deploy=False)
+# 生成数量
+num_images = 2
+for i in range(num_images):
+    gen_model.generate(index=i)
+```
+
+#### 3.2 生成参数
 
 **参数讲解**
 
@@ -348,6 +491,7 @@ Integrated Design Diffusion Model
 | --num_images    |          | 生成图片个数                     |   int    | 单次生成图片个数                                             |
 | --weight_path   |          | 权重路径                         |   str    | 模型权重路径，网络生成需要加载文件                           |
 | --result_path   |          | 保存路径                         |   str    | 保存路径                                                     |
+| --use_gpu       |          | 设置运行指定的GPU                |   int    | 生成中设置指定的运行GPU，输入为GPU的编号                     |
 | --sample        |          | 采样方式                         |   str    | 设置采样器类别，当前支持ddpm，ddim（**1.1.1版本后的模型可不用设置**） |
 | --network       |          | 训练网络                         |   str    | 设置训练网络，当前支持UNet，CSPDarkUNet（**1.1.1版本后的模型可不用设置**） |
 | --act           |          | 激活函数                         |   str    | 激活函数选择，目前支持gelu、silu、relu、relu6和lrelu。如果不选择，会产生马赛克现象（**1.1.1版本后的模型可不用设置**） |
@@ -357,79 +501,41 @@ Integrated Design Diffusion Model
 
 
 
-### 结果
+### 4 结果
 
-我们在以下4个数据集做了训练，开启`conditional`，采样器为`DDPM`，图片尺寸均为`64*64`，激活函数为`gelu`，学习率为`3e-4`，采用`线性`学习方法，迭代次数为`300`，分别是`cifar10`，`NEUDET`，`NRSD-MN`和`WOOD`。结果如下图所示：
+我们在以下5个数据集做了训练，开启`conditional`，采样器为`DDPM`，图片尺寸均为`64*64`，激活函数为`gelu`，学习率为`3e-4`，采用`线性`学习方法，迭代次数为`300`，分别是`cifar10`，`NEU-DET`，`NRSD-MN`，`WOOD`和`Animate face`。结果如下图所示：
 
-#### cifar10
+#### 4.1 cifar10数据集
 
-![cifar_244_ema](assets/cifar_244_ema.jpg)
+![cifar_244_ema](assets/cifar_244_ema.jpg)![cifar_294_ema](assets/cifar_294_ema.jpg)
 
-![cifar_294_ema](assets/cifar_294_ema.jpg)
+#### 4.2 NEU-DET数据集
 
-#### NEUDET
+![neudet_290_ema](assets/neudet_290_ema.jpg)![neudet_270_ema](assets/neudet_270_ema.jpg)![neudet_276_ema](assets/neudet_276_ema.jpg)![neudet_265_ema](assets/neudet_265_ema.jpg)![neudet_240_ema](assets/neudet_240_ema.jpg)![neudet_244_ema](assets/neudet_244_ema.jpg)![neudet_245_ema](assets/neudet_245_ema.jpg)![neudet_298_ema](assets/neudet_298_ema.jpg)
 
-![neudet_290_ema](assets/neudet_290_ema.jpg)
+#### 4.3 NRSD数据集
 
-![neudet_270_ema](assets/neudet_270_ema.jpg)
+![nrsd_180_ema](assets/nrsd_180_ema.jpg)![nrsd_188_ema](assets/nrsd_188_ema.jpg)![nrsd_194_ema](assets/nrsd_194_ema.jpg)![nrsd_203_ema](assets/nrsd_203_ema.jpg)![nrsd_210_ema](assets/nrsd_210_ema.jpg)![nrsd_217_ema](assets/nrsd_217_ema.jpg)![nrsd_218_ema](assets/nrsd_218_ema.jpg)![nrsd_248_ema](assets/nrsd_248_ema.jpg)![nrsd_276_ema](assets/nrsd_276_ema.jpg)![nrsd_285_ema](assets/nrsd_285_ema.jpg)![nrsd_295_ema](assets/nrsd_295_ema.jpg)![nrsd_298_ema](assets/nrsd_298_ema.jpg)
 
-![neudet_276_ema](assets/neudet_276_ema.jpg)
-
-![neudet_265_ema](assets/neudet_265_ema.jpg)
-
-![neudet_240_ema](assets/neudet_240_ema.jpg)
-
-![neudet_244_ema](assets/neudet_244_ema.jpg)
-
-![neudet_298_ema](assets/neudet_298_ema.jpg)
-
-#### NRSD
-
-![nrsd_180_ema](assets/nrsd_180_ema.jpg)
-
-![nrsd_188_ema](assets/nrsd_188_ema.jpg)
-
-![nrsd_194_ema](assets/nrsd_194_ema.jpg)
-
-![nrsd_203_ema](assets/nrsd_203_ema.jpg)
-
-![nrsd_210_ema](assets/nrsd_210_ema.jpg)
-
-![nrsd_217_ema](assets/nrsd_217_ema.jpg)
-
-![nrsd_218_ema](assets/nrsd_218_ema.jpg)
-
-![nrsd_248_ema](assets/nrsd_248_ema.jpg)
-
-![nrsd_276_ema](assets/nrsd_276_ema.jpg)
-
-![nrsd_285_ema](assets/nrsd_285_ema.jpg)
-
-![nrsd_298_ema](assets/nrsd_298_ema.jpg)
-
-#### WOOD
+#### 4.4 WOOD数据集
 
 ![wood_495](assets/wood_495.jpg)
 
-#### Animate face（整活生成）
+#### 4.5 Animate face数据集（~~整活生成~~）
 
-![model_428_ema](assets/animate_face_428_ema.jpg)
+![model_428_ema](assets/animate_face_428_ema.jpg)![model_440_ema](assets/animate_face_440_ema.jpg)![model_488_ema](assets/animate_face_488_ema.jpg)![model_497_ema](assets/animate_face_497_ema.jpg)![model_499_ema](assets/animate_face_499_ema.jpg)![model_459_ema](assets/animate_face_459_ema.jpg)
 
-![model_488_ema](assets/animate_face_488_ema.jpg)
+#### 4.6 基于64×64模型生成160×160（任意大尺寸）图像（仅限工业表面缺陷生成）
 
-![model_497_ema](assets/animate_face_497_ema.jpg)
-
-![model_499_ema](assets/animate_face_499_ema.jpg)
-
-![model_459_ema](assets/animate_face_459_ema.jpg)
-
-#### 基于64×64模型生成160×160（任意大尺寸）图像
-
-当然，我们根据64×64的基础模型，在`generate.py`文件中生成160×160的`NEU-DET`图片（单张输出，每张图片占用显存21GB）。**请注意这个**[[**issue**]](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues/9#issuecomment-1886422210)：如果是缺陷纹理那种图片，特征物不明显的直接生成大尺寸就不会有这些问题，例如NRSD、NEU数据集。如果是含有背景有特定明显特征的则需要超分或者resize提升尺寸，例如Cifar10、CelebA-HQ等。**如果实在需要大尺寸图像，在显存足够的情况下直接训练大像素图片。**详细图片如下：
+当然，我们根据64×64的基础模型，在`generate.py`文件中生成160×160的`NEU-DET`图片（单张输出，每张图片占用显存21GB）。**请注意这个**[[**issue**]](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues/9#issuecomment-1886422210)：如果是缺陷纹理那种图片，特征物不明显的直接生成大尺寸就不会有这些问题，例如NRSD、NEU数据集。如果是含有背景有特定明显特征的则需要超分或者resize提升尺寸，例如Cifar10、CelebA-HQ等。**如果实在需要大尺寸图像，在显存足够的情况下直接训练大像素图片**。详细图片如下：
 
 ![model_499_ema](assets/neu160_0.jpg)![model_499_ema](assets/neu160_1.jpg)![model_499_ema](assets/neu160_2.jpg)![model_499_ema](assets/neu160_3.jpg)![model_499_ema](assets/neu160_4.jpg)![model_499_ema](assets/neu160_5.jpg)
 
-### 评估
+
+
+### 5 评估
+
+#### 5.1 开始你的第一个评估
 
 1. 数据准备阶段，使用`generate.py`生成数据集，数据集生成量应该与训练集的数量、尺寸相似（**注意**：评估时所需要的训练集应为进行了`resize`后的结果，即为训练时的`image_size`大小。例如，训练集的路径为`/your/path/datasets/landscape`，图片尺寸为**256**；生成集的路径为`/your/path/generate/landscape`，尺寸为64，使用`resize`方法将训练集路径中的图片转为**64**，此时新的评估用训练集路径为`/your/new/path/datasets/landscape`）。
 
@@ -451,7 +557,7 @@ Integrated Design Diffusion Model
    python FID_calculator_plus.py /your/input/path /your/output/path --save_stats
    ```
 
-#### 评估参数
+#### 5.2 评估参数
 
 | **参数名称**  | 参数使用方法      | 参数类型 | 参数解释                                                     |
 | ------------- | ----------------- | :------: | ------------------------------------------------------------ |
@@ -464,7 +570,7 @@ Integrated Design Diffusion Model
 
 
 
-### 关于引用
+### 6 关于引用
 
 如果在学术论文中使用该项目进行实验，在可能的情况下，请适当引用我们的项目，为此我们表示感谢。具体引用格式可访问[**此网站**](https://zenodo.org/records/10866128)。
 
@@ -480,7 +586,11 @@ Integrated Design Diffusion Model
 }
 ```
 
-### 致谢
+**引用详情可以参考此处**：![image-20241124174257466](assets/image-citation.png)
+
+
+
+### 7 致谢
 
 **人员**：
 
@@ -489,10 +599,6 @@ Integrated Design Diffusion Model
 **组织**：
 
 [@JetBrains](https://www.jetbrains.com/)
-
-[@Python](https://www.python.org/)
-
-[@Pytorch](https://pytorch.org/)
 
 ![JetBrains logo](assets/jetbrains.svg)
 
