@@ -35,6 +35,7 @@
         <img src="https://gitee.com/chairc/Integrated-Design-Diffusion-Model/badge/fork.svg?theme=blue" />
     </a>
 </div>
+
 [中文文档](README_zh.md)
 
 
