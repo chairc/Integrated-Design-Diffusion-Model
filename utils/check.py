@@ -104,3 +104,14 @@ def check_pretrain_path(pretrain_path):
     if pretrain_path is None or not os.path.exists(pretrain_path):
         return True
     return False
+
+
+def check_is_distributed(distributed):
+    """
+    Check the distributed is valid
+    :param distributed: Distributed
+    :return: Boolean
+    """
+    if distributed and torch.cuda.device_count() > 1 and torch.cuda.is_available():
+        return True
+    return False
