@@ -1,14 +1,14 @@
 coloredlogs==15.0.1
-gradio==4.25.0
+gradio==5.0.0
 matplotlib==3.7.1
 numpy==1.25.0
 Pillow==10.3.0
-Requests==2.31.0
+Requests==2.32.0
 scikit-image==0.22.0
 torch_summary==1.4.5
-tqdm==4.65.0
+tqdm==4.66.3
 pytorch_fid==0.3.0
-flask==3.0.3
+fastapi==0.115.6
 tensorboardX==2.6.1
 
 # If you want to download gpu version

@@ -12,8 +12,10 @@ import logging
 import uuid
 
 import coloredlogs
+import uvicorn
 
-from flask import Flask, request, jsonify
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from torchvision import transforms
 
 sys.path.append(os.path.dirname(sys.path[0]))
@@ -24,23 +26,21 @@ from utils.processing import image_to_base64
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
-app = Flask(__name__)
+app = FastAPI()
 
 
-@app.route("/")
+@app.get("/")
 def index():
     logger.info(msg="Route -> Hello IDDM")
     return "Hello, IDDM!"
 
 
-@app.route("/api/generate/df", methods=["POST"])
-def generate_diffusion_model_api():
+@app.post("/api/generate/df")
+def generate_diffusion_model_api(data: dict):
     """
     Generate a diffusion model
     """
     logger.info(msg="Route -> /api/df")
-
-    data = request.json
     logger.info(msg=f"Send json: {data}")
 
     # Sample type
@@ -61,7 +61,7 @@ def generate_diffusion_model_api():
     re_json = {"image": [], "type": str(re_type)}
 
     if any(param is None for param in [sample, image_size, num_images, weight_path, result_path, re_type]):
-        return jsonify({"code": 400, "msg": "Illegal parameters.", "data": None}), 400
+        return JSONResponse({"code": 400, "msg": "Illegal parameters.", "data": None})
 
     # Init args
     args = init_generate_args()
@@ -101,12 +101,12 @@ def generate_diffusion_model_api():
 
         logger.info(msg="[Web]: Finish generation.")
 
-        return jsonify({"code": 200, "msg": "success!", "data": json.dumps(re_json, ensure_ascii=False)}), 200
+        return JSONResponse({"code": 200, "msg": "success!", "data": json.dumps(re_json, ensure_ascii=False)})
     except Exception as e:
-        return jsonify({"code": 500, "msg": str(e), "data": None}), 500
+        return JSONResponse({"code": 500, "msg": str(e), "data": None})
 
 
-@app.route("/api/generate/sr")
+@app.post("/api/generate/sr")
 def generate_super_resolution_model_api():
     logger.info(msg="Route -> /api/sr")
     # TODO: super resolution api
@@ -118,4 +118,4 @@ if __name__ == "__main__":
     port = 12341
     logger.info(msg=f"Run -> {host}:{port}")
     get_version_banner()
-    app.run(host=host, port=port, debug=True)
+    uvicorn.run(app=app, host=host, port=port)
