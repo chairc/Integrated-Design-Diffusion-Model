@@ -8,7 +8,7 @@ scikit-image==0.22.0
 torch_summary==1.4.5
 tqdm==4.66.3
 pytorch_fid==0.3.0
-flask==3.0.3
+fastapi==0.115.6
 tensorboardX==2.6.1
 
 # If you want to download gpu version
