@@ -80,7 +80,8 @@ def post_image(images, device="cpu"):
     mean_tensor = torch.tensor(data=SR_MEAN).view(1, -1, 1, 1).to(device)
     std_tensor = torch.tensor(data=SR_STD).view(1, -1, 1, 1).to(device)
     new_images = images * std_tensor + mean_tensor
-    new_images = (new_images * 255).to(torch.uint8)
+    # Limit the image between 0 and 1
+    new_images = (new_images.clamp(0, 1) * 255).to(torch.uint8)
     return new_images
 
 
