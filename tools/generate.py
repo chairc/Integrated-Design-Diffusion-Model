@@ -133,11 +133,11 @@ def init_generate_args():
     parser = argparse.ArgumentParser()
     # =================================Base settings=================================
     # Generation name (required)
-    parser.add_argument("--generate_name", type=str, default="df")
+    parser.add_argument("--generate_name", "-n", type=str, default="df")
     # Input image size (required)
     # [Warn] Compatible with older versions
     # [Warn] Version <= 1.1.1 need to be equal to model's image size, version > 1.1.1 can set whatever you want
-    parser.add_argument("--image_size", type=parse_image_size_type, default=64)
+    parser.add_argument("--image_size", "-i", type=parse_image_size_type, default=64)
     # Generated image format
     # Recommend to use png for better generation quality.
     # Option: jpg/png
@@ -175,7 +175,7 @@ def init_generate_args():
     # [Note] The conditional settings are consistent with the loaded model training settings.
     # [Warn] Compatible with older versions, version <= 1.1.1
     # [Warn] Version <= 1.1.1 need to be equal to model's network, version > 1.1.1 can set whatever you want
-    parser.add_argument("--conditional", default=False, action="store_true")
+    parser.add_argument("--conditional", "-c", default=False, action="store_true")
     # Set network
     # Option: unet/cspdarkunet
     # [Warn] Compatible with older versions, version <= 1.1.1
