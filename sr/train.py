@@ -49,21 +49,21 @@ def init_sr_train_args():
     parser = argparse.ArgumentParser()
     # =================================Base settings=================================
     # Set the seed for initialization (required)
-    parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--seed", "-s", type=int, default=0)
     # Set network
     # Option: srv1
     parser.add_argument("--network", type=str, default="srv1", choices=sr_network_choices)
     # File name for initializing the model (required)
-    parser.add_argument("--run_name", type=str, default="sr")
+    parser.add_argument("--run_name", "-n", type=str, default="sr")
     # Total epoch for training (required)
-    parser.add_argument("--epochs", type=int, default=300)
+    parser.add_argument("--epochs", "-e", type=int, default=300)
     # Batch size for training (required)
-    parser.add_argument("--batch_size", type=int, default=8)
+    parser.add_argument("--batch_size", "-b", type=int, default=8)
     # Number of sub-processes used for data loading (needed)
     # It may consume a significant amount of CPU and memory, but it can speed up the training process.
     parser.add_argument("--num_workers", type=int, default=2)
     # Input image size (required)
-    parser.add_argument("--image_size", type=int, default=128)
+    parser.add_argument("--image_size", "-i", type=int, default=128)
     # Dataset path (required)
     # Conditional dataset
     # e.g: cifar10, Each category is stored in a separate folder, and the main folder represents the path.
@@ -116,7 +116,7 @@ def init_sr_train_args():
     # we cannot set any loading epoch points because we did not save the model.
     # We save the 'ckpt_last.pt' file every training, so we need to use the last saved model for interrupted training
     # If you do not know what epoch the checkpoint is, rename this checkpoint is 'ckpt_last'.pt
-    parser.add_argument("--resume", default=False, action="store_true")
+    parser.add_argument("--resume", "-r", default=False, action="store_true")
     parser.add_argument("--start_epoch", type=int, default=None)
     # Enable use pretrain model (needed)
     parser.add_argument("--pretrain", default=False, action="store_true")
@@ -127,7 +127,7 @@ def init_sr_train_args():
 
     # =================================Enable distributed training (if applicable)=================================
     # Enable distributed training (needed)
-    parser.add_argument("--distributed", default=False, action="store_true")
+    parser.add_argument("--distributed", "-d", default=False, action="store_true")
     # Set the main GPU (required)
     # Default GPU is '0'
     parser.add_argument("--main_gpu", type=int, default=0)
