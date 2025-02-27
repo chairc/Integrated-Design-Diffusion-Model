@@ -33,6 +33,9 @@
     <a href="https://gitee.com/chairc/Integrated-Design-Diffusion-Model">
         <img src="https://gitee.com/chairc/Integrated-Design-Diffusion-Model/badge/fork.svg?theme=blue" />
     </a>
+    <a href="https://gitcode.com/chair_c/Integrated-Design-Diffusion-Model">
+        <img src="https://gitcode.com/chair_c/Integrated-Design-Diffusion-Model/star/badge.svg" />
+    </a>
 </div>
 
 [English Document](README.md)
