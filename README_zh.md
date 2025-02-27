@@ -373,7 +373,7 @@ mp.spawn(DMTrainer(
 | :---------------------------: | :----------: | :-----------: | :------: | :----------------------------------------------------------: |
 |   `celebahq-120-weight.pt`    |      ✓       |   CelebA-HQ   | 120×120  | [模型下载](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/celebahq-120-weight.pt) |
 | `animate-ganyu-120-weight.pt` |      ✓       | Animate-ganyu | 120×120  | [模型下载](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/animate-ganyu-120-weight.pt) |
-|      `neu-120-weight.pt`      |      ✓       |    NEU-DET    | 120×120  | [模型下载](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/cifar10-64-weight.pt) |
+|      `neu-120-weight.pt`      |      ✓       |    NEU-DET    | 120×120  | [模型下载](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/neu-120-weight.pt) |
 |    `neu-cls-64-weight.pt`     |      ✓       |    NEU-CLS    |  64×64   | [模型下载](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.7/neu-cls-64-weight.pt) |
 |     `cifar-64-weight.pt`      |      ✓       |   Cifar-10    |  64×64   | [模型下载](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/cifar10-64-weight.pt) |
 |  `animate-face-64-weight.pt`  |      ✓       | Animate-face  |  64×64   | [模型下载](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/animate-face-64-weight.pt) |
