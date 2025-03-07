@@ -24,6 +24,8 @@ jobs:
       - run: echo "The workflow is now ready to run tests and upload coverage."
       - name: Set up Python
         uses: actions/setup-python@v4
+      - name: Update pip setuptools
+        run: pip install --upgrade pip setuptools
       - name: Install dependencies
         run: pip install pytest pytest-cov
       - name: Install IDDM dependencies
