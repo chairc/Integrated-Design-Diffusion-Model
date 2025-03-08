@@ -19,10 +19,10 @@ from fastapi.responses import JSONResponse
 from torchvision import transforms
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from config.version import get_version_banner
-from tools.generate import Generator, init_generate_args
-from utils import save_images
-from utils.processing import image_to_base64
+from iddm.config.version import get_version_banner
+from iddm.tools.generate import Generator, init_generate_args
+from iddm.utils import save_images
+from iddm.utils.processing import image_to_base64
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")

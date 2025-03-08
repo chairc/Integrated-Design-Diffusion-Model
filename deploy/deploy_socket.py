@@ -17,10 +17,10 @@ import coloredlogs
 from torchvision import transforms
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from tools.generate import init_generate_args, Generator
-from utils.utils import save_images
-from utils.processing import image_to_base64
-from config.version import get_version_banner
+from iddm.tools.generate import init_generate_args, Generator
+from iddm.utils.utils import save_images
+from iddm.utils.processing import image_to_base64
+from iddm.config.version import get_version_banner
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
