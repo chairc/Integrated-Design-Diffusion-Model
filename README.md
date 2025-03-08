@@ -51,15 +51,10 @@ We named this project IDDM: Integrated Design Diffusion Model. It aims to reprod
 
 If you have any questions, please check [**the existing issues**](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues/9) first. If the issue persists, feel free to open a new one for assistance, or you can contact me via email at chenyu1998424@gmail.com or chairc1998@163.com. **If you think my project is interesting, please give me a ⭐⭐⭐Star⭐⭐⭐ :)**
 
-**Repository Structure**
+#### 0.1 Repository Structure
 
 ```yaml
 Integrated Design Diffusion Model
-├── config
-│   ├── choices.py
-│   ├── model_list.py
-│   ├── setting.py
-│   └── version.py
 ├── datasets
 │   └── dataset_demo
 │       ├── class_1
@@ -68,58 +63,116 @@ Integrated Design Diffusion Model
 ├── deploy
 │   ├── deploy_socket.py
 │   └── deploy_server.py
-├── model
-│   ├── modules
-│   │   ├── activation.py
-│   │   ├── attention.py
-│   │   ├── block.py
-│   │   ├── conv.py
-│   │   ├── ema.py
-│   │   └── module.py
-│   ├── networks
-│   │   ├── sr
-│   │   │   └── srv1.py
-│   │   ├── base.py
-│   │   ├── cspdarkunet.py
-│   │   └── unet.py
-│   ├── samples
-│   │   ├── base.py
-│   │   ├── ddim.py
-│   │   ├── ddpm.py
-│   │   └── plms.py
-│   └── trainers
-│       ├── base.py
-│       ├── dm.py
-│       └── sr.py
+├── iddm
+│   ├── config
+│   │   ├── choices.py
+│   │   ├── model_list.py
+│   │   ├── setting.py
+│   │   └── version.py
+│   ├── model
+│   │   ├── modules
+│   │   │   ├── activation.py
+│   │   │   ├── attention.py
+│   │   │   ├── block.py
+│   │   │   ├── conv.py
+│   │   │   ├── ema.py
+│   │   │   └── module.py
+│   │   ├── networks
+│   │   │   ├── sr
+│   │   │   │   └── srv1.py
+│   │   │   ├── base.py
+│   │   │   ├── cspdarkunet.py
+│   │   │   └── unet.py
+│   │   ├── samples
+│   │   │   ├── base.py
+│   │   │   ├── ddim.py
+│   │   │   ├── ddpm.py
+│   │   │   └── plms.py
+│   │   └── trainers
+│   │       ├── base.py
+│   │       ├── dm.py
+│   │       └── sr.py
+│   ├── sr
+│   │   ├── dataset.py
+│   │   ├── demo.py
+│   │   ├── interface.py
+│   │   └── train.py
+│   ├── tools
+│   │   ├── FID_calculator.py
+│   │   ├── FID_calculator_plus.py
+│   │   ├── generate.py
+│   │   └── train.py
+│   └── utils
+│       ├── check.py
+│       ├── checkpoint.py
+│       ├── dataset.py
+│       ├── initializer.py
+│       ├── logger.py
+│       ├── lr_scheduler.py
+│       ├── metrics.py
+│       ├── processing.py
+│       └── utils.py
 ├── results
-├── sr
-│   ├── dataset.py
-│   ├── demo.py
-│   ├── interface.py
-│   └── train.py
 ├── test
 │   ├── noising_test
 │   │   ├── landscape
 │   │   └── noise
 │   └── test_module.py
-├── tools
-│   ├── FID_calculator.py
-│   ├── FID_calculator_plus.py
-│   ├── generate.py
-│   └── train.py
-├── utils
-│   ├── check.py
-│   ├── checkpoint.py
-│   ├── dataset.py
-│   ├── initializer.py
-│   ├── logger.py
-│   ├── lr_scheduler.py
-│   ├── metrics.py
-│   ├── processing.py
-│   └── utils.py
 ├── webui
 │   └──web.py
 └── weights
+```
+
+#### 0.2 Running  Locally
+
+Use the `git clone` or directly download the `zip` file of this repository's code, and then configure the environment locally to run it.
+
+```bash
+git clone https://github.com/chairc/Integrated-Design-Diffusion-Model.git
+cd Integrated-Design-Diffusion-Model
+```
+
+#### 0.3 Installation
+
+In addition to running locally, there are also the following two approachs for installing this code.
+
+**Approach 1**: Use [pip](https://pypi.org/project/iddm/) install (Recommend)
+
+```bash
+pip install iddm
+```
+
+The following  packages are required.
+
+```yaml
+coloredlogs==15.0.1
+gradio==5.0.0
+matplotlib==3.7.1
+numpy==1.25.0
+Pillow==10.3.0
+Requests==2.32.0
+scikit-image==0.22.0
+torch_summary==1.4.5
+tqdm==4.66.3
+pytorch_fid==0.3.0
+fastapi==0.115.6
+tensorboardX==2.6.1
+
+# If you want to download gpu version
+# Please use: pip install torch==1.13.0+cu116 torchvision==0.14.0+cu116 -f https://download.pytorch.org/whl/torch_stable.html
+# About more torch information please click: https://pytorch.org/get-started/previous-versions/#linux-and-windows-25
+# More versions please click: https://pytorch.org/get-started/previous-versions
+# [Note] torch versions must >= 1.9.0
+torch>=1.9.0 # More info: https://pytorch.org/get-started/locally/ (recommended)
+torchvision>=0.10.0 # More info: https://pytorch.org/get-started/locally/ (recommended)
+```
+
+**Approach 2**：Repository Installation
+
+```bash
+git clone https://github.com/chairc/Integrated-Design-Diffusion-Model.git
+cd Integrated-Design-Diffusion-Model
+python setup.py install
 ```
 
 
@@ -144,6 +197,7 @@ Integrated Design Diffusion Model
 - [x] [2024-11-26] Adding PSNR and SSIM calculators to verify super resolution image quality.
 - [x] [2024-12-10] Adding pretrain model download.
 - [x] [2024-12-25] Reconstruct the overall structure of the trainer.
+- [x] [2025-03-08] Support PyPI install.
 - [ ] [Maybe 2025-01-31] Adding the deployment of Docker and image.
 - [ ] [To be determined] Reconstruct the project by Baidu PaddlePaddle.
 - [ ] [To be determined] ~~Use Latent Diffusion and reduce GPU memory usage~~
@@ -271,10 +325,10 @@ The training GPU implements environment for this README is as follows: models ar
 ##### 2.2.2 Python Training
 
 ```python
-from model.trainers.dm import DMTrainer
-from tools.train import init_train_args
+from iddm.model.trainers.dm import DMTrainer
+from iddm.tools.train import init_train_args
 
-# Function 1
+# Approach 1
 # Initialize arguments
 args = init_train_args()
 # Customize your parameters, or you can configure them by entering the init_train_args method
@@ -291,12 +345,12 @@ setattr(args, "vis", True)  # Enable visualization
 # Start training
 DMTrainer(args=args).train()
 
-# Function 2
+# Approach 2
 args = init_train_args()
 # Input args and update some params
 DMTrainer(args=args, dataset_path="/your/dataset/path/").train()
 
-# Function 3
+# Approach 3
 DMTrainer(
     conditional=True, sample="ddpm", dataset_path="/your/dataset/path/",
     network="unet", epochs=300, image_size=64, result_path="/your/save/path/",
@@ -334,10 +388,10 @@ DMTrainer(
 
 ```python
 from torch import multiprocessing as mp
-from model.trainers.dm import DMTrainer
-from tools.train import init_train_args
+from iddm.model.trainers.dm import DMTrainer
+from iddm.tools.train import init_train_args
 
-# Function 1
+# Approach 1
 # Initialize arguments
 args = init_train_args()
 gpus = torch.cuda.device_count()
@@ -357,12 +411,12 @@ setattr(args, "vis", True)  # Enable visualization
 # Start training
 mp.spawn(DMTrainer(args=args, dataset_path="/your/dataset/path/").train, nprocs=gpus)
 
-# Function 2
+# Approach 2
 args = init_train_args()
 # Input args and update some params
 mp.spawn(DMTrainer(args=args, dataset_path="/your/dataset/path/").train, nprocs=gpus)
 
-# Function 3
+# Approach 3
 mp.spawn(DMTrainer(
     conditional=True, sample="ddpm", dataset_path="/your/dataset/path/",
     network="unet", epochs=300, image_size=64, result_path="/your/save/path/",
@@ -374,7 +428,7 @@ mp.spawn(DMTrainer(
 
 **Note**: The model repo will continue to update pre-trained models.
 
-##### 2.4.1 Diffusion Model Pre-training Model
+##### 2.4.1 Diffusion Model Pre-trained Model
 
 |          Model Name           | Conditional |   Datasets    | Model Size |                        Download Link                         |
 | :---------------------------: | :---------: | :-----------: | :--------: | :----------------------------------------------------------: |
@@ -471,20 +525,20 @@ Coming soon :-)
 ##### 3.1.2 Python generation
 
 ```python
-from tools.generate import Generator, init_generate_args
+from iddm.tools.generate import Generator, init_generate_args
 
 # Initialize generation arguments, or you can configure them by entering the init_generate_args method
 args = init_generate_args()
 # Customize your parameters
-args["weight_path"] = "/your/model/path/model.pt"
-args["result_path"] = "/your/save/path/"
+setattr(args, "weight_path", "/your/model/path/model.pt")
+setattr(args, "result_path", "/your/save/path/")
 # ...
-# args["parameter_name"] = "your setting"
+# Or use args["parameter_name"] = "your setting"
 gen_model = Generator(gen_args=args, deploy=False)
 # Number of generations
 num_images = 2
 for i in range(num_images):
-    gen_model.generate(index=i)
+   gen_model.generate(index=i)
 ```
 
 #### 3.2 Generation Parameters

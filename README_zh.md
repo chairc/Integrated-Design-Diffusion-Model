@@ -50,15 +50,10 @@
 
 如果有任何问题，请先到此[**issue**](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues/9)进行问题查询，若无法解决可以加入我们的QQ群：949120343、开启新issue提问或联系我的邮箱：chenyu1998424@gmail.com/chairc1998@163.com。**如果你认为我的项目有意思请给我点一颗⭐⭐⭐Star⭐⭐⭐吧。**
 
-**本仓库整体结构**
+#### 0.1本仓库整体结构
 
 ```yaml
 Integrated Design Diffusion Model
-├── config
-│   ├── choices.py
-│   ├── model_list.py
-│   ├── setting.py
-│   └── version.py
 ├── datasets
 │   └── dataset_demo
 │       ├── class_1
@@ -67,58 +62,115 @@ Integrated Design Diffusion Model
 ├── deploy
 │   ├── deploy_socket.py
 │   └── deploy_server.py
-├── model
-│   ├── modules
-│   │   ├── activation.py
-│   │   ├── attention.py
-│   │   ├── block.py
-│   │   ├── conv.py
-│   │   ├── ema.py
-│   │   └── module.py
-│   ├── networks
-│   │   ├── sr
-│   │   │   └── srv1.py
-│   │   ├── base.py
-│   │   ├── cspdarkunet.py
-│   │   └── unet.py
-│   ├── samples
-│   │   ├── base.py
-│   │   ├── ddim.py
-│   │   ├── ddpm.py
-│   │   └── plms.py
-│   └── trainers
-│       ├── base.py
-│       ├── dm.py
-│       └── sr.py
+├── iddm
+│   ├── config
+│   │   ├── choices.py
+│   │   ├── model_list.py
+│   │   ├── setting.py
+│   │   └── version.py
+│   ├── model
+│   │   ├── modules
+│   │   │   ├── activation.py
+│   │   │   ├── attention.py
+│   │   │   ├── block.py
+│   │   │   ├── conv.py
+│   │   │   ├── ema.py
+│   │   │   └── module.py
+│   │   ├── networks
+│   │   │   ├── sr
+│   │   │   │   └── srv1.py
+│   │   │   ├── base.py
+│   │   │   ├── cspdarkunet.py
+│   │   │   └── unet.py
+│   │   ├── samples
+│   │   │   ├── base.py
+│   │   │   ├── ddim.py
+│   │   │   ├── ddpm.py
+│   │   │   └── plms.py
+│   │   └── trainers
+│   │       ├── base.py
+│   │       ├── dm.py
+│   │       └── sr.py
+│   ├── sr
+│   │   ├── dataset.py
+│   │   ├── demo.py
+│   │   ├── interface.py
+│   │   └── train.py
+│   ├── tools
+│   │   ├── FID_calculator.py
+│   │   ├── FID_calculator_plus.py
+│   │   ├── generate.py
+│   │   └── train.py
+│   └── utils
+│       ├── check.py
+│       ├── checkpoint.py
+│       ├── dataset.py
+│       ├── initializer.py
+│       ├── logger.py
+│       ├── lr_scheduler.py
+│       ├── metrics.py
+│       ├── processing.py
+│       └── utils.py
 ├── results
-├── sr
-│   ├── dataset.py
-│   ├── demo.py
-│   ├── interface.py
-│   └── train.py
 ├── test
 │   ├── noising_test
 │   │   ├── landscape
 │   │   └── noise
 │   └── test_module.py
-├── tools
-│   ├── FID_calculator.py
-│   ├── FID_calculator_plus.py
-│   ├── generate.py
-│   └── train.py
-├── utils
-│   ├── check.py
-│   ├── checkpoint.py
-│   ├── dataset.py
-│   ├── initializer.py
-│   ├── logger.py
-│   ├── lr_scheduler.py
-│   ├── metrics.py
-│   ├── processing.py
-│   └── utils.py
 ├── webui
 │   └──web.py
 └── weights
+```
+
+#### 0.2 本地运行
+
+使用`git clone `方法或直接下载本仓库代码`zip`文件，本地配置环境运行即可
+
+```bash
+git clone https://github.com/chairc/Integrated-Design-Diffusion-Model.git
+cd Integrated-Design-Diffusion-Model
+```
+
+#### 0.3 安装
+
+除了本地运行外，也可采用下列两种方式安装本代码
+
+**方式1**：使用[pip](https://pypi.org/project/iddm/)安装（推荐）
+
+```bash
+pip install iddm
+```
+
+需要以下前置安装包
+
+```yaml
+coloredlogs==15.0.1
+gradio==5.0.0
+matplotlib==3.7.1
+numpy==1.25.0
+Pillow==10.3.0
+Requests==2.32.0
+scikit-image==0.22.0
+torch_summary==1.4.5
+tqdm==4.66.3
+pytorch_fid==0.3.0
+fastapi==0.115.6
+tensorboardX==2.6.1
+
+# 如果你想下载GPU版本请使用：pip install torch==1.13.0+cu116 torchvision==0.14.0+cu116 -f https://download.pytorch.org/whl/torch_stable.html
+# 想了解更多信息请访问：https://pytorch.org/get-started/previous-versions/#linux-and-windows-25
+# 更多版本请访问：https://pytorch.org/get-started/previous-versions
+# 需要注意torch版本 >= 1.9.0
+torch>=1.9.0 # 更多信息：https://pytorch.org/get-started/locally/ （推荐）
+torchvision>=0.10.0 # 更多信息：https://pytorch.org/get-started/locally/ （推荐）
+```
+
+**方式2**：仓库安装
+
+```bash
+git clone https://github.com/chairc/Integrated-Design-Diffusion-Model.git
+cd Integrated-Design-Diffusion-Model
+python setup.py install
 ```
 
 
@@ -143,6 +195,7 @@ Integrated Design Diffusion Model
 - [x] [2024-11-26] 增加PSNR和SSIM方法验证超分图像质量
 - [x] [2024-12-10] 增加预训练模型下载
 - [x] [2024-12-25] 重构训练器结构
+- [x] [2025-03-08] 支持PyPI包下载
 - [ ] [预计2025-01-31] 增加Docker部署与镜像
 - [ ] [待定] 重构项目利用百度飞桨框架
 - [ ] [待定] ~~使用Latent方式降低显存消耗~~
@@ -267,8 +320,8 @@ Integrated Design Diffusion Model
 ##### 2.2.2 Python脚本训练
 
 ```python
-from model.trainers.dm import DMTrainer
-from tools.train import init_train_args
+from iddm.model.trainers.dm import DMTrainer
+from iddm.tools.train import init_train_args
 
 # 方法一
 # 初始化参数
@@ -330,8 +383,8 @@ DMTrainer(
 
 ```python
 from torch import multiprocessing as mp
-from model.trainers.dm import DMTrainer
-from tools.train import init_train_args
+from iddm.model.trainers.dm import DMTrainer
+from iddm.tools.train import init_train_args
 
 # 方法一
 # 初始化参数
@@ -465,20 +518,20 @@ mp.spawn(DMTrainer(
 ##### 3.1.2 Python脚本生成
 
 ```python
-from tools.generate import Generator, init_generate_args
+from iddm.tools.generate import Generator, init_generate_args
 
 # 初始化生成参数，也可以进入init_generate_args方法配置
 args = init_generate_args()
 # 自定义你的参数
-args["weight_path"] = "/你/的/模/型/路/径/model.pt"
-args["result_path"] = "/你/的/保/存/路/径/"
+setattr(args, "weight_path", "/你/的/模/型/路/径/model.pt")
+setattr(args, "result_path", "/你/的/保/存/路/径/")
 # ...
-# args["参数名称"] = "你的设置"
+# 或者使用args["参数名称"] = "你的设置"
 gen_model = Generator(gen_args=args, deploy=False)
 # 生成数量
 num_images = 2
 for i in range(num_images):
-    gen_model.generate(index=i)
+   gen_model.generate(index=i)
 ```
 
 #### 3.2 生成参数
