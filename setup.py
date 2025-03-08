@@ -38,7 +38,7 @@ if __name__ == "__main__":
     # Define the metadata of the package
     setup(
         name="iddm",
-        version="1.1.8",
+        version="1.1.8-b3",
         packages=find_packages(),
         python_requires=">=3.8",
         install_requires=package_list,
