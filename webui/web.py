@@ -14,7 +14,6 @@ import gradio
 import webbrowser
 import numpy as np
 import torch
-import torchvision
 from PIL import Image
 
 from torch import nn as nn
@@ -23,16 +22,15 @@ from torch.cuda.amp import autocast
 from tqdm import tqdm
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from config.choices import bool_choices, sample_choices, network_choices, optim_choices, act_choices, lr_func_choices, \
-    image_format_choices
-from config.setting import RANDOM_RESIZED_CROP_SCALE, MEAN, STD
-from model.modules.ema import EMA
-from utils.initializer import device_initializer, seed_initializer, network_initializer, optimizer_initializer, \
+from iddm.config.choices import bool_choices, sample_choices, network_choices, optim_choices, act_choices, \
+    lr_func_choices, image_format_choices
+from iddm.model.modules.ema import EMA
+from iddm.utils.initializer import device_initializer, seed_initializer, network_initializer, optimizer_initializer, \
     sample_initializer, lr_initializer, amp_initializer, classes_initializer
-from utils.dataset import get_dataset
-from utils.utils import plot_images, save_images, setup_logging, check_and_create_dir
-from utils.checkpoint import load_ckpt, save_ckpt
-from utils.logger import CustomLogger
+from iddm.utils.dataset import get_dataset
+from iddm.utils.utils import save_images, setup_logging, check_and_create_dir
+from iddm.utils.checkpoint import load_ckpt, save_ckpt
+from iddm.utils.logger import CustomLogger
 
 
 class GradioWebui:
@@ -169,9 +167,9 @@ class GradioWebui:
                 # The images are all resized in dataloader
                 images = images.to(device)
                 # Generates a tensor of size images.shape[0] randomly sampled time steps
-                time = diffusion.sample_time_steps(images.shape[0]).to(device)
+                sample_time = diffusion.sample_time_steps(images.shape[0]).to(device)
                 # Add noise, return as x value at time t and standard normal distribution
-                x_time, noise = diffusion.noise_images(x=images, time=time)
+                x_time, noise = diffusion.noise_images(x=images, time=sample_time)
                 # Enable Automatic mixed precision training
                 # Automatic mixed precision training
                 # Note: If your Pytorch version > 2.4.1, with torch.amp.autocast("cuda", enabled=amp):
@@ -179,7 +177,7 @@ class GradioWebui:
                     # Unconditional training
                     if not conditional:
                         # Unconditional model prediction
-                        predicted_noise = model(x_time, time)
+                        predicted_noise = model(x_time, sample_time)
                     # Conditional training, need to add labels
                     else:
                         labels = labels.to(device)
@@ -187,7 +185,7 @@ class GradioWebui:
                         if np.random.random() < 0.1:
                             labels = None
                         # Conditional model prediction
-                        predicted_noise = model(x_time, time, labels)
+                        predicted_noise = model(x_time, sample_time, labels)
                     # To calculate the MSE loss
                     # You need to use the standard normal distribution of x at time t and the predicted noise
                     loss = mse(noise, predicted_noise)
@@ -577,8 +575,8 @@ def main():
                 btn_generate.click(fn=gradio_webui.generate, inputs=generate_args, outputs=output_images)
 
     # Open in browser
-    webbrowser.open("http://127.0.0.1:8888")
-    webui.queue(max_size=20).launch(server_name="127.0.0.1", server_port=8888)
+    webbrowser.open("http://0.0.0.0:8888")
+    webui.queue(max_size=20).launch(server_name="0.0.0.0", server_port=8888)
 
 
 if __name__ == "__main__":

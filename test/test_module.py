@@ -21,14 +21,14 @@ from torchvision.utils import save_image
 from torchsummary import summary
 from matplotlib import pyplot as plt
 
-from config.choices import parse_image_size_type
-from utils.dataset import get_dataset, set_resize_images_size
-from utils.utils import delete_files, download_files, download_model_pretrain_model
-from utils.initializer import device_initializer, network_initializer, sample_initializer, generate_initializer
-from utils.lr_scheduler import set_cosine_lr
-from utils.check import check_is_nan, check_image_size
-from utils.checkpoint import separate_ckpt_weights
-from utils.processing import image_to_base64, base64_to_image
+from iddm.config.choices import parse_image_size_type
+from iddm.utils.dataset import get_dataset, set_resize_images_size
+from iddm.utils.utils import delete_files, download_files, download_model_pretrain_model
+from iddm.utils.initializer import device_initializer, network_initializer, sample_initializer, generate_initializer
+from iddm.utils.lr_scheduler import set_cosine_lr
+from iddm.utils.check import check_is_nan, check_image_size
+from iddm.utils.checkpoint import separate_ckpt_weights
+from iddm.utils.processing import image_to_base64, base64_to_image
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
