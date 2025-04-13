@@ -128,3 +128,16 @@ class BaseDiffusion:
             self.img_size = DEFAULT_IMAGE_SIZE
         else:
             self.img_size = img_size
+
+    @staticmethod
+    def post_process(x):
+        """
+        Post process
+        :param x: Input image tensor must range of -1 and 1
+        :return: Post process tensor
+        """
+        # Return the value to the range of 0 and 1
+        x = (x + 1) * 0.5
+        # Multiply by 255 to enter the effective pixel range
+        x = (x * 255).type(torch.uint8)
+        return x

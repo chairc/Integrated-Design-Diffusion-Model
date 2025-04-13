@@ -98,3 +98,17 @@ class BaseNet(nn.Module):
         except Exception:
             raise IndexError("The image size is set too small and the preprocessing exceeds the index range. "
                              "It is recommended that the image length and width be set to no less than 32.")
+
+    def encode_time_with_label(self, time, y):
+        """
+        Encode time with label
+        :param time: Time
+        :param y: Input label
+        :return: time
+        """
+        time = time.unsqueeze(-1).type(torch.float)
+        time = self.pos_encoding(time, self.time_channel)
+
+        if y is not None:
+            time += self.label_emb(y)
+        return time

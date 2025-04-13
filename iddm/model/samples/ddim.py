@@ -99,8 +99,6 @@ class DDIMDiffusion(BaseDiffusion):
                 # Predicted x0 + direction pointing to xt + sigma * predicted noise
                 x = torch.sqrt(alpha_prev) * x0_t + c2 * predicted_noise + c1 * noise
         model.train()
-        # Return the value to the range of 0 and 1
-        x = (x + 1) * 0.5
-        # Multiply by 255 to enter the effective pixel range
-        x = (x * 255).type(torch.uint8)
+        # Post process
+        x = self.post_process(x=x)
         return x

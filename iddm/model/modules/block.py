@@ -8,6 +8,7 @@
 import torch
 import torch.nn as nn
 
+from iddm.config.setting import EMB_CHANNEL
 from iddm.model.modules.conv import BaseConv, DoubleConv
 from iddm.model.modules.module import CSPLayer, DenseModule
 
@@ -17,7 +18,7 @@ class DownBlock(nn.Module):
     Downsample block
     """
 
-    def __init__(self, in_channels, out_channels, emb_channels=256, act="silu"):
+    def __init__(self, in_channels, out_channels, emb_channels=EMB_CHANNEL, act="silu"):
         """
         Initialize the downsample block
         :param in_channels: Input channels
@@ -54,7 +55,7 @@ class UpBlock(nn.Module):
     Upsample Block
     """
 
-    def __init__(self, in_channels, out_channels, emb_channels=256, act="silu"):
+    def __init__(self, in_channels, out_channels, emb_channels=EMB_CHANNEL, act="silu"):
         """
         Initialize the upsample block
         :param in_channels: Input channels
@@ -95,7 +96,7 @@ class UpBlockV2(UpBlock):
     Upsample Block v2
     """
 
-    def __init__(self, in_channels, out_channels, emb_channels=256, act="silu"):
+    def __init__(self, in_channels, out_channels, emb_channels=EMB_CHANNEL, act="silu"):
         """
         Initialize the upsample block v2
         :param in_channels: Input channels
@@ -124,7 +125,7 @@ class UpBlockV2(UpBlock):
 
 
 class CSPDarkDownBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, emb_channels=256, n=1, act="silu"):
+    def __init__(self, in_channels, out_channels, emb_channels=EMB_CHANNEL, n=1, act="silu"):
         super().__init__()
         self.conv_csp = nn.Sequential(
             BaseConv(in_channels=in_channels, out_channels=out_channels, kernel_size=3, stride=2, act=act),
@@ -144,7 +145,7 @@ class CSPDarkDownBlock(nn.Module):
 
 class CSPDarkUpBlock(nn.Module):
 
-    def __init__(self, in_channels, out_channels, emb_channels=256, n=1, act="silu"):
+    def __init__(self, in_channels, out_channels, emb_channels=EMB_CHANNEL, n=1, act="silu"):
         super().__init__()
         self.up = nn.Upsample(scale_factor=2, mode="nearest")
         self.conv = BaseConv(in_channels=in_channels, out_channels=out_channels, kernel_size=1, stride=1, act=act)
