@@ -85,11 +85,7 @@ class CSPDarkUnet(BaseNet):
         :param y: Input label
         :return: output
         """
-        time = time.unsqueeze(-1).type(torch.float)
-        time = self.pos_encoding(time, self.time_channel)
-
-        if y is not None:
-            time += self.label_emb(y)
+        time = self.encode_time_with_label(time=time, y=y)
 
         x1 = self.inc(x)
         x2 = self.down1(x1, time)
