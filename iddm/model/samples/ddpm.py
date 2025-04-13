@@ -87,8 +87,6 @@ class DDPMDiffusion(BaseDiffusion):
                         x - ((1 - alpha) / (torch.sqrt(1 - alpha_hat))) * predicted_noise) + torch.sqrt(
                     beta) * noise
         model.train()
-        # Return the value to the range of 0 and 1
-        x = (x.clamp(-1, 1) + 1) / 2
-        # Multiply by 255 to enter the effective pixel range
-        x = (x * 255).type(torch.uint8)
+        # Post process
+        x = self.post_process(x=x.clamp(-1, 1))
         return x

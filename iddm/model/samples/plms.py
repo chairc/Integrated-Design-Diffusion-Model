@@ -123,8 +123,6 @@ class PLMSDiffusion(BaseDiffusion):
                 # Save old predicted_noise
                 old_eps.append(predicted_noise)
         model.train()
-        # Return the value to the range of 0 and 1
-        x = (x + 1) * 0.5
-        # Multiply by 255 to enter the effective pixel range
-        x = (x * 255).type(torch.uint8)
+        # Post process
+        x = self.post_process(x=x)
         return x
