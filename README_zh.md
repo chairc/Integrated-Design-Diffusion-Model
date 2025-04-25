@@ -98,7 +98,7 @@ torchvision>=0.10.0 # 更多信息：https://pytorch.org/get-started/locally/ �
 ```bash
 git clone https://github.com/chairc/Integrated-Design-Diffusion-Model.git
 cd Integrated-Design-Diffusion-Model
-python setup.py install
+pip install . # 或者 python setup.py install
 ```
 
 
