@@ -38,10 +38,11 @@ if __name__ == "__main__":
     # Define the metadata of the package
     setup(
         name="iddm",
-        version="1.1.8-b3",
+        version="1.1.8b3",
         packages=find_packages(),
         python_requires=">=3.8",
-        install_requires=package_list,
+        # Windows users may get path problems, replace get_install_requirements() with package_list
+        install_requires=get_install_requirements(),
         license="Apache-2.0",
         description="IDDM: Integrated Design Diffusion Model",
         long_description=get_long_description(),
