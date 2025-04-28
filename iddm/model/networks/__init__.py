@@ -10,6 +10,7 @@ from .base import BaseNet
 from .cspdarkunet import CSPDarkUnet
 from .unet import UNet
 from .unetv2 import UNetV2
+from .unet_slim import UNetSlim
 
 # Super resolution network
 from .sr.srv1 import SRv1
