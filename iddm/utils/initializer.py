@@ -17,6 +17,7 @@ from torch.cuda.amp import GradScaler
 
 from iddm.model.networks.unet import UNet
 from iddm.model.networks.unetv2 import UNetV2
+from iddm.model.networks.unet_slim import UNetSlim
 from iddm.model.networks.cspdarkunet import CSPDarkUnet
 from iddm.model.networks.sr.srv1 import SRv1
 from iddm.model.samples.ddim import DDIMDiffusion
@@ -94,6 +95,8 @@ def network_initializer(network, device):
         Network = UNetV2
     elif network == "cspdarkunet":
         Network = CSPDarkUnet
+    elif network == "unet-slim":
+        Network = UNetSlim
     else:
         Network = UNet
         logger.warning(msg=f"[{device}]: Setting network error, we has been automatically set to unet.")
