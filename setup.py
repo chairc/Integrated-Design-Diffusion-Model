@@ -42,7 +42,8 @@ if __name__ == "__main__":
         packages=find_packages(),
         python_requires=">=3.8",
         # Windows users may get path problems, replace get_install_requirements() with package_list
-        install_requires=get_install_requirements(),
+        # install_requires=get_install_requirements(),
+        install_requires=package_list,
         license="Apache-2.0",
         description="IDDM: Integrated Design Diffusion Model",
         long_description=get_long_description(),
@@ -52,7 +53,6 @@ if __name__ == "__main__":
         url="https://github.com/chairc/Integrated-Design-Diffusion-Model",
         classifiers=[
             "Programming Language :: Python :: 3",
-            "License :: OSI Approved :: Apache Software License",
             "Operating System :: OS Independent",
         ],
         project_urls={
