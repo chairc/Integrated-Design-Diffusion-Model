@@ -57,6 +57,14 @@
 ```bash
 git clone https://github.com/chairc/Integrated-Design-Diffusion-Model.git
 cd Integrated-Design-Diffusion-Model
+# 在虚拟环境中运行项目（推荐）
+conda create -n iddm python=3.10
+pip install -r requirements.txt
+# 训练模型
+cd iddm/tools
+python train.py --xxx xxx # 用个人参数替换-xxx
+# 生成图像
+python generate.py --xxx xxx # 用个人参数替换-xxx
 ```
 
 #### 安装
