@@ -1,0 +1,2 @@
+Model checkpoint are stored in the `weights` directory.
+You can download the pre-trained model weights from the following link: [https://github.com/chairc/Integrated-Design-Diffusion-Model/releases](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases)
