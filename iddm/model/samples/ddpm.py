@@ -5,9 +5,12 @@
     @Author : chairc
     @Site   : https://github.com/chairc
 """
+from typing import Optional, List, Union
+
 import torch
 import logging
 import coloredlogs
+from torch import nn
 
 from tqdm import tqdm
 
@@ -22,8 +25,15 @@ class DDPMDiffusion(BaseDiffusion):
     DDPM class
     """
 
-    def __init__(self, noise_steps=1000, beta_start=1e-4, beta_end=2e-2, img_size=None, device="cpu",
-                 schedule_name="linear"):
+    def __init__(
+            self,
+            noise_steps: int = 1000,
+            beta_start: float = 1e-4,
+            beta_end: float = 2e-2,
+            img_size: Optional[List[int]] = None,
+            device: Union[str, torch.device] = "cpu",
+            schedule_name: str = "linear"
+    ):
         """
         The implement of DDPM
         Paper: Denoising Diffusion Probabilistic Models
@@ -38,7 +48,13 @@ class DDPMDiffusion(BaseDiffusion):
 
         super().__init__(noise_steps, beta_start, beta_end, img_size, device, schedule_name)
 
-    def sample(self, model, n, labels=None, cfg_scale=None):
+    def sample(
+            self,
+            model: nn.Module,
+            n: int,
+            labels: Optional[torch.Tensor] = None,
+            cfg_scale: Optional[float] = None
+    ) -> torch.Tensor:
         """
         DDPM sample method
         :param model: Model
@@ -58,19 +74,8 @@ class DDPMDiffusion(BaseDiffusion):
                 # Time step, creating a tensor of size n
                 t = (torch.ones(n) * i).long().to(self.device)
                 # Whether the network has conditional input, such as multiple category input
-                if labels is None and cfg_scale is None:
-                    # Images and time steps input into the model
-                    predicted_noise = model(x, t)
-                else:
-                    predicted_noise = model(x, t, labels)
-                    # Avoiding the posterior collapse problem and better generate model effect
-                    if cfg_scale > 0:
-                        # Unconditional predictive noise
-                        unconditional_predicted_noise = model(x, t, None)
-                        # 'torch.lerp' performs linear interpolation between the start and end values
-                        # according to the given weights
-                        # Formula: input + weight * (end - input)
-                        predicted_noise = torch.lerp(unconditional_predicted_noise, predicted_noise, cfg_scale)
+                # Predict noise
+                predicted_noise = self._get_predicted_noise(model, x, t, labels, cfg_scale)
                 # Expand to a 4-dimensional tensor, and get the value according to the time step t
                 alpha = self.alpha[t][:, None, None, None]
                 alpha_hat = self.alpha_hat[t][:, None, None, None]

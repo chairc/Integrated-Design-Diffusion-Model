@@ -5,9 +5,12 @@
     @Author : chairc
     @Site   : https://github.com/chairc
 """
+from typing import Optional, List, Union, Tuple
+
 import torch
 import logging
 import coloredlogs
+from torch import nn
 
 from tqdm import tqdm
 
@@ -22,8 +25,16 @@ class DDIMDiffusion(BaseDiffusion):
     DDIM class
     """
 
-    def __init__(self, noise_steps=1000, sample_steps=100, beta_start=1e-4, beta_end=2e-2, img_size=None, device="cpu",
-                 schedule_name="linear"):
+    def __init__(
+            self,
+            noise_steps: int = 1000,
+            sample_steps: int = 100,
+            beta_start: float = 1e-4,
+            beta_end: float = 2e-2,
+            img_size: Optional[List[int]] = None,
+            device: Union[str, torch.device] = "cpu",
+            schedule_name: str = "linear"
+    ):
         """
         The implement of DDIM
         Paper: Denoising Diffusion Implicit Models
@@ -43,11 +54,24 @@ class DDIMDiffusion(BaseDiffusion):
         self.eta = 0
 
         # Calculate time step size, it skips some steps
+        self._init_time_step()
+
+    def _init_time_step(self):
+        """
+        Initialize the time step for DDIM sampling
+        :return: List of tuples (current step, previous step)
+        """
         self.time_step = torch.arange(0, self.noise_steps, (self.noise_steps // self.sample_steps)).long() + 1
         self.time_step = reversed(torch.cat((torch.tensor([0], dtype=torch.long), self.time_step)))
         self.time_step = list(zip(self.time_step[:-1], self.time_step[1:]))
 
-    def sample(self, model, n, labels=None, cfg_scale=None):
+    def sample(
+            self,
+            model: nn.Module,
+            n: int,
+            labels: Optional[torch.Tensor] = None,
+            cfg_scale: Optional[float] = None
+    ) -> torch.Tensor:
         """
         DDIM sample method
         :param model: Model
@@ -71,24 +95,9 @@ class DDIMDiffusion(BaseDiffusion):
                 # Expand to a 4-dimensional tensor, and get the value according to the time step t
                 alpha_t = self.alpha_hat[t][:, None, None, None]
                 alpha_prev = self.alpha_hat[p_t][:, None, None, None]
-                if i > 1:
-                    noise = torch.randn_like(x)
-                else:
-                    noise = torch.zeros_like(x)
-                # Whether the network has conditional input, such as multiple category input
-                if labels is None and cfg_scale is None:
-                    # Images and time steps input into the model
-                    predicted_noise = model(x, t)
-                else:
-                    predicted_noise = model(x, t, labels)
-                    # Avoiding the posterior collapse problem and better generate model effect
-                    if cfg_scale > 0:
-                        # Unconditional predictive noise
-                        unconditional_predicted_noise = model(x, t, None)
-                        # 'torch.lerp' performs linear interpolation between the start and end values
-                        # according to the given weights
-                        # Formula: input + weight * (end - input)
-                        predicted_noise = torch.lerp(unconditional_predicted_noise, predicted_noise, cfg_scale)
+                noise = torch.randn_like(x) if i > 1 else torch.zeros_like(x)
+                # Predict noise
+                predicted_noise = self._get_predicted_noise(model, x, t, labels, cfg_scale)
                 # Calculation formula
                 # Division would cause the value to be too large or too small, and it needs to be constrained
                 # https://github.com/ermongroup/ddim/blob/main/functions/denoising.py#L54C12-L54C54
