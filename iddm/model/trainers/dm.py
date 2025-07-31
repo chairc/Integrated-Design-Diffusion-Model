@@ -153,9 +153,9 @@ class DMTrainer(Trainer):
             # Parameter 'ckpt_path' is None in the train mode
             if ckpt_path is None:
                 ckpt_path = os.path.join(self.results_dir, "ckpt_last.pt")
-            self.start_epoch = load_ckpt(ckpt_path=ckpt_path, model=self.model, device=self.device,
-                                         optimizer=self.optimizer, is_distributed=self.distributed,
-                                         conditional=self.conditional)
+            self.start_epoch, _ = load_ckpt(ckpt_path=ckpt_path, model=self.model, device=self.device,
+                                            optimizer=self.optimizer, is_distributed=self.distributed,
+                                            conditional=self.conditional)
             logger.info(msg=f"[{self.device}]: Successfully load resume model checkpoint.")
         else:
             # Pretrain mode
