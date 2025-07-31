@@ -146,9 +146,12 @@ class Trainer:
         """
         Train in epochs method
         """
-        self.before_iter()
-        self.train_in_iter()
-        self.after_iter()
+        logger.info(msg=f"[{self.device}]: Start training.")
+        # Start iterating
+        for self.epoch in range(self.start_epoch, self.epochs):
+            self.before_iter()
+            self.train_in_iter()
+            self.after_iter()
 
     def before_iter(self):
         """

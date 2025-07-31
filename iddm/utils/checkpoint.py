@@ -43,8 +43,6 @@ def load_ckpt(ckpt_path, model=None, device="cpu", optimizer=None, is_train=True
 
     # Load the model best score
     if ckpt_type == "sr":
-        logger.info(msg=f"[{device}]: Successfully load the best sr checkpoint from {ckpt_path}.")
-        return ckpt_state["ssim"], ckpt_state["psnr"]
         model_score = [ckpt_state["best_ssim"], ckpt_state["best_psnr"]]
     else:
         model_score = []

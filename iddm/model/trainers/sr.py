@@ -175,17 +175,6 @@ class SRTrainer(Trainer):
         # EMA model
         self.ema_model = copy.deepcopy(self.model).eval().requires_grad_(False)
 
-    def train_in_epochs(self):
-        """
-        Train in epochs super resolution model method
-        """
-        logger.info(msg=f"[{self.device}]: Start training.")
-        # Start iterating
-        for self.epoch in range(self.start_epoch, self.epochs):
-            self.before_iter()
-            self.train_in_iter()
-            self.after_iter()
-
     def before_iter(self):
         """
         Before training one iter super resolution model method
@@ -331,7 +320,7 @@ class SRTrainer(Trainer):
                       save_model_interval=self.save_model_interval, start_model_interval=self.start_model_interval,
                       save_model_interval_epochs=self.save_model_interval_epochs, image_size=self.image_size,
                       network=self.network, act=self.act, is_sr=True, is_best=is_best, ssim=self.avg_ssim,
-                      psnr=self.avg_psnr)
+                      psnr=self.avg_psnr,best_ssim=self.best_ssim, best_psnr=self.best_psnr)
         logger.info(msg=f"[{self.device}]: Finish epoch {self.epoch}:")
 
         # Synchronization during distributed training
