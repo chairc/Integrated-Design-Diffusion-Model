@@ -154,19 +154,41 @@ class BaseDiffusion:
     def sample(
             self,
             model: nn.Module,
-            n: int,
+            x: Optional[torch.Tensor] = None,
+            n: int = 1,
             labels: Optional[torch.Tensor] = None,
             cfg_scale: Optional[float] = None
     ) -> torch.Tensor:
         """
         Sample method, this method should be implemented in the subclass
         :param model: Model
-        :param n: Number of sample images
+        :param x: Input image tensor, if provided, will be used as the starting point for sampling
+        :param n: Number of sample images, x priority is greater than n
         :param labels: Labels
         :param cfg_scale: classifier-free guidance interpolation weight, users can better generate model effect.
         :return: Sample images
         """
         pass
+
+    def _get_input_image(
+            self,
+            n: int,
+            x: Optional[torch.Tensor] = None
+    ) -> Tuple[torch.Tensor, int]:
+        """
+        Get input image tensor
+        :param x: Input image tensor, if provided, will be used as the starting point for sampling
+        :return: Input image tensor
+        """
+        if x is None and n > 0:
+            # If no input image is provided, generate a random noise image
+            return torch.randn((n, self.image_channel, self.img_size[0], self.img_size[1])).to(self.device), n
+        elif x is not None:
+            # If an input image is provided, ensure it has the correct shape
+            return x.to(self.device), x.shape[0]
+        else:
+            # If no input image is provided and n is 0, return a random noise image with batch size 1
+            return torch.randn((1, self.image_channel, self.img_size[0], self.img_size[1])).to(self.device), 1
 
     @staticmethod
     def _get_predicted_noise(

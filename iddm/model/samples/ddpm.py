@@ -51,41 +51,43 @@ class DDPMDiffusion(BaseDiffusion):
     def sample(
             self,
             model: nn.Module,
-            n: int,
+            x: Optional[torch.Tensor] = None,
+            n: int = 1,
             labels: Optional[torch.Tensor] = None,
             cfg_scale: Optional[float] = None
     ) -> torch.Tensor:
         """
         DDPM sample method
         :param model: Model
-        :param n: Number of sample images
+        :param x: Input image tensor, if provided, will be used as the starting point for sampling
+        :param n: Number of sample images, x priority is greater than n
         :param labels: Labels
         :param cfg_scale: classifier-free guidance interpolation weight, users can better generate model effect.
         Avoiding the posterior collapse problem, Reference paper: 'Classifier-Free Diffusion Guidance'
         :return: Sample images
         """
+        # Input dim: [n, img_channel, img_size_h, img_size_w]
+        x, n = self._get_input_image(n=n, x=x)
         logger.info(msg=f"DDPM Sampling {n} new images....")
         model.eval()
         with torch.no_grad():
-            # Input dim: [n, img_channel, img_size_h, img_size_w]
-            x = torch.randn((n, self.image_channel, self.img_size[0], self.img_size[1])).to(self.device)
             # 'reversed(range(1, self.noise_steps)' iterates over a sequence of integers in reverse
             for i in tqdm(reversed(range(1, self.noise_steps)), position=0, total=self.noise_steps - 1):
                 # Time step, creating a tensor of size n
                 t = (torch.ones(n) * i).long().to(self.device)
+
                 # Whether the network has conditional input, such as multiple category input
                 # Predict noise
                 predicted_noise = self._get_predicted_noise(model, x, t, labels, cfg_scale)
+
                 # Expand to a 4-dimensional tensor, and get the value according to the time step t
                 alpha = self.alpha[t][:, None, None, None]
                 alpha_hat = self.alpha_hat[t][:, None, None, None]
                 beta = self.beta[t][:, None, None, None]
                 # Only noise with a step size greater than 1 is required.
                 # For details, refer to line 3 of Algorithm 2 on page 4 of the paper
-                if i > 1:
-                    noise = torch.randn_like(x)
-                else:
-                    noise = torch.zeros_like(x)
+                noise = torch.randn_like(x) if i > 1 else torch.zeros_like(x)
+
                 # In each epoch, use x to calculate t - 1 of x
                 # For details, refer to line 4 of Algorithm 2 on page 4 of the paper
                 x = 1 / torch.sqrt(alpha) * (

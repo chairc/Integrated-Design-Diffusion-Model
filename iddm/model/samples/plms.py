@@ -52,24 +52,26 @@ class PLMSDiffusion(DDIMDiffusion):
     def sample(
             self,
             model: nn.Module,
-            n: int,
+            x: Optional[torch.Tensor] = None,
+            n: int = 1,
             labels: Optional[torch.Tensor] = None,
             cfg_scale: Optional[float] = None
     ) -> torch.Tensor:
         """
         PLMS sample method
         :param model: Model
-        :param n: Number of sample images
+        :param x: Input image tensor, if provided, will be used as the starting point for sampling
+        :param n: Number of sample images, x priority is greater than n
         :param labels: Labels
         :param cfg_scale: classifier-free guidance interpolation weight, users can better generate model effect.
         Avoiding the posterior collapse problem, Reference paper: 'Classifier-Free Diffusion Guidance'
         :return: Sample images
         """
+        # Input dim: [n, img_channel, img_size_h, img_size_w]
+        x, n = self._get_input_image(n=n, x=x)
         logger.info(msg=f"PLMS Sampling {n} new images....")
         model.eval()
         with torch.no_grad():
-            # Input dim: [n, img_channel, img_size_h, img_size_w]
-            x = torch.randn((n, self.image_channel, self.img_size[0], self.img_size[1])).to(self.device)
             # Old eps
             old_eps = []
             # The list of current time and previous time
@@ -82,8 +84,10 @@ class PLMSDiffusion(DDIMDiffusion):
                 alpha_t = self.alpha_hat[t][:, None, None, None]
                 alpha_prev = self.alpha_hat[p_t][:, None, None, None]
                 noise = torch.randn_like(x) if i > 1 else torch.zeros_like(x)
+
                 # Predict noise
                 predicted_noise = self._get_predicted_noise(model, x, t, labels, cfg_scale)
+
                 # Calculation formula
                 if len(old_eps) == 0:
                     # Pseudo Improved Euler (2nd order)
