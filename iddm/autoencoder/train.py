@@ -53,7 +53,7 @@ def init_autoencoder_train_args():
     parser.add_argument("--seed", "-s", type=int, default=0)
     # Set network
     # Option: vae1
-    parser.add_argument("--network", type=str, default="vae1", choices=autoencoder_network_choices)
+    parser.add_argument("--network", type=str, default="vae", choices=autoencoder_network_choices)
     # File name for initializing the model (required)
     parser.add_argument("--run_name", "-n", type=str, default="autoencoder")
     # Total epoch for training (required)
@@ -66,7 +66,7 @@ def init_autoencoder_train_args():
     # Input image size (required)
     parser.add_argument("--image_size", "-i", type=int, default=512)
     # Set the number of channels in the latent space (needed)
-    parser.add_argument("--latent_channels", "-l", type=int, default=4)
+    parser.add_argument("--latent_channels", "-l", type=int, default=8)
     # Dataset path (required)
     # Conditional dataset
     # e.g: cifar10, Each category is stored in a separate folder, and the main folder represents the path.
@@ -79,21 +79,17 @@ def init_autoencoder_train_args():
     # Enable automatic mixed precision training (needed)
     # Effectively reducing GPU memory usage may lead to lower training accuracy and results.
     parser.add_argument("--amp", default=False, action="store_true")
-    # It is recommended that the batch size of the evaluation data be set to 1,
-    # which can accurately evaluate each picture and reduce the evaluation error of each group of pictures.
-    # If you want to evaluate quickly, set it to batch size.
-    parser.add_argument("--quick_eval", default=False, action="store_true")
     # Set optimizer (needed)
     # Option: adam/adamw/sgd
-    parser.add_argument("--optim", type=str, default="sgd", choices=optim_choices)
+    parser.add_argument("--optim", type=str, default="adamw", choices=optim_choices)
     # Set loss function
     # Option: mse only
-    parser.add_argument("--loss", type=str, default="mse", choices=autoencoder_loss_func_choices)
+    parser.add_argument("--loss", type=str, default="mse_kl", choices=autoencoder_loss_func_choices)
     # Set activation function (needed)
     # Option: gelu/silu/relu/relu6/lrelu
     parser.add_argument("--act", type=str, default="silu")
     # Learning rate (needed)
-    parser.add_argument("--lr", type=float, default=1e-3)
+    parser.add_argument("--lr", type=float, default=1e-4)
     # Learning rate function (needed)
     # Option: linear/cosine/warmup_cosine
     parser.add_argument("--lr_func", type=str, default="cosine")
