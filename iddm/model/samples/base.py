@@ -6,8 +6,10 @@
     @Site   : https://github.com/chairc
 """
 import math
+from typing import Optional, List, Union, Tuple
 
 import torch
+from torch import nn
 
 from iddm.config.setting import DEFAULT_IMAGE_SIZE, IMAGE_CHANNEL
 
@@ -17,8 +19,15 @@ class BaseDiffusion:
     Base diffusion class
     """
 
-    def __init__(self, noise_steps=1000, beta_start=1e-4, beta_end=2e-2, img_size=None, device="cpu",
-                 schedule_name="linear"):
+    def __init__(
+            self,
+            noise_steps: int = 1000,
+            beta_start: float = 1e-4,
+            beta_end: float = 2e-2,
+            img_size: Optional[List[int]] = None,
+            device: Union[str, torch.device] = "cpu",
+            schedule_name: str = "linear"
+    ):
         """
         Diffusion model base class
         :param noise_steps: Noise steps
@@ -47,7 +56,10 @@ class BaseDiffusion:
         # The cumulative sum of α.
         self.alpha_hat = torch.cumprod(input=self.alpha, dim=0)
 
-    def prepare_noise_schedule(self, schedule_name="linear"):
+    def prepare_noise_schedule(
+            self,
+            schedule_name: str = "linear"
+    ) -> torch.Tensor:
         """
         Prepare the noise schedule
         :param schedule_name: Function, linear and cosine
@@ -94,7 +106,11 @@ class BaseDiffusion:
         else:
             raise NotImplementedError(f"Unknown beta schedule: {schedule_name}")
 
-    def noise_images(self, x, time):
+    def noise_images(
+            self,
+            x: torch.Tensor,
+            time: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Add noise to the image
         :param x: Input image
@@ -105,10 +121,13 @@ class BaseDiffusion:
         sqrt_one_minus_alpha_hat = torch.sqrt(1 - self.alpha_hat[time])[:, None, None, None]
         # Generates a tensor of the same shape as the x tensor,
         # with elements randomly sampled from a standard normal distribution (mean 0, variance 1)
-        Ɛ = torch.randn_like(x)
-        return sqrt_alpha_hat * x + sqrt_one_minus_alpha_hat * Ɛ, Ɛ
+        eps = torch.randn_like(x)
+        return sqrt_alpha_hat * x + sqrt_one_minus_alpha_hat * eps, eps
 
-    def sample_time_steps(self, n):
+    def sample_time_steps(
+            self,
+            n: int
+    ) -> torch.Tensor:
         """
         Sample time steps
         :param n: Image size
@@ -118,7 +137,10 @@ class BaseDiffusion:
         # where each element is randomly chosen between low and high (contains low, does not contain high)
         return torch.randint(low=1, high=self.noise_steps, size=(n,))
 
-    def init_sample_image_size(self, img_size):
+    def init_sample_image_size(
+            self,
+            img_size: Optional[List[int]] = None
+    ):
         """
         Initialize sample image size
         :param img_size: Image size
@@ -129,8 +151,82 @@ class BaseDiffusion:
         else:
             self.img_size = img_size
 
+    def sample(
+            self,
+            model: nn.Module,
+            x: Optional[torch.Tensor] = None,
+            n: int = 1,
+            labels: Optional[torch.Tensor] = None,
+            cfg_scale: Optional[float] = None
+    ) -> torch.Tensor:
+        """
+        Sample method, this method should be implemented in the subclass
+        :param model: Model
+        :param x: Input image tensor, if provided, will be used as the starting point for sampling
+        :param n: Number of sample images, x priority is greater than n
+        :param labels: Labels
+        :param cfg_scale: classifier-free guidance interpolation weight, users can better generate model effect.
+        :return: Sample images
+        """
+        pass
+
+    def _get_input_image(
+            self,
+            n: int,
+            x: Optional[torch.Tensor] = None
+    ) -> Tuple[torch.Tensor, int]:
+        """
+        Get input image tensor
+        :param x: Input image tensor, if provided, will be used as the starting point for sampling
+        :return: Input image tensor
+        """
+        if x is None and n > 0:
+            # If no input image is provided, generate a random noise image
+            return torch.randn((n, self.image_channel, self.img_size[0], self.img_size[1])).to(self.device), n
+        elif x is not None:
+            # If an input image is provided, ensure it has the correct shape
+            return x.to(self.device), x.shape[0]
+        else:
+            # If no input image is provided and n is 0, return a random noise image with batch size 1
+            return torch.randn((1, self.image_channel, self.img_size[0], self.img_size[1])).to(self.device), 1
+
     @staticmethod
-    def post_process(x):
+    def _get_predicted_noise(
+            model: nn.Module,
+            x: torch.Tensor,
+            t: torch.Tensor,
+            labels: Optional[torch.Tensor],
+            cfg_scale: Optional[float]
+    ) -> torch.Tensor:
+        """
+        Obtaining Predictive Noise (Public Logic Extraction)
+        Handle conditional generation and classifier guidance
+        :param model: Noise prediction model
+        :param x: Input image tensor
+        :param t: Time step tensor
+        :param labels: Conditional labels (optional)
+        :param cfg_scale: Classifier-free guidance scale (optional)
+        :return: Predicted noise tensor
+        """
+        # Whether the network has conditional input, such as multiple category input
+        if labels is None or cfg_scale is None or cfg_scale <= 0:
+            # Images and time steps input into the model
+            return model(x, t) if labels is None else model(x, t, labels)
+
+        # Classifier guidance: mixed conditional and unconditional predictions
+        conditional_noise = model(x, t, labels)
+        # Avoiding the posterior collapse problem and better generate model effect
+        # Unconditional predictive noise
+        unconditional_noise = model(x, t, None)
+        # 'torch.lerp' performs linear interpolation between the start and end values
+        # according to the given weights
+        # Formula: input + weight * (end - input)
+        return torch.lerp(unconditional_noise, conditional_noise, cfg_scale)
+
+    @staticmethod
+    def post_process(
+            x: torch.Tensor
+    ) -> torch.Tensor:
         """
         Post process
         :param x: Input image tensor must range of -1 and 1

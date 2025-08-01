@@ -5,25 +5,36 @@
     @Author : chairc
     @Site   : https://github.com/chairc
 """
+from typing import Optional, List, Union
+
 import torch
 import logging
 import coloredlogs
+from torch import nn
 
 from tqdm import tqdm
 
-from iddm.model.samples.base import BaseDiffusion
+from iddm.model.samples.ddim import DDIMDiffusion
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
 
 
-class PLMSDiffusion(BaseDiffusion):
+class PLMSDiffusion(DDIMDiffusion):
     """
     PLMS class
     """
 
-    def __init__(self, noise_steps=1000, sample_steps=100, beta_start=1e-4, beta_end=2e-2, img_size=None, device="cpu",
-                 schedule_name="linear"):
+    def __init__(
+            self,
+            noise_steps: int = 1000,
+            sample_steps: int = 100,
+            beta_start: float = 1e-4,
+            beta_end: float = 2e-2,
+            img_size: Optional[List[int]] = None,
+            device: Union[str, torch.device] = "cpu",
+            schedule_name: str = "linear"
+    ):
         """
         The implement of PLMS, like DDIM
         Paper: Pseudo Numerical Methods for Diffusion Models on Manifolds
@@ -36,32 +47,31 @@ class PLMSDiffusion(BaseDiffusion):
         :param device: Device type
         :param schedule_name: Prepare the noise schedule name
         """
-        super().__init__(noise_steps, beta_start, beta_end, img_size, device, schedule_name)
-        # Sample steps, it skips some steps
-        self.sample_steps = sample_steps
+        super().__init__(noise_steps, sample_steps, beta_start, beta_end, img_size, device, schedule_name)
 
-        self.eta = 0
-
-        # Calculate time step size, it skips some steps
-        self.time_step = torch.arange(0, self.noise_steps, (self.noise_steps // self.sample_steps)).long() + 1
-        self.time_step = reversed(torch.cat((torch.tensor([0], dtype=torch.long), self.time_step)))
-        self.time_step = list(zip(self.time_step[:-1], self.time_step[1:]))
-
-    def sample(self, model, n, labels=None, cfg_scale=None):
+    def sample(
+            self,
+            model: nn.Module,
+            x: Optional[torch.Tensor] = None,
+            n: int = 1,
+            labels: Optional[torch.Tensor] = None,
+            cfg_scale: Optional[float] = None
+    ) -> torch.Tensor:
         """
         PLMS sample method
         :param model: Model
-        :param n: Number of sample images
+        :param x: Input image tensor, if provided, will be used as the starting point for sampling
+        :param n: Number of sample images, x priority is greater than n
         :param labels: Labels
         :param cfg_scale: classifier-free guidance interpolation weight, users can better generate model effect.
         Avoiding the posterior collapse problem, Reference paper: 'Classifier-Free Diffusion Guidance'
         :return: Sample images
         """
+        # Input dim: [n, img_channel, img_size_h, img_size_w]
+        x, n = self._get_input_image(n=n, x=x)
         logger.info(msg=f"PLMS Sampling {n} new images....")
         model.eval()
         with torch.no_grad():
-            # Input dim: [n, img_channel, img_size_h, img_size_w]
-            x = torch.randn((n, self.image_channel, self.img_size[0], self.img_size[1])).to(self.device)
             # Old eps
             old_eps = []
             # The list of current time and previous time
@@ -73,24 +83,11 @@ class PLMSDiffusion(BaseDiffusion):
                 # Expand to a 4-dimensional tensor, and get the value according to the time step t
                 alpha_t = self.alpha_hat[t][:, None, None, None]
                 alpha_prev = self.alpha_hat[p_t][:, None, None, None]
-                if i > 1:
-                    noise = torch.randn_like(x)
-                else:
-                    noise = torch.zeros_like(x)
-                # Whether the network has conditional input, such as multiple category input
-                if labels is None and cfg_scale is None:
-                    # Images and time steps input into the model
-                    predicted_noise = model(x, t)
-                else:
-                    predicted_noise = model(x, t, labels)
-                    # Avoiding the posterior collapse problem and better generate model effect
-                    if cfg_scale > 0:
-                        # Unconditional predictive noise
-                        unconditional_predicted_noise = model(x, t, None)
-                        # 'torch.lerp' performs linear interpolation between the start and end values
-                        # according to the given weights
-                        # Formula: input + weight * (end - input)
-                        predicted_noise = torch.lerp(unconditional_predicted_noise, predicted_noise, cfg_scale)
+                noise = torch.randn_like(x) if i > 1 else torch.zeros_like(x)
+
+                # Predict noise
+                predicted_noise = self._get_predicted_noise(model, x, t, labels, cfg_scale)
+
                 # Calculation formula
                 if len(old_eps) == 0:
                     # Pseudo Improved Euler (2nd order)
@@ -122,6 +119,9 @@ class PLMSDiffusion(BaseDiffusion):
                 x = torch.sqrt(alpha_prev) * x0_t + c2 * predicted_noise_prime + c1 * noise
                 # Save old predicted_noise
                 old_eps.append(predicted_noise)
+                # Only the last 3 historical values are retained to save memory
+                if len(old_eps) > 3:
+                    old_eps.pop(0)
         model.train()
         # Post process
         x = self.post_process(x=x)

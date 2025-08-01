@@ -144,16 +144,13 @@ class SRTrainer(Trainer):
             # Parameter 'ckpt_path' is None in the train mode
             if ckpt_path is None:
                 ckpt_path = os.path.join(self.results_dir, "ckpt_last.pt")
-            # The best model
-            ckpt_best_path = os.path.join(self.results_dir, "ckpt_best.pt")
             # Get model state
-            self.start_epoch = load_ckpt(ckpt_path=ckpt_path, model=self.model, device=self.device,
-                                         optimizer=self.optimizer, is_distributed=self.distributed)
+            self.start_epoch, model_score = load_ckpt(ckpt_path=ckpt_path, model=self.model, device=self.device,
+                                                      optimizer=self.optimizer, is_distributed=self.distributed,
+                                                      ckpt_type="sr")
             # Get best ssim and psnr
-            self.best_ssim, self.best_psnr = load_ckpt(ckpt_path=ckpt_best_path, device=self.device, ckpt_type="sr")
+            self.best_ssim, self.best_psnr = model_score[0], model_score[1]
             logger.info(msg=f"[{self.device}]: Successfully load resume model checkpoint.")
-            logger.info(msg=f"[{self.device}]: The start epoch is {self.start_epoch}, best ssim is {self.best_ssim}, "
-                            f"best psnr is {self.best_psnr}.")
         else:
             # Pretrain mode
             if self.pretrain:
@@ -162,8 +159,8 @@ class SRTrainer(Trainer):
                 logger.info(msg=f"[{self.device}]: Successfully load pretrain model checkpoint.")
             # Init
             self.start_epoch, self.best_ssim, self.best_psnr = 0, 0, 0
-            logger.info(msg=f"[{self.device}]: The start epoch is {self.start_epoch}, best ssim is {self.best_ssim}, "
-                            f"best psnr is {self.best_psnr}.")
+        logger.info(msg=f"[{self.device}]: The start epoch is {self.start_epoch}, best ssim is {self.best_ssim}, "
+                        f"best psnr is {self.best_psnr}.")
         # Set harf-precision
         self.scaler = amp_initializer(amp=self.amp, device=self.device)
         # Loss function
@@ -177,17 +174,6 @@ class SRTrainer(Trainer):
         self.ema = EMA(beta=EMA_BETA)
         # EMA model
         self.ema_model = copy.deepcopy(self.model).eval().requires_grad_(False)
-
-    def train_in_epochs(self):
-        """
-        Train in epochs super resolution model method
-        """
-        logger.info(msg=f"[{self.device}]: Start training.")
-        # Start iterating
-        for self.epoch in range(self.start_epoch, self.epochs):
-            self.before_iter()
-            self.train_in_iter()
-            self.after_iter()
 
     def before_iter(self):
         """
@@ -334,7 +320,7 @@ class SRTrainer(Trainer):
                       save_model_interval=self.save_model_interval, start_model_interval=self.start_model_interval,
                       save_model_interval_epochs=self.save_model_interval_epochs, image_size=self.image_size,
                       network=self.network, act=self.act, is_sr=True, is_best=is_best, ssim=self.avg_ssim,
-                      psnr=self.avg_psnr)
+                      psnr=self.avg_psnr,best_ssim=self.best_ssim, best_psnr=self.best_psnr)
         logger.info(msg=f"[{self.device}]: Finish epoch {self.epoch}:")
 
         # Synchronization during distributed training

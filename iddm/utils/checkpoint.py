@@ -38,44 +38,49 @@ def load_ckpt(ckpt_path, model=None, device="cpu", optimizer=None, is_train=True
     """
     # Check path
     check_path_is_exist(path=ckpt_path)
-    # Load checkpoint
-    ckpt_state = torch.load(f=ckpt_path, map_location=device)
-    # Load the best model params as ssim and psnr
+    # Load checkpoint, pytorch 2.6+ default weights_only=True
+    ckpt_state = torch.load(f=ckpt_path, map_location=device, weights_only=False)
+
+    # Load the model best score
     if ckpt_type == "sr":
-        logger.info(msg=f"[{device}]: Successfully load the best sr checkpoint from {ckpt_path}.")
-        return ckpt_state["ssim"], ckpt_state["psnr"]
-    if is_pretrain:
-        logger.info(msg=f"[{device}]: Successfully load pretrain checkpoint, path is '{ckpt_path}'.")
+        model_score = [ckpt_state["best_ssim"], ckpt_state["best_psnr"]]
     else:
-        logger.info(msg=f"[{device}]: Successfully load checkpoint, path is '{ckpt_path}'.")
+        model_score = []
+
+    # Pretrain checkpoint
+    if is_pretrain:
+        logger.info(msg=f"[{device}]: Load pretrain checkpoint[{ckpt_type}], path is '{ckpt_path}'.")
+    else:
+        logger.info(msg=f"[{device}]: Load checkpoint[{ckpt_type}], path is '{ckpt_path}'.")
     # Check checkpoint's structure
     assert ckpt_state["model"] is not None or ckpt_state["ema_model"] is not None, \
-        "Error!! Checkpoint model and ema_model are not None. Please check checkpoint's structure."
+        f"Error!! Checkpoint model and ema_model are not None. Please check checkpoint[{ckpt_type}]'s structure."
     # 'model' is default option
     if ckpt_state["model"] is None:
-        logger.info(msg=f"[{device}]: Failed to load checkpoint 'model', 'ema_model' would be loaded.")
+        logger.info(msg=f"[{device}]: Failed to load checkpoint[{ckpt_type}] 'model', 'ema_model' would be loaded.")
         ckpt_model = ckpt_state["ema_model"]
     else:
         if is_use_ema:
-            logger.info(msg=f"[{device}]: Successfully to load checkpoint 'ema_model', using ema is True.")
+            logger.info(msg=f"[{device}]: Successfully to load checkpoint[{ckpt_type}] 'ema_model', using ema is True.")
             ckpt_model = ckpt_state["ema_model"]
         else:
-            logger.info(msg=f"[{device}]: Successfully to load checkpoint 'model'.")
+            logger.info(msg=f"[{device}]: Successfully to load checkpoint[{ckpt_type}] 'model'.")
             ckpt_model = ckpt_state["model"]
     # Load the current model
     load_model_ckpt(model=model, model_ckpt=ckpt_model, is_train=is_train, is_pretrain=is_pretrain,
                     is_distributed=is_distributed, conditional=conditional)
-    logger.info(msg=f"[{device}]: Successfully load model checkpoint.")
-    # Train mode
+    logger.info(msg=f"[{device}]: Successfully load model's checkpoint[{ckpt_type}].")
+    # Train mode, resume training
     if is_train and not is_pretrain:
         # Load the previous model optimizer
         optim_weights_dict = ckpt_state["optimizer"]
         optimizer.load_state_dict(state_dict=optim_weights_dict)
-        logger.info(msg=f"[{device}]: Successfully load optimizer checkpoint.")
+        logger.info(msg=f"[{device}]: Successfully load optimizer checkpoint[{ckpt_type}].")
         # Current checkpoint epoch
         start_epoch = ckpt_state["start_epoch"]
         # Next epoch
-        return start_epoch + 1
+        return start_epoch + 1, model_score
+    return None
 
 
 def load_model_ckpt(model, model_ckpt, is_train=True, is_pretrain=False, is_distributed=False, conditional=False):
@@ -86,7 +91,7 @@ def load_model_ckpt(model, model_ckpt, is_train=True, is_pretrain=False, is_dist
     :param is_train: Whether to train mode
     :param is_pretrain: Whether to load pretrain checkpoint
     :param is_distributed:  Whether to distribute training
-    :param conditional:  Whether conditional training
+    :param conditional:  Whether conditional training for diffusion model
     :return: None
     """
     model_dict = model.state_dict()
@@ -103,7 +108,7 @@ def load_model_ckpt(model, model_ckpt, is_train=True, is_pretrain=False, is_dist
                 new_model_weights_dict[key] = value
         model_weights_dict = new_model_weights_dict
         logger.info(msg="Successfully check the load weight and rename.")
-    # Train mode and it is pretraining
+    # Train mode and it is pretraining and conditional for diffusion model
     if is_train and is_pretrain and conditional:
         if is_distributed:
             new_model_weights_dict = {}
@@ -151,32 +156,58 @@ def save_ckpt(epoch, save_name, ckpt_model, ckpt_ema_model, ckpt_optimizer, resu
     :param classes_name: All classes name
     :return: None
     """
-    # Checkpoint
-    ckpt_state = {
-        "start_epoch": epoch, "model": ckpt_model, "ema_model": ckpt_ema_model, "optimizer": ckpt_optimizer,
-        "num_classes": num_classes if conditional else 1, "classes_name": classes_name, "conditional": conditional,
-        "image_size": image_size, "sample": sample, "network": network, "act": act,
-    }
-    # Check is sr mode
+    # Check mode type
+    # Super resolution
     if kwargs.get("is_sr", False):
-        best_ssim, best_psnr = kwargs.get("ssim"), kwargs.get("psnr")
-        ckpt_state["ssim"] = best_ssim
-        ckpt_state["psnr"] = best_psnr
-        # Check is the best sr model?
-        if kwargs.get("is_best", False):
-            last_filename = os.path.join(results_dir, f"ckpt_best.pt")
-            torch.save(obj=ckpt_state, f=last_filename)
-            logger.info(msg=f"Save the ckpt_best.pt, best ssim is {best_ssim}, best psnr is {best_psnr}")
+        ckpt_state = {
+            "start_epoch": epoch, "model": ckpt_model, "ema_model": ckpt_ema_model,
+            "optimizer": ckpt_optimizer, "image_size": image_size, "network": network, "act": act, "ssim": -1,
+            "psnr": -1, "best_ssim": -1, "best_psnr": -1
+        }
+        ssim, psnr = kwargs.get("ssim"), kwargs.get("psnr")
+        best_ssim, best_psnr = kwargs.get("best_ssim"), kwargs.get("best_psnr")
+        ckpt_state["ssim"] = ssim
+        ckpt_state["psnr"] = psnr
+        ckpt_state["best_ssim"] = best_ssim
+        ckpt_state["best_psnr"] = best_psnr
+        message_info = f"current ssim is {ssim}, psnr is {psnr}, best ssim is {best_ssim}, best psnr is {best_psnr}"
+    # Autoencoder
+    elif kwargs.get("is_autoencoder", False):
+        ckpt_state = {
+            "start_epoch": epoch, "model": ckpt_model, "ema_model": ckpt_ema_model, "optimizer": ckpt_optimizer,
+            "image_size": image_size, "network": network, "act": act, "score": -1, "best_score": -1,
+        }
+        score = kwargs.get("score")
+        best_score = kwargs.get("best_score")
+        ckpt_state["score"] = score
+        ckpt_state["best_score"] = best_score
+        message_info = f"current score is {score}, best score is {best_score}"
+    # Diffusion model
+    else:
+        ckpt_state = {
+            "start_epoch": epoch, "model": ckpt_model, "ema_model": ckpt_ema_model, "optimizer": ckpt_optimizer,
+            "num_classes": num_classes if conditional else 1, "classes_name": classes_name, "conditional": conditional,
+            "image_size": image_size, "sample": sample, "network": network, "act": act,
+        }
+        message_info = ""
+
     # Save last checkpoint, it must be done
     last_filename = os.path.join(results_dir, f"ckpt_last.pt")
     torch.save(obj=ckpt_state, f=last_filename)
     logger.info(msg=f"Save the ckpt_last.pt")
+
     # If save each checkpoint, just copy the last saved checkpoint and rename it
     if save_model_interval and epoch > start_model_interval:
         if epoch % save_model_interval_epochs == 0:
             filename = os.path.join(results_dir, f"{save_name}.pt")
             shutil.copyfile(last_filename, filename)
             logger.info(msg=f"Save the {save_name}.pt")
+
+    # Check is the best model and save it
+    if kwargs.get("is_best", False):
+        best_filename = os.path.join(results_dir, f"ckpt_best.pt")
+        shutil.copyfile(last_filename, best_filename)
+        logger.info(msg=f"Save the ckpt_best.pt, {message_info}")
     logger.info(msg="Finish saving the model.")
 
 
