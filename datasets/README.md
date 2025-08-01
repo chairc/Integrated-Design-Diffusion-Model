@@ -82,7 +82,7 @@ dataset_dir
 
 - **`dataset_dir`**：Replace this with the actual path to your dataset.
 - **`train`, `val`, ...**：These are subdirectories representing the training and validation subdirectories in the dataset.
-- **`images`**：表示数据集中存放图片的子目录。
+- **`images`**：There is a subdirectory of images in a dataset.
 - **`image_1.jpg`, `image_2.jpg`, ...**：These are the image files.
 
 #####  Diffusion Model
@@ -111,7 +111,7 @@ dataset_dir
 
 #### Dataset Structure
 
-为了便于使用超分辨率模型，你的数据集应该按照特定的文件夹结构进行组织。结构如下：
+To facilitate the use of super-resolution models, your datasets should be organized according to a specific folder structure. The structure is as follows:
 
 ```
 dataset_dir
