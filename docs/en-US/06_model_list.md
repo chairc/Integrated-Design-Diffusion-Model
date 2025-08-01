@@ -17,7 +17,7 @@
 |    `neu-cls-64-weight.pt`     |      ✓      |   ×    |    NEU-CLS    |   64×64    | [Download](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.7/neu-cls-64-weight.pt) |
 |     `cifar-64-weight.pt`      |      ✓      |   ×    |   Cifar-10    |   64×64    | [Download](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/cifar10-64-weight.pt) |
 |  `animate-face-64-weight.pt`  |      ✓      |   ×    | Animate-face  |   64×64    | [Download](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/animate-face-64-weight.pt) |
-|   `neu-64-latent-weight.pt`   |      ✓      |   ✓    |    NEU-DET    |   64×64    |                                                              |
+|   `neu-64-latent-weight.pt`   |      ✓      |   ✓    |    NEU-DET    |   64×64    | [Download](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.2.0/neu-64-latent-weight.pt) |
 
 
 
@@ -31,4 +31,4 @@ Coming soon :-)
 
 |           Model Name            | Latent | Datasets | Model Size | Download Link |
 | :-----------------------------: | :----: | :------: | :--------: | :-----------: |
-| `neu-autoencoder-512-weight.pt` |   ✓    | NEU-DET  |  512×512   |               |
+| `neu-autoencoder-512-weight.pt` |   ✓    | NEU-DET  |  512×512   | [Download](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.2.0/neu-autoencoder-512-weight.pt) |
