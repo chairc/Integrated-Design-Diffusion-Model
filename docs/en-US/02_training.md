@@ -1,5 +1,3 @@
-### Training
-
 > [!NOTE]
 >
 > The training GPU implements environment for this README is as follows: 
@@ -13,6 +11,8 @@
 > **The above GPUs can all be trained and tested normally**.
 
 
+
+### 1. Diffusion Models Training
 
 #### Start Your First Training (Using cifar10 as an Example, Single GPU Mode)
 
@@ -244,28 +244,6 @@ mp.spawn(DMTrainer(
 
 
 
-#### Model Repositories
-
-> [!NOTE]
->
-> The model repo will continue to update pre-trained models.
->
-
-##### Diffusion Model Pre-trained Model
-
-|          Model Name           | Conditional |   Datasets    | Model Size |                        Download Link                         |
-| :---------------------------: | :---------: | :-----------: | :--------: | :----------------------------------------------------------: |
-|   `celebahq-120-weight.pt`    |      ✓      |   CelebA-HQ   |  120×120   | [Download](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/celebahq-120-weight.pt) |
-| `animate-ganyu-120-weight.pt` |      ✓      | Animate-ganyu |  120×120   | [Download](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/animate-ganyu-120-weight.pt) |
-|      `neu-120-weight.pt`      |      ✓      |    NEU-DET    |  120×120   | [Download](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/neu-120-weight.pt) |
-|    `neu-cls-64-weight.pt`     |      ✓      |    NEU-CLS    |   64×64    | [Download](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.7/neu-cls-64-weight.pt) |
-|     `cifar-64-weight.pt`      |      ✓      |   Cifar-10    |   64×64    | [Download](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/cifar10-64-weight.pt) |
-|  `animate-face-64-weight.pt`  |      ✓      | Animate-face  |   64×64    | [Download](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.1.5/animate-face-64-weight.pt) |
-
-##### Super Resolution Pre-trained Model
-
-Coming soon :-)
-
 #### Training Parameters
 
 **Parameter Explanation**
@@ -311,3 +289,114 @@ Coming soon :-)
 | --num_classes                |      ✓      | Number of classes                        |  int  | Number of classes used for classification **(No need to set for models after version 1.1.4)** |
 | --cfg_scale                  |      ✓      | Classifier-free guidance weight          |  int  | Classifier-free guidance interpolation weight for better model generation effects |
 
+
+
+### 2. Autoencoder Model Training
+
+#### Before Training
+
+1. **Import the Dataset**
+
+   First, upload the dataset to the target folder `datasets`. After uploading, the folder structure (neu-det folder contains train and val; All the training images are stored in the images folder) should look like the following:
+
+   ```yaml
+   datasets
+      └── neu-det
+          │
+          ├── train
+          │   └── images
+          │       ├── image_1.jpg
+          │       ├── image_2.jpg
+          │       └── ...
+          │
+          └── val
+              └── images
+                  ├── image_1.jpg
+                  ├── image_2.jpg
+                  └── ...
+   ```
+
+   At this point, your pre-training setup is complete.
+
+2. **Set Training Parameters**
+
+   Open the `train.py` file and modify the `parser` parameters inside the `if __name__ == "__main__":` block.
+
+   Set the `--run_name` parameter to the desired file name you want to create, for example, `neudet_autoencoder`.
+
+   Set the `--images_size` parameter to the size of your image input (recommended default), e.g. '512'.
+
+   Set the `--dataset_path` parameter to the file path on your local or remote server, such as `/your/local/or/remote/server/file/path/datasets/neudet`.
+
+   Set the `--result_path` parameter to the file path on your local or remote server where you want to save the results.
+
+   Set any other custom parameters as needed. If the error `CUDA out of memory` is shown in your terminal, turn down `--batch_size` and `num_workers`.
+
+   In the custom parameters, you can set different training networks `--network` such as `vae`. Of course, activation function `--act`, optimizer `--optim`, automatic mixed precision training `--amp`, learning rate method `--lr_func` and other parameters can also be customized.
+
+   For detailed commands, refer to the **Training Parameters** section.
+
+3. **Wait for the Training Process**
+
+   After clicking `run`, the project will create a `neudet_autoencoder` folder in the `results` folder. This folder will contain training log files, model training files, model EMA (Exponential Moving Average) files, model optimizer files, all files saved during the last training iteration, and generated images after evaluation.
+
+4. **View the Results**
+
+   You can find the training results in the `results/neudet_autoencoder` folder.
+
+
+
+
+#### Normal Training
+
+> [!NOTE]
+>
+> For detailed training, please refer to:**1. Diffusion Models Training - Normal Training**
+>
+
+
+
+#### Distributed Training
+
+> [!NOTE]
+>
+> For detailed training, please refer to:**1. Diffusion Models Training - Distributed Training**
+
+
+
+#### Training Parameters
+
+**Parameter Explanation**
+
+
+| Parameter Name               | Usage                              | Type  | Description                                                  |
+| ---------------------------- | ---------------------------------- | :---: | ------------------------------------------------------------ |
+| --seed                       | Initialize Seed                    |  int  | Set the seed for reproducible image generation from the network |
+| --network                    | Training network                   |  str  | Set the training network, currently supporting UNet, CSPDarkUNet. |
+| --run_name                   | File name                          |  str  | File name used to initialize the model and save information  |
+| --epochs                     | Total number of epochs             |  int  | Total number of training epochs                              |
+| --batch_size                 | Training batch size                |  int  | Size of each training batch                                  |
+| --num_workers                | Number of loading processes        |  int  | Number of subprocesses used for data loading. It consumes a large amount of CPU and memory but can speed up training |
+| --image_size                 | Input image size                   |  int  | Input image size. Adaptive input and output sizes            |
+| --latent_channels            | The latent space                   |  int  | The number of channels in the latent space                   |
+| --train_dataset_path         | Train Dataset path                 |  str  | Train Dataset path                                           |
+| --val_dataset_path           | Val dataset path                   |  str  | Val dataset path                                             |
+| --amp                        | Automatic mixed precision training | bool  | Enable automatic mixed precision training. It effectively reduces GPU memory usage but may affect training accuracy and results |
+| --optim                      | Optimizer                          |  str  | Optimizer selection. Currently supports Adam and AdamW       |
+| --loss                       | Loss function                      |  str  | Loss selection. Currently supports MSELoss, L1Loss, HuberLoss and SmoothL1Loss |
+| --act                        | Activation function                |  str  | Activation function selection. Currently supports gelu, silu, relu, relu6 and lrelu |
+| --lr                         | Learning rate                      | float | Initial learning rate.                                       |
+| --lr_func                    | Learning rate schedule             |  str  | Setting learning rate schedule, currently supporting linear, cosine, and warmup_cosine. |
+| --result_path                | Save path                          |  str  | Path to save the training results                            |
+| --save_model_interval        | Save model after in training       | bool  | Whether to save the model after each training iteration for model selection based on visualization. If false, the model only save the last one |
+| --save_model_interval_epochs | Save the model interval            |  int  | Save model interval and save it every X epochs               |
+| --start_model_interval       | Start epoch for saving models      |  int  | Start epoch for saving models. This option saves disk space. If not set, the default is -1. If set, it starts saving models from the specified epoch. It needs to be used with --save_model_interval |
+| --image_format               | Generated image format in training |  str  | Generated image format in training, recommend to use png for better generation quality |
+| --resume                     | Resume interrupted training        | bool  | Set to "True" to resume interrupted training. Note: If the epoch number of interruption is outside the condition of --start_model_interval, it will not take effect. For example, if the start saving model time is 100 and the interruption number is 50, we cannot set any loading epoch points because we did not save the model. We save the xxx_last.pt file every training, so we need to use the last saved model for interrupted training |
+| --start_epoch                | Epoch number of interruption       |  int  | Epoch number where the training was interrupted, the model will load current checkpoint |
+| --pretrain                   | Enable use pretrain model          | bool  | Enable use pretrain mode to load checkpoint                  |
+| --pretrain_path              | Pretrain model load path           |  str  | Pretrain model load path                                     |
+| --use_gpu                    | Set the use GPU                    |  int  | Set the use GPU in normal training, input is GPU's id        |
+| --distributed                | Distributed training               | bool  | Enable distributed training                                  |
+| --main_gpu                   | Main GPU for distributed           |  int  | Set the main GPU for distributed training                    |
+| --world_size                 | Number of distributed nodes        |  int  | Number of distributed nodes, corresponds to the actual number of GPUs or distributed nodes being used |
