@@ -145,11 +145,12 @@ pip install . # Or python setup.py install
 Please read the guide carefully before developing or using.
 
 |    Guide Name    |                   Document                   |
-| :--------------: | :------------------------------------------: |
+|:----------------:|:--------------------------------------------:|
 |  Model Training  |   [Training.md](docs/en-US/02_training.md)   |
 | Model Generation | [Generation.md](docs/en-US/03_generation.md) |
 |  Model Results   |    [Results.md](docs/en-US/04_results.md)    |
 | Model Evaluation | [Evaluation.md](docs/en-US/05_evaluation.md) |
+|    Model List    | [Model List.md](docs/en-US/06_model_list.md) |
 
 
 
