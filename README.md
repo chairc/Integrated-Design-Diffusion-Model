@@ -45,7 +45,7 @@
 
 ### About the Model
 
-This diffusion model is based on the classic DDPM (Denoising Diffusion Probabilistic Models), DDIM (Denoising Diffusion Implicit Models) and PLMS (Pseudo Numerical Methods for Diffusion Models on Manifolds) presented in the papers "[Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)", "[Denoising Diffusion Implicit Models](https://arxiv.org/abs/2010.02502)" and "[Pseudo Numerical Methods for Diffusion Models on Manifolds](https://openreview.net/forum?id=PlKWVd2yBkY)".
+This diffusion model is based on the classic LDM (Latent Diffusion Models), DDPM (Denoising Diffusion Probabilistic Models), DDIM (Denoising Diffusion Implicit Models) and PLMS (Pseudo Numerical Methods for Diffusion Models on Manifolds) presented in the papers "[High-Resolution Image Synthesis with Latent Diffusion Models](https://openaccess.thecvf.com/content/CVPR2022/html/Rombach_High-Resolution_Image_Synthesis_With_Latent_Diffusion_Models_CVPR_2022_paper)", "[Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)", "[Denoising Diffusion Implicit Models](https://arxiv.org/abs/2010.02502)" and "[Pseudo Numerical Methods for Diffusion Models on Manifolds](https://openreview.net/forum?id=PlKWVd2yBkY)".
 
 We named this project IDDM: Integrated Design Diffusion Model. It aims to reproduce the model, write trainers and generators, and improve and optimize certain algorithms and network structures. This repository is **actively maintained**.
 
@@ -134,9 +134,9 @@ pip install . # Or python setup.py install
 - [x] [2024-12-10] Adding pretrain model download.
 - [x] [2024-12-25] Refactor the overall structure of the trainer.
 - [x] [2025-03-08] Support PyPI install.
+- [x] [2025-08-01] Adding LDM Method. **Support generate 512*512 images** and use Latent Diffusion and reduce GPU memory usage.
 - [ ] [Maybe 2025-01-31] Adding the deployment of Docker and image.
 - [ ] [To be determined] Refactor the project by Baidu PaddlePaddle.
-- [ ] [To be determined] ~~Use Latent Diffusion and reduce GPU memory usage~~
 
 
 

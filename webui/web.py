@@ -123,8 +123,8 @@ class GradioWebui:
             # Parameter 'ckpt_path' is None in the train mode
             if ckpt_path is None:
                 ckpt_path = os.path.join(results_dir, "ckpt_last.pt")
-            start_epoch = load_ckpt(ckpt_path=ckpt_path, model=model, device=device, optimizer=optimizer,
-                                    is_distributed=False)
+            start_epoch, _ = load_ckpt(ckpt_path=ckpt_path, model=model, device=device, optimizer=optimizer,
+                                       is_distributed=False)
             yield logger.info(msg=f"[{device}]: Successfully load resume model checkpoint.")
         else:
             # Pretrain mode

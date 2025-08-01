@@ -30,6 +30,12 @@ DEFAULT_IMAGE_SIZE = [64, 64]
 SR_IMAGE_TYPE = "RGB"
 SR_IMAGE_CHANNEL = image_type_choices[SR_IMAGE_TYPE]
 
+# model.networks.ldm
+# Latent space channel, default is 4 (If the image is blurry, it can be set to 8), which is the same as the original LDM
+LATENT_CHANNEL = 8
+# Downsampled by 8 times
+IMAGE_SCALE = 8
+
 # Data processing
 # ****** torchvision.transforms.Compose ******
 # RandomResizedCrop

@@ -135,7 +135,7 @@ class BaseDiffusion:
         """
         # Generate a tensor of integers with the specified shape (n,)
         # where each element is randomly chosen between low and high (contains low, does not contain high)
-        return torch.randint(low=1, high=self.noise_steps, size=(n,))
+        return torch.randint(low=1, high=self.noise_steps, size=(n,), device=self.device)
 
     def init_sample_image_size(
             self,

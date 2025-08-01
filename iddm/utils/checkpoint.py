@@ -44,6 +44,8 @@ def load_ckpt(ckpt_path, model=None, device="cpu", optimizer=None, is_train=True
     # Load the model best score
     if ckpt_type == "sr":
         model_score = [ckpt_state["best_ssim"], ckpt_state["best_psnr"]]
+    elif ckpt_type == "autoencoder":
+        model_score = [ckpt_state["best_score"]]
     else:
         model_score = []
 
@@ -179,8 +181,10 @@ def save_ckpt(epoch, save_name, ckpt_model, ckpt_ema_model, ckpt_optimizer, resu
         }
         score = kwargs.get("score")
         best_score = kwargs.get("best_score")
+        latent_channel = kwargs.get("latent_channel", 4)
         ckpt_state["score"] = score
         ckpt_state["best_score"] = best_score
+        ckpt_state["latent_channel"] = latent_channel
         message_info = f"current score is {score}, best score is {best_score}"
     # Diffusion model
     else:
