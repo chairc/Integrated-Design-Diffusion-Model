@@ -60,9 +60,9 @@ dataset = datasets.ImageFolder(root='dataset_path', transform=transform)
 
 #### 数据集结构
 
-##### 自分编码器
+##### 变分自编码器
 
-为了便于使用 `torchvision.datasets.ImageFolder` 类自动标注，你的自分编码器数据集应该按照特定的文件夹结构进行组织。结构如下：
+为了便于使用 `torchvision.datasets.ImageFolder` 类自动标注，你的变分自编码器数据集应该按照特定的文件夹结构进行组织。结构如下：
 
 ```
 dataset_dir
