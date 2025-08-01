@@ -5,6 +5,7 @@
     @Author : chairc
     @Site   : https://github.com/chairc
 """
+import torch
 import torchvision
 
 from torch.utils.data import DataLoader, DistributedSampler
@@ -106,3 +107,18 @@ def set_resize_images_size(image_size: Union[int, list, tuple], divisor=4):
         return image_size
     else:
         raise TypeError("image_size must be int, list or tuple.")
+
+
+def post_image(images, device="cpu"):
+    """
+    Post images
+    :param images: Images
+    :param device: CPU or GPU
+    :return: new_images
+    """
+    mean_tensor = torch.tensor(data=MEAN).view(1, -1, 1, 1).to(device)
+    std_tensor = torch.tensor(data=STD).view(1, -1, 1, 1).to(device)
+    new_images = images * std_tensor + mean_tensor
+    # Limit the image between 0 and 1
+    new_images = (new_images.clamp(0, 1) * 255).to(torch.uint8)
+    return new_images

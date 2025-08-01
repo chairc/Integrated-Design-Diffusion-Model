@@ -8,6 +8,7 @@
 import logging
 import coloredlogs
 
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -96,3 +97,36 @@ class BaseConv(nn.Module):
 
     def forward(self, x):
         return self.act(self.gn(self.conv(x)))
+
+
+class VAEConv2d(nn.Module):
+    """
+    VAE Convolutional
+    """
+
+    def __init__(
+            self, in_channels: int,
+            out_channels: int,
+            kernel_size: int = 3,
+            stride: int = 1,
+            padding: int = 1,
+            downsample: bool = False,
+            act: str = "silu",
+    ):
+        super().__init__()
+        self.stride = 2 if downsample else stride
+        self.conv = nn.Conv2d(
+            in_channels,
+            out_channels,
+            kernel_size=kernel_size,
+            stride=self.stride,
+            padding=padding
+        )
+        self.norm = nn.GroupNorm(num_groups=32, num_channels=out_channels)
+        self.act = get_activation_function(name=act)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.conv(x)
+        x = self.norm(x)
+        x = self.act(x)
+        return x

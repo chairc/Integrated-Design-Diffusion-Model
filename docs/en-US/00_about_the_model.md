@@ -35,6 +35,8 @@ Integrated Design Diffusion Model
 │   │   ├── networks
 │   │   │   ├── sr
 │   │   │   │   └── srv1.py
+│   │   │   ├── vae
+│   │   │   │   └── autoencoder.py
 │   │   │   ├── base.py
 │   │   │   ├── cspdarkunet.py
 │   │   │   └── unet.py
@@ -42,15 +44,21 @@ Integrated Design Diffusion Model
 │   │   │   ├── base.py
 │   │   │   ├── ddim.py
 │   │   │   ├── ddpm.py
+│   │   │   ├── ldm.py
 │   │   │   └── plms.py
 │   │   └── trainers
+│   │       ├── autoencoder.py
 │   │       ├── base.py
 │   │       ├── dm.py
+│   │       ├── ldm.py
 │   │       └── sr.py
 │   ├── sr
 │   │   ├── dataset.py
 │   │   ├── demo.py
 │   │   ├── interface.py
+│   │   └── train.py
+│   ├── autoencoder
+│   │   ├── generate.py
 │   │   └── train.py
 │   ├── tools
 │   │   ├── FID_calculator.py
@@ -63,6 +71,7 @@ Integrated Design Diffusion Model
 │       ├── dataset.py
 │       ├── initializer.py
 │       ├── logger.py
+│       ├── loss.py
 │       ├── lr_scheduler.py
 │       ├── metrics.py
 │       ├── processing.py
@@ -75,7 +84,9 @@ Integrated Design Diffusion Model
 │   └── test_module.py
 ├── webui
 │   └──web.py
-└── weights
+├── weights
+├── requirements.txt
+└── setup.py
 ```
 
 #### Running  Locally

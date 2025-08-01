@@ -44,7 +44,7 @@
 
 ### 关于模型
 
-该扩散模型为经典的ddpm、ddim和plms，来源于论文《**[Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)**》、《**[Denoising Diffusion Implicit Models](https://arxiv.org/abs/2010.02502)**》和《**[Pseudo Numerical Methods for Diffusion Models on Manifolds](https://openreview.net/forum?id=PlKWVd2yBkY)**》。
+该扩散模型为经典的ldm、ddpm、ddim和plms，来源于论文《**[High-Resolution Image Synthesis with Latent Diffusion Models](https://openaccess.thecvf.com/content/CVPR2022/html/Rombach_High-Resolution_Image_Synthesis_With_Latent_Diffusion_Models_CVPR_2022_paper)**》、《**[Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)**》、《**[Denoising Diffusion Implicit Models](https://arxiv.org/abs/2010.02502)**》和《**[Pseudo Numerical Methods for Diffusion Models on Manifolds](https://openreview.net/forum?id=PlKWVd2yBkY)**》。
 
 我们将此项目命名为IDDM: Integrated Design Diffusion Model，中文名为集成设计扩散模型。在此项目中进行模型复现、训练器和生成器编写、部分算法和网络结构的改进与优化，该仓库**持续维护**。
 
@@ -132,9 +132,9 @@ pip install . # 或者 python setup.py install
 - [x] [2024-12-10] 增加预训练模型下载
 - [x] [2024-12-25] 重构训练器结构
 - [x] [2025-03-08] 支持PyPI包下载
+- [x] [2025-08-01] 增加LDM方法，**支持生成512*512图像**，使用Latent方式降低显存消耗
 - [ ] [预计2025-01-31] 增加Docker部署与镜像
 - [ ] [待定] 重构项目利用百度飞桨框架
-- [ ] [待定] ~~使用Latent方式降低显存消耗~~
 
 
 

@@ -20,10 +20,12 @@ from iddm.model.networks.unetv2 import UNetV2
 from iddm.model.networks.unet_slim import UNetSlim
 from iddm.model.networks.cspdarkunet import CSPDarkUnet
 from iddm.model.networks.sr.srv1 import SRv1
+from iddm.model.networks.vae.autoencoder import Autoencoder
 from iddm.model.samples.ddim import DDIMDiffusion
 from iddm.model.samples.ddpm import DDPMDiffusion
 from iddm.model.samples.plms import PLMSDiffusion
 from iddm.utils.check import check_path_is_exist
+from iddm.utils.loss import MSEKLLoss
 from iddm.utils.lr_scheduler import set_cosine_lr
 
 logger = logging.getLogger(__name__)
@@ -120,6 +122,22 @@ def sr_network_initializer(network, device):
     return Network
 
 
+def autoencoder_network_initializer(network, device):
+    """
+    Initialize autoencoder network
+    :param network: Network name
+    :param device: GPU or CPU
+    :return: Network
+    """
+    if network == "vae":
+        Network = Autoencoder
+    else:
+        Network = Autoencoder
+        logger.warning(msg=f"[{device}]: Setting network error, we has been automatically set to autoencoder.")
+    logger.info(msg=f"[{device}]: This autoencoder network is {network}")
+    return Network
+
+
 def loss_initializer(loss_name, device):
     """
     Initialize loss function
@@ -135,6 +153,8 @@ def loss_initializer(loss_name, device):
         loss_function = nn.HuberLoss()
     elif loss_name == "smooth_l1":
         loss_function = nn.SmoothL1Loss()
+    elif loss_name == "mse_kl":
+        loss_function = MSEKLLoss()
     else:
         loss_function = nn.MSELoss()
         logger.warning(msg=f"[{device}]: Setting loss function error, we has been automatically set to mse loss.")
@@ -265,7 +285,7 @@ def generate_initializer(ckpt_path, conditional, network, image_size, num_classe
 
     logger.info(msg=f"[{device}]: Checking parameters validity.")
     # Load checkpoint before generate
-    ckpt_state = torch.load(f=ckpt_path, map_location=device)
+    ckpt_state = torch.load(f=ckpt_path, map_location=device, weights_only=False)
     # Valid
     conditional = check_param_in_dict(param="conditional", dict_params=ckpt_state, args_param=conditional)
     network = check_param_in_dict(param="network", dict_params=ckpt_state, args_param=network)
@@ -274,6 +294,23 @@ def generate_initializer(ckpt_path, conditional, network, image_size, num_classe
     act = check_param_in_dict(param="act", dict_params=ckpt_state, args_param=act)
     logger.info(msg=f"[{device}]: Successfully checked parameters.")
     return conditional, network, image_size, num_classes, act
+
+
+def generate_autoencoder_initializer(ckpt_path, device):
+    """
+    Check the parameters in checkpoint before generate autoencoder
+    :param ckpt_path: Checkpoint path
+    :param device: GPU or CPU
+    :return: network, image_size, latent_channels, act
+    """
+    # Load checkpoint before generate
+    ckpt_state = torch.load(f=ckpt_path, map_location=device, weights_only=False)
+    network = ckpt_state["network"]
+    image_size = ckpt_state["image_size"]
+    latent_channel = ckpt_state["latent_channel"]
+    act = ckpt_state["act"]
+    logger.info(msg=f"[{device}]: Successfully checked autoencoder parameters.")
+    return network, image_size, latent_channel, act
 
 
 def classes_initializer(dataset_path):

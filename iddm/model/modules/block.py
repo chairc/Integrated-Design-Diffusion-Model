@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 
 from iddm.config.setting import EMB_CHANNEL
-from iddm.model.modules.conv import BaseConv, DoubleConv
+from iddm.model.modules.conv import BaseConv, DoubleConv, VAEConv2d
 from iddm.model.modules.module import CSPLayer, DenseModule
 
 
@@ -180,3 +180,36 @@ class ResidualDenseBlock(nn.Module):
         y = self.m(x)
         y = self.conv(y)
         return x + y
+
+
+class VAEResidualBlock(nn.Module):
+    """
+    VAE Residual Block: Enhanced feature propagation capabilities
+    """
+
+    def __init__(self, in_channels: int, out_channels: int, act: str = "silu"):
+        channels = in_channels if in_channels == out_channels else out_channels
+        super().__init__()
+        self.block1 = VAEConv2d(in_channels=in_channels, out_channels=channels, downsample=False, act=act)
+        self.block2 = VAEConv2d(in_channels=channels, out_channels=out_channels, downsample=False, act=act)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        residual = x
+        x = self.block1(x)
+        x = self.block2(x)
+        return x + residual
+
+class VAEUpBlock(nn.Module):
+    """
+    Upsampling block: Used to scale up the feature size of the decoder
+    """
+
+    def __init__(self, in_channels: int, out_channels: int, act: str = "silu"):
+        super().__init__()
+        self.upsample = nn.Upsample(scale_factor=2, mode="bilinear", align_corners=False)
+        self.conv = VAEConv2d(in_channels, out_channels, downsample=False, act=act)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.upsample(x)
+        x = self.conv(x)
+        return x
