@@ -26,7 +26,10 @@ class BaseDiffusion:
             beta_end: float = 2e-2,
             img_size: Optional[List[int]] = None,
             device: Union[str, torch.device] = "cpu",
-            schedule_name: str = "linear"
+            schedule_name: str = "linear",
+            latent: bool = False,
+            latent_channel: int = 8,
+            autoencoder: Optional[nn.Module] = None
     ):
         """
         Diffusion model base class
@@ -36,6 +39,9 @@ class BaseDiffusion:
         :param img_size: Image size
         :param device: Device type
         :param schedule_name: Prepare the noise schedule name
+        :param latent: Whether to use latent diffusion
+        :param latent_channel: Latent channel size, default is 8
+        :param autoencoder: Autoencoder, used for latent diffusion
         """
         self.noise_steps = noise_steps
         self.beta_start = beta_start
@@ -47,7 +53,17 @@ class BaseDiffusion:
         self.image_channel = IMAGE_CHANNEL
 
         # Init image size
-        self.init_sample_image_size(img_size=img_size)
+        self._init_sample_image_size(img_size=img_size)
+
+        # Latent diffusion
+        # Whether to use latent diffusion
+        self.latent = latent
+        if self.latent:
+            # Latent channel size
+            self.latent_channel = latent_channel
+            # Autoencoder, used for latent diffusion
+            self.autoencoder = autoencoder
+            self._init_autoencoder()
 
         # Noise steps
         self.beta = self.prepare_noise_schedule(schedule_name=self.schedule_name).to(self.device)
@@ -137,7 +153,7 @@ class BaseDiffusion:
         # where each element is randomly chosen between low and high (contains low, does not contain high)
         return torch.randint(low=1, high=self.noise_steps, size=(n,), device=self.device)
 
-    def init_sample_image_size(
+    def _init_sample_image_size(
             self,
             img_size: Optional[List[int]] = None
     ):
@@ -180,15 +196,19 @@ class BaseDiffusion:
         :param x: Input image tensor, if provided, will be used as the starting point for sampling
         :return: Input image tensor
         """
+        if self.latent:
+            channel = self.latent_channel
+        else:
+            channel = self.image_channel
         if x is None and n > 0:
             # If no input image is provided, generate a random noise image
-            return torch.randn((n, self.image_channel, self.img_size[0], self.img_size[1])).to(self.device), n
+            return torch.randn((n, channel, self.img_size[0], self.img_size[1])).to(self.device), n
         elif x is not None:
             # If an input image is provided, ensure it has the correct shape
             return x.to(self.device), x.shape[0]
         else:
             # If no input image is provided and n is 0, return a random noise image with batch size 1
-            return torch.randn((1, self.image_channel, self.img_size[0], self.img_size[1])).to(self.device), 1
+            return torch.randn((1, channel, self.img_size[0], self.img_size[1])).to(self.device), 1
 
     @staticmethod
     def _get_predicted_noise(
@@ -223,8 +243,8 @@ class BaseDiffusion:
         # Formula: input + weight * (end - input)
         return torch.lerp(unconditional_noise, conditional_noise, cfg_scale)
 
-    @staticmethod
     def post_process(
+            self,
             x: torch.Tensor
     ) -> torch.Tensor:
         """
@@ -232,8 +252,23 @@ class BaseDiffusion:
         :param x: Input image tensor must range of -1 and 1
         :return: Post process tensor
         """
+        # Latent mode
+        if self.latent:
+            # If latent diffusion, the output is a tensor of shape [n, latent_channel, img_size_h, img_size_w]
+            # The latent channel size is 8, so we need to convert it to 3 channels
+            x = self.autoencoder.decode(x)
         # Return the value to the range of 0 and 1
         x = (x + 1) * 0.5
         # Multiply by 255 to enter the effective pixel range
         x = (x * 255).type(torch.uint8)
         return x
+
+    def _init_autoencoder(self):
+        """
+        Initialize the autoencoder and check its type
+        :return: None
+        """
+        if self.autoencoder is not None:
+            if not isinstance(self.autoencoder, nn.Module):
+                raise TypeError("'autoencoder' must be an instance of nn.Module")
+            self.autoencoder = self.autoencoder.to(self.device)
