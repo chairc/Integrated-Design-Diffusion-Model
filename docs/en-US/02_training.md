@@ -138,6 +138,20 @@
    python train.py --pretrain --pretrain_path /your/pretrain/path/model.pt --sample ddpm --run_name df --epochs 300 --batch_size 16 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
    ```
 
+7. During the training of a latent diffusion model, first set `latent` to `True`, `autoencoder_network` to the variational autoencoder model that provides encoding and decoding functions for this training session, and `autoencoder_ckpt` to the weight path of the current variational autoencoder. The remaining settings are the same as those for training an ordinary diffusion model. Alternatively, you can use the following commands for latent diffusion training:
+
+   **Command for conditional training with latent diffusion model**
+
+   ```bash
+   python train.py --latent --autoencoder_network vae --autoencoder_ckpt /your/path/of/autoencoder/weight.pt --sample ddpm --conditional --run_name ldm --epochs 300 --batch_size 8 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
+   ```
+
+   **Command for unconditional training with latent diffusion model**
+
+   ```bash
+   python train.py --latent --autoencoder_network vae --autoencoder_ckpt /your/path/of/autoencoder/weight.pt --sample ddpm --run_name ldm --epochs 300 --batch_size 8 --image_size 64 --dataset_path /your/dataset/path --result_path /your/save/path
+   ```
+
 ##### Python Training
 
 ```python
@@ -254,40 +268,43 @@ mp.spawn(DMTrainer(
 
 | Parameter Name               | Conditional | Usage                                    | Type  | Description                                                  |
 | ---------------------------- | :---------: | ---------------------------------------- | :---: | ------------------------------------------------------------ |
-| --seed                       |             | Initialize Seed                          |  int  | Set the seed for reproducible image generation from the network |
-| --conditional                |             | Enable conditional training              | bool  | Enable to modify custom configurations, such as modifying the number of classes and classifier-free guidance interpolation weights |
+| --seed                       |             | Initialize Seed                          |  int  | Set the seed for reproducible image generation from the network. |
+| --conditional                |             | Enable conditional training              | bool  | Enable to modify custom configurations, such as modifying the number of classes and classifier-free guidance interpolation weights. |
+| --latent                     |             | Enable latent diffusion model            | bool  | If enabled, the model will use latent diffusion.             |
 | --sample                     |             | Sampling method                          |  str  | Set the sampling method type, currently supporting DDPM and DDIM. |
 | --network                    |             | Training network                         |  str  | Set the training network, currently supporting UNet, CSPDarkUNet. |
-| --run_name                   |             | File name                                |  str  | File name used to initialize the model and save information  |
-| --epochs                     |             | Total number of epochs                   |  int  | Total number of training epochs                              |
-| --batch_size                 |             | Training batch size                      |  int  | Size of each training batch                                  |
-| --num_workers                |             | Number of loading processes              |  int  | Number of subprocesses used for data loading. It consumes a large amount of CPU and memory but can speed up training |
-| --image_size                 |             | Input image size                         |  int  | Input image size. Adaptive input and output sizes            |
-| --dataset_path               |             | Dataset path                             |  str  | Path to the conditional dataset, such as CIFAR-10, with each class in a separate folder, or the path to the unconditional dataset with all images in one folder |
-| --amp                        |             | Automatic mixed precision training       | bool  | Enable automatic mixed precision training. It effectively reduces GPU memory usage but may affect training accuracy and results |
-| --optim                      |             | Optimizer                                |  str  | Optimizer selection. Currently supports Adam and AdamW       |
-| --loss                       |             | Loss function                            |  str  | Loss selection. Currently supports MSELoss, L1Loss, HuberLoss and SmoothL1Loss |
-| --act                        |             | Activation function                      |  str  | Activation function selection. Currently supports gelu, silu, relu, relu6 and lrelu |
+| --run_name                   |             | File name                                |  str  | File name used to initialize the model and save information. |
+| --epochs                     |             | Total number of epochs                   |  int  | Total number of training epochs.                             |
+| --batch_size                 |             | Training batch size                      |  int  | Size of each training batch.                                 |
+| --num_workers                |             | Number of loading processes              |  int  | Number of subprocesses used for data loading. It consumes a large amount of CPU and memory but can speed up training. |
+| --image_size                 |             | Input image size                         |  int  | Input image size. Adaptive input and output sizes.           |
+| --dataset_path               |             | Dataset path                             |  str  | Path to the conditional dataset, such as CIFAR-10, with each class in a separate folder, or the path to the unconditional dataset with all images in one folder. |
+| --amp                        |             | Automatic mixed precision training       | bool  | Enable automatic mixed precision training. It effectively reduces GPU memory usage but may affect training accuracy and results. |
+| --optim                      |             | Optimizer                                |  str  | Optimizer selection. Currently supports Adam and AdamW.      |
+| --loss                       |             | Loss function                            |  str  | Loss selection. Currently supports MSELoss, L1Loss, HuberLoss and SmoothL1Loss. |
+| --act                        |             | Activation function                      |  str  | Activation function selection. Currently supports gelu, silu, relu, relu6 and lrelu. |
 | --lr                         |             | Learning rate                            | float | Initial learning rate.                                       |
 | --lr_func                    |             | Learning rate schedule                   |  str  | Setting learning rate schedule, currently supporting linear, cosine, and warmup_cosine. |
-| --result_path                |             | Save path                                |  str  | Path to save the training results                            |
-| --save_model_interval        |             | Save model after in training             | bool  | Whether to save the model after each training iteration for model selection based on visualization. If false, the model only save the last one |
-| --save_model_interval_epochs |             | Save the model interval                  |  int  | Save model interval and save it every X epochs               |
-| --start_model_interval       |             | Start epoch for saving models            |  int  | Start epoch for saving models. This option saves disk space. If not set, the default is -1. If set, it starts saving models from the specified epoch. It needs to be used with --save_model_interval |
-| --vis                        |             | Visualize dataset information            | bool  | Enable visualization of dataset information for model selection based on visualization |
-| --num_vis                    |             | Number of visualization images generated |  int  | Number of visualization images generated. If not filled, the default is the number of image classes |
-| --image_format               |             | Generated image format in training       |  str  | Generated image format in training, recommend to use png for better generation quality |
-| --noise_schedule             |             | Noise schedule                           |  str  | This method is a model noise adding method                   |
-| --resume                     |             | Resume interrupted training              | bool  | Set to "True" to resume interrupted training. Note: If the epoch number of interruption is outside the condition of --start_model_interval, it will not take effect. For example, if the start saving model time is 100 and the interruption number is 50, we cannot set any loading epoch points because we did not save the model. We save the xxx_last.pt file every training, so we need to use the last saved model for interrupted training |
-| --start_epoch                |             | Epoch number of interruption             |  int  | Epoch number where the training was interrupted, the model will load current checkpoint |
-| --pretrain                   |             | Enable use pretrain model                | bool  | Enable use pretrain mode to load checkpoint                  |
-| --pretrain_path              |             | Pretrain model load path                 |  str  | Pretrain model load path                                     |
-| --use_gpu                    |             | Set the use GPU                          |  int  | Set the use GPU in normal training, input is GPU's id        |
-| --distributed                |             | Distributed training                     | bool  | Enable distributed training                                  |
-| --main_gpu                   |             | Main GPU for distributed                 |  int  | Set the main GPU for distributed training                    |
-| --world_size                 |             | Number of distributed nodes              |  int  | Number of distributed nodes, corresponds to the actual number of GPUs or distributed nodes being used |
-| --num_classes                |      ✓      | Number of classes                        |  int  | Number of classes used for classification **(No need to set for models after version 1.1.4)** |
-| --cfg_scale                  |      ✓      | Classifier-free guidance weight          |  int  | Classifier-free guidance interpolation weight for better model generation effects |
+| --result_path                |             | Save path                                |  str  | Path to save the training results.                           |
+| --save_model_interval        |             | Save model after in training             | bool  | Whether to save the model after each training iteration for model selection based on visualization. If false, the model only save the last one. |
+| --save_model_interval_epochs |             | Save the model interval                  |  int  | Save model interval and save it every X epochs.              |
+| --start_model_interval       |             | Start epoch for saving models            |  int  | Start epoch for saving models. This option saves disk space. If not set, the default is -1. If set, it starts saving models from the specified epoch. It needs to be used with --save_model_interval. |
+| --vis                        |             | Visualize dataset information            | bool  | Enable visualization of dataset information for model selection based on visualization. |
+| --num_vis                    |             | Number of visualization images generated |  int  | Number of visualization images generated. If not filled, the default is the number of image classes. |
+| --image_format               |             | Generated image format in training       |  str  | Generated image format in training, recommend to use png for better generation quality. |
+| --noise_schedule             |             | Noise schedule                           |  str  | This method is a model noise adding method.                  |
+| --resume                     |             | Resume interrupted training              | bool  | Set to "True" to resume interrupted training. Note: If the epoch number of interruption is outside the condition of --start_model_interval, it will not take effect. For example, if the start saving model time is 100 and the interruption number is 50, we cannot set any loading epoch points because we did not save the model. We save the xxx_last.pt file every training, so we need to use the last saved model for interrupted training. |
+| --start_epoch                |             | Epoch number of interruption             |  int  | Epoch number where the training was interrupted, the model will load current checkpoint. |
+| --pretrain                   |             | Enable use pretrain model                | bool  | Enable use pretrain mode to load checkpoint.                 |
+| --pretrain_path              |             | Pretrain model load path                 |  str  | Pretrain model load path.                                    |
+| --use_gpu                    |             | Set the use GPU                          |  int  | Set the use GPU in normal training, input is GPU's id.       |
+| --distributed                |             | Distributed training                     | bool  | Enable distributed training.                                 |
+| --main_gpu                   |             | Main GPU for distributed                 |  int  | Set the main GPU for distributed training.                   |
+| --world_size                 |             | Number of distributed nodes              |  int  | Number of distributed nodes, corresponds to the actual number of GPUs or distributed nodes being used. |
+| --num_classes                |      ✓      | Number of classes                        |  int  | Number of classes used for classification **(No need to set for models after version 1.1.4)**. |
+| --cfg_scale                  |      ✓      | Classifier-free guidance weight          |  int  | Classifier-free guidance interpolation weight for better model generation effects. |
+| --autoencoder_network        |             | VAE model                                |  str  | VAE model support encode and decode.                         |
+| --autoencoder_ckpt           |             | VAE model weight path                    |  str  | VAE model weight path.                                       |
 
 
 
@@ -320,7 +337,7 @@ mp.spawn(DMTrainer(
 
 2. **Set Training Parameters**
 
-   Open the `train.py` file and modify the `parser` parameters inside the `if __name__ == "__main__":` block.
+   Open the `/iddm/autoencoder/train.py` file and modify the `parser` parameters inside the `if __name__ == "__main__":` block.
 
    Set the `--run_name` parameter to the desired file name you want to create, for example, `neudet_autoencoder`.
 
@@ -371,32 +388,32 @@ mp.spawn(DMTrainer(
 
 | Parameter Name               | Usage                              | Type  | Description                                                  |
 | ---------------------------- | ---------------------------------- | :---: | ------------------------------------------------------------ |
-| --seed                       | Initialize Seed                    |  int  | Set the seed for reproducible image generation from the network |
+| --seed                       | Initialize Seed                    |  int  | Set the seed for reproducible image generation from the network. |
 | --network                    | Training network                   |  str  | Set the training network, currently supporting UNet, CSPDarkUNet. |
-| --run_name                   | File name                          |  str  | File name used to initialize the model and save information  |
-| --epochs                     | Total number of epochs             |  int  | Total number of training epochs                              |
-| --batch_size                 | Training batch size                |  int  | Size of each training batch                                  |
-| --num_workers                | Number of loading processes        |  int  | Number of subprocesses used for data loading. It consumes a large amount of CPU and memory but can speed up training |
-| --image_size                 | Input image size                   |  int  | Input image size. Adaptive input and output sizes            |
-| --latent_channels            | The latent space                   |  int  | The number of channels in the latent space                   |
-| --train_dataset_path         | Train Dataset path                 |  str  | Train Dataset path                                           |
-| --val_dataset_path           | Val dataset path                   |  str  | Val dataset path                                             |
-| --amp                        | Automatic mixed precision training | bool  | Enable automatic mixed precision training. It effectively reduces GPU memory usage but may affect training accuracy and results |
-| --optim                      | Optimizer                          |  str  | Optimizer selection. Currently supports Adam and AdamW       |
-| --loss                       | Loss function                      |  str  | Loss selection. Currently supports MSELoss, L1Loss, HuberLoss and SmoothL1Loss |
-| --act                        | Activation function                |  str  | Activation function selection. Currently supports gelu, silu, relu, relu6 and lrelu |
+| --run_name                   | File name                          |  str  | File name used to initialize the model and save information. |
+| --epochs                     | Total number of epochs             |  int  | Total number of training epochs.                             |
+| --batch_size                 | Training batch size                |  int  | Size of each training batch.                                 |
+| --num_workers                | Number of loading processes        |  int  | Number of subprocesses used for data loading. It consumes a large amount of CPU and memory but can speed up training. |
+| --image_size                 | Input image size                   |  int  | Input image size. Adaptive input and output sizes.           |
+| --latent_channels            | The latent space                   |  int  | The number of channels in the latent space.                  |
+| --train_dataset_path         | Train Dataset path                 |  str  | Train Dataset path.                                          |
+| --val_dataset_path           | Val dataset path                   |  str  | Val dataset path.                                            |
+| --amp                        | Automatic mixed precision training | bool  | Enable automatic mixed precision training. It effectively reduces GPU memory usage but may affect training accuracy and results. |
+| --optim                      | Optimizer                          |  str  | Optimizer selection. Currently supports Adam and AdamW.      |
+| --loss                       | Loss function                      |  str  | Loss selection. Currently supports MSELoss, L1Loss, HuberLoss and SmoothL1Loss. |
+| --act                        | Activation function                |  str  | Activation function selection. Currently supports gelu, silu, relu, relu6 and lrelu. |
 | --lr                         | Learning rate                      | float | Initial learning rate.                                       |
 | --lr_func                    | Learning rate schedule             |  str  | Setting learning rate schedule, currently supporting linear, cosine, and warmup_cosine. |
-| --result_path                | Save path                          |  str  | Path to save the training results                            |
-| --save_model_interval        | Save model after in training       | bool  | Whether to save the model after each training iteration for model selection based on visualization. If false, the model only save the last one |
-| --save_model_interval_epochs | Save the model interval            |  int  | Save model interval and save it every X epochs               |
-| --start_model_interval       | Start epoch for saving models      |  int  | Start epoch for saving models. This option saves disk space. If not set, the default is -1. If set, it starts saving models from the specified epoch. It needs to be used with --save_model_interval |
-| --image_format               | Generated image format in training |  str  | Generated image format in training, recommend to use png for better generation quality |
-| --resume                     | Resume interrupted training        | bool  | Set to "True" to resume interrupted training. Note: If the epoch number of interruption is outside the condition of --start_model_interval, it will not take effect. For example, if the start saving model time is 100 and the interruption number is 50, we cannot set any loading epoch points because we did not save the model. We save the xxx_last.pt file every training, so we need to use the last saved model for interrupted training |
-| --start_epoch                | Epoch number of interruption       |  int  | Epoch number where the training was interrupted, the model will load current checkpoint |
-| --pretrain                   | Enable use pretrain model          | bool  | Enable use pretrain mode to load checkpoint                  |
-| --pretrain_path              | Pretrain model load path           |  str  | Pretrain model load path                                     |
-| --use_gpu                    | Set the use GPU                    |  int  | Set the use GPU in normal training, input is GPU's id        |
-| --distributed                | Distributed training               | bool  | Enable distributed training                                  |
-| --main_gpu                   | Main GPU for distributed           |  int  | Set the main GPU for distributed training                    |
-| --world_size                 | Number of distributed nodes        |  int  | Number of distributed nodes, corresponds to the actual number of GPUs or distributed nodes being used |
+| --result_path                | Save path                          |  str  | Path to save the training results.                           |
+| --save_model_interval        | Save model after in training       | bool  | Whether to save the model after each training iteration for model selection based on visualization. If false, the model only save the last one. |
+| --save_model_interval_epochs | Save the model interval            |  int  | Save model interval and save it every X epochs.              |
+| --start_model_interval       | Start epoch for saving models      |  int  | Start epoch for saving models. This option saves disk space. If not set, the default is -1. If set, it starts saving models from the specified epoch. It needs to be used with --save_model_interval. |
+| --image_format               | Generated image format in training |  str  | Generated image format in training, recommend to use png for better generation quality. |
+| --resume                     | Resume interrupted training        | bool  | Set to "True" to resume interrupted training. Note: If the epoch number of interruption is outside the condition of --start_model_interval, it will not take effect. For example, if the start saving model time is 100 and the interruption number is 50, we cannot set any loading epoch points because we did not save the model. We save the xxx_last.pt file every training, so we need to use the last saved model for interrupted training. |
+| --start_epoch                | Epoch number of interruption       |  int  | Epoch number where the training was interrupted, the model will load current checkpoint. |
+| --pretrain                   | Enable use pretrain model          | bool  | Enable use pretrain mode to load checkpoint.                 |
+| --pretrain_path              | Pretrain model load path           |  str  | Pretrain model load path.                                    |
+| --use_gpu                    | Set the use GPU                    |  int  | Set the use GPU in normal training, input is GPU's id.       |
+| --distributed                | Distributed training               | bool  | Enable distributed training.                                 |
+| --main_gpu                   | Main GPU for distributed           |  int  | Set the main GPU for distributed training.                   |
+| --world_size                 | Number of distributed nodes        |  int  | Number of distributed nodes, corresponds to the actual number of GPUs or distributed nodes being used. |

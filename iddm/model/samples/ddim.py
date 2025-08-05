@@ -5,7 +5,7 @@
     @Author : chairc
     @Site   : https://github.com/chairc
 """
-from typing import Optional, List, Union, Tuple
+from typing import Optional, List, Union
 
 import torch
 import logging
@@ -33,7 +33,10 @@ class DDIMDiffusion(BaseDiffusion):
             beta_end: float = 2e-2,
             img_size: Optional[List[int]] = None,
             device: Union[str, torch.device] = "cpu",
-            schedule_name: str = "linear"
+            schedule_name: str = "linear",
+            latent: bool = False,
+            latent_channel: int = 8,
+            autoencoder: Optional[nn.Module] = None
     ):
         """
         The implement of DDIM
@@ -46,8 +49,13 @@ class DDIMDiffusion(BaseDiffusion):
         :param img_size: Image size
         :param device: Device type
         :param schedule_name: Prepare the noise schedule name
+        :param latent: Whether to use latent diffusion
+        :param latent_channel: Latent channel size, default is 8
+        :param autoencoder: Autoencoder model, if provided, will be used for latent diffusion
         """
-        super().__init__(noise_steps, beta_start, beta_end, img_size, device, schedule_name)
+        super().__init__(noise_steps=noise_steps, beta_start=beta_start, beta_end=beta_end, img_size=img_size,
+                         device=device, schedule_name=schedule_name, latent=latent, latent_channel=latent_channel,
+                         autoencoder=autoencoder)
         # Sample steps, it skips some steps
         self.sample_steps = sample_steps
 
@@ -111,7 +119,7 @@ class DDIMDiffusion(BaseDiffusion):
                 c2 = torch.sqrt((1 - alpha_prev) - c1 ** 2)
                 # Predicted x0 + direction pointing to xt + sigma * predicted noise
                 x = torch.sqrt(alpha_prev) * x0_t + c2 * predicted_noise + c1 * noise
+            # Post process
+            x = self.post_process(x=x)
         model.train()
-        # Post process
-        x = self.post_process(x=x)
         return x
