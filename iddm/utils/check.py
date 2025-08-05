@@ -10,6 +10,7 @@ import logging
 import coloredlogs
 
 import torch
+import torch.nn as nn
 
 from urllib.parse import urlparse
 
@@ -130,3 +131,27 @@ def check_gpu_num_is_valid(gpu_list):
     if len_gpu != 0 and len_gpu <= gpus:
         return True
     return False
+
+
+def check_model_support_compile(model: nn.Module, **compile_kwargs) -> nn.Module:
+    """
+    Check if the model supports torch.compile and apply it if supported.
+    :param model: The PyTorch model to check and potentially compile.
+    :param compile_kwargs: Additional keyword arguments to pass to torch.compile.
+    :return: The compiled model if supported, otherwise the original model.
+    """
+    # Parse the version number and compare
+    # Remove possible suffixes (e.g. +cu118)
+    torch_version = torch.__version__.split("+")[0]
+    major, minor = map(int, torch_version.split("."))[:2]
+
+    if major > 2 or (major == 2 and minor >= 2):
+        logger.info(
+            msg=f"PyTorch version {torch.__version__} supports torch.compile, enables compilation optimization...")
+        # Compile the model with default parameters, and you can pass in custom parameters through kwargs
+        default_kwargs = {"mode": "reduce-overhead", "dynamic": False}
+        default_kwargs.update(compile_kwargs)
+        return torch.compile(model, **default_kwargs)
+    else:
+        logger.warning(msg=f"PyTorch version {torch.__version__} < 2.2, torch.compile is not enabled.")
+        return model

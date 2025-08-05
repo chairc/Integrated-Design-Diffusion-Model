@@ -16,7 +16,7 @@ from torch import multiprocessing as mp
 
 sys.path.append(os.path.dirname(sys.path[0]))
 from iddm.config.choices import sample_choices, network_choices, optim_choices, act_choices, lr_func_choices, \
-    image_format_choices, noise_schedule_choices, parse_image_size_type, loss_func_choices
+    image_format_choices, noise_schedule_choices, parse_image_size_type, loss_func_choices, autoencoder_network_choices
 from iddm.config.version import get_version_banner
 from iddm.model.trainers import DMTrainer
 
@@ -49,16 +49,20 @@ def init_train_args():
     parser = argparse.ArgumentParser()
     # =================================Base settings=================================
     # Set the seed for initialization (required)
-    parser.add_argument("--seed", "-s", type=int, default=0)
+    parser.add_argument("--seed", type=int, default=0)
     # Enable conditional training (required)
     # If enabled, you can modify the custom configuration.
     # For more details, please refer to the boundary line at the bottom.
     # [Note] We recommend enabling it to 'True'.
     parser.add_argument("--conditional", "-c", default=False, action="store_true")
+    # Enable latent diffusion model (needed)
+    # If enabled, the model will use latent diffusion.
+    # For more details, please refer to the boundary line at the bottom.
+    parser.add_argument("--latent", "-l", default=False, action="store_true")
     # Set the sample type (required)
     # If not set, the default is for 'ddpm'. You can set it to either 'ddpm', 'ddim' or 'plms'.
     # Option: ddpm/ddim/plms
-    parser.add_argument("--sample", type=str, default="ddpm", choices=sample_choices)
+    parser.add_argument("--sample", "-s", type=str, default="ddpm", choices=sample_choices)
     # Set network
     # Option: unet/cspdarkunet/unetv2
     parser.add_argument("--network", type=str, default="unet", choices=network_choices)
@@ -151,6 +155,13 @@ def init_train_args():
     # =====================Enable the conditional training (if '--conditional' is set to 'True')=====================
     # classifier-free guidance interpolation weight, users can better generate model effect (recommend)
     parser.add_argument("--cfg_scale", type=int, default=3)
+
+    # =====================Enable the latent training (if '--latent' is set to 'True')=====================
+    # Set autoencoder network
+    # Option: autoencoder
+    parser.add_argument("--autoencoder_network", type=str, default="vae", choices=autoencoder_network_choices)
+    # Set the autoencoder checkpoint path (needed)
+    parser.add_argument("--autoencoder_ckpt", type=str, default="/your/path/of/autoencoder/weight.pt")
 
     return parser.parse_args()
 

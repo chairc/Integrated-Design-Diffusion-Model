@@ -187,23 +187,24 @@ def optimizer_initializer(model, optim, init_lr, device):
     return optimizer
 
 
-def sample_initializer(sample, image_size, device, schedule_name="linear"):
+def sample_initializer(sample, image_size, device, schedule_name="linear", **kwargs):
     """
     Initialize sample
     :param sample: Sample function
     :param image_size: image size
     :param device: GPU or CPU
     :param schedule_name: Prepare the noise schedule name
+    :param kwargs: Additional arguments for the diffusion model
     :return: diffusion
     """
     if sample == "ddpm":
-        diffusion = DDPMDiffusion(img_size=image_size, device=device, schedule_name=schedule_name)
+        diffusion = DDPMDiffusion(img_size=image_size, device=device, schedule_name=schedule_name, **kwargs)
     elif sample == "ddim":
-        diffusion = DDIMDiffusion(img_size=image_size, device=device, schedule_name=schedule_name)
+        diffusion = DDIMDiffusion(img_size=image_size, device=device, schedule_name=schedule_name, **kwargs)
     elif sample == "plms":
-        diffusion = PLMSDiffusion(img_size=image_size, device=device, schedule_name=schedule_name)
+        diffusion = PLMSDiffusion(img_size=image_size, device=device, schedule_name=schedule_name, **kwargs)
     else:
-        diffusion = DDPMDiffusion(img_size=image_size, device=device, schedule_name=schedule_name)
+        diffusion = DDPMDiffusion(img_size=image_size, device=device, schedule_name=schedule_name, **kwargs)
         logger.warning(msg=f"[{device}]: Setting sample error, we has been automatically set to ddpm.")
     return diffusion
 

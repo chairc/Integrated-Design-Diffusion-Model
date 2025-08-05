@@ -20,12 +20,13 @@ from torch.cuda.amp import autocast
 from tqdm import tqdm
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from iddm.config.setting import MASTER_ADDR, MASTER_PORT, EMA_BETA
+from iddm.config.setting import MASTER_ADDR, MASTER_PORT, EMA_BETA, LATENT_CHANNEL, IMAGE_CHANNEL, IMAGE_SCALE
 from iddm.model.modules.ema import EMA
 from iddm.utils.check import check_image_size, check_pretrain_path, check_is_distributed
 from iddm.utils.dataset import get_dataset
 from iddm.utils.initializer import device_initializer, seed_initializer, network_initializer, optimizer_initializer, \
-    sample_initializer, lr_initializer, amp_initializer, loss_initializer, classes_initializer
+    sample_initializer, lr_initializer, amp_initializer, loss_initializer, classes_initializer, \
+    autoencoder_network_initializer
 from iddm.utils.utils import plot_images, save_images, setup_logging, save_train_logging, download_model_pretrain_model
 from iddm.utils.checkpoint import load_ckpt, save_ckpt
 from iddm.model.trainers.base import Trainer
@@ -65,7 +66,17 @@ class DMTrainer(Trainer):
         # classifier-free guidance interpolation weight, users can better generate model effect
         self.cfg_scale = self.check_args_and_kwargs(kwarg="cfg_scale", default=3)
 
+        # Parameters specific to Latent Diffusion
+        self.latent = self.check_args_and_kwargs(kwarg="latent", default=False)
+        self.autoencoder_image_size = None
+        self.autoencoder_ckpt = self.check_args_and_kwargs(kwarg="autoencoder_ckpt", default="")
+        self.autoencoder_network = self.check_args_and_kwargs(kwarg="autoencoder_network", default="autoencoder")
+        self.latent_channels = LATENT_CHANNEL
+        self.autoencoder = None
+
         # Default params
+        self.in_channels, self.out_channels = IMAGE_CHANNEL, IMAGE_CHANNEL
+        self.dataset_image_size = 64
         self.num_classes = None
         self.diffusion = None
         self.pbar = None
@@ -96,6 +107,15 @@ class DMTrainer(Trainer):
         seed_initializer(seed_id=self.seed)
         # Input image size
         self.image_size = check_image_size(image_size=self.image_size)
+        self.dataset_image_size = self.image_size
+        if self.latent:
+            # Autoencoder image size
+            if isinstance(self.image_size, (list, tuple)):
+                self.autoencoder_image_size = [s * IMAGE_SCALE for s in self.image_size]
+            else:
+                self.autoencoder_image_size = self.image_size * IMAGE_SCALE
+            self.in_channels, self.out_channels = LATENT_CHANNEL, LATENT_CHANNEL
+            self.dataset_image_size = self.autoencoder_image_size
         # Number of classes
         self.num_classes = classes_initializer(dataset_path=self.dataset_path)
         # Initialize and save the model identification bit
@@ -132,9 +152,11 @@ class DMTrainer(Trainer):
         Network = network_initializer(network=self.network, device=self.device)
         # Model
         if not self.conditional:
-            self.model = Network(device=self.device, image_size=self.image_size, act=self.act).to(self.device)
+            self.model = Network(in_channel=self.in_channels, out_channel=self.out_channels, device=self.device,
+                                 image_size=self.image_size, act=self.act).to(self.device)
         else:
-            self.model = Network(num_classes=self.num_classes, device=self.device, image_size=self.image_size,
+            self.model = Network(in_channel=self.in_channels, out_channel=self.out_channels,
+                                 num_classes=self.num_classes, device=self.device, image_size=self.image_size,
                                  act=self.act).to(self.device)
         # Distributed training
         if self.distributed:
@@ -175,9 +197,6 @@ class DMTrainer(Trainer):
         self.scaler = amp_initializer(amp=self.amp, device=self.device)
         # Loss function
         self.loss_func = loss_initializer(loss_name=self.loss_name, device=self.device)
-        # Initialize the diffusion model
-        self.diffusion = sample_initializer(sample=self.sample, image_size=self.image_size, device=self.device,
-                                            schedule_name=self.noise_schedule)
         # Exponential Moving Average (EMA) may not be as dominant for single class as for multi class
         self.ema = EMA(beta=EMA_BETA)
         # EMA model
@@ -186,11 +205,26 @@ class DMTrainer(Trainer):
         # =================================About data=================================
         # Step4: Set data
         # Dataloader
-        self.dataloader = get_dataset(image_size=self.image_size, dataset_path=self.dataset_path,
+        self.dataloader = get_dataset(image_size=self.dataset_image_size, dataset_path=self.dataset_path,
                                       batch_size=self.batch_size, num_workers=self.num_workers,
                                       distributed=self.distributed)
         # Number of dataset batches in the dataloader
         self.len_dataloader = len(self.dataloader)
+
+        # =================================About autoencoder and diffusion=================================
+        # Step4: Set autoencoder
+        # Loading autoencoder (fixed parameters, only used to encode images into latent space)
+        if self.latent:
+            Network = autoencoder_network_initializer(network=self.autoencoder_network, device=self.device)
+            self.autoencoder = Network(latent_channels=self.latent_channels, device=self.device).to(self.device)
+            load_ckpt(ckpt_path=self.autoencoder_ckpt, model=self.autoencoder, is_train=False,
+                      device=self.device)
+            # Inference mode, no updating parameters
+            self.autoencoder.eval()
+        # Initialize the diffusion model
+        self.diffusion = sample_initializer(sample=self.sample, image_size=self.image_size, device=self.device,
+                                            schedule_name=self.noise_schedule, latent=self.latent,
+                                            latent_channel=self.latent_channels, autoencoder=self.autoencoder)
 
     def before_iter(self):
         """
@@ -212,6 +246,14 @@ class DMTrainer(Trainer):
         for i, (images, labels) in enumerate(self.pbar):
             # The images are all resized in dataloader
             images = images.to(self.device)
+            if self.latent:
+                with torch.no_grad():
+                    # Latent variable shape: [B, C, H/8, W/8]
+                    z = self.autoencoder.encode(images)
+                    mean, log_var = z
+                    z = self.autoencoder.reparameterize(mean, log_var, sample=False)
+                    # Scaling latent variables
+                    images = z * self.autoencoder.scale_factor
             # Generates a tensor of size images.shape[0] randomly sampled time steps
             time = self.diffusion.sample_time_steps(images.shape[0]).to(self.device)
             # Add noise, return as x value at time t and standard normal distribution
@@ -299,7 +341,7 @@ class DMTrainer(Trainer):
                       save_model_interval_epochs=self.save_model_interval_epochs,
                       start_model_interval=self.start_model_interval, conditional=self.conditional,
                       image_size=self.image_size, sample=self.sample, network=self.network, act=self.act,
-                      num_classes=self.num_classes)
+                      num_classes=self.num_classes, latent=self.latent)
         logger.info(msg=f"[{self.device}]: Finish epoch {self.epoch}:")
 
         # Synchronization during distributed training

@@ -15,11 +15,13 @@ import logging
 import coloredlogs
 
 sys.path.append(os.path.dirname(sys.path[0]))
+from iddm.config import IMAGE_CHANNEL
 from iddm.config.choices import sample_choices, network_choices, act_choices, image_format_choices, \
-    parse_image_size_type
+    parse_image_size_type, autoencoder_network_choices
 from iddm.config.version import get_version_banner
 from iddm.utils.check import check_image_size
-from iddm.utils.initializer import device_initializer, network_initializer, sample_initializer, generate_initializer
+from iddm.utils.initializer import device_initializer, network_initializer, sample_initializer, generate_initializer, \
+    generate_autoencoder_initializer, autoencoder_network_initializer
 from iddm.utils.utils import plot_images, save_images, save_one_image_in_images, check_and_create_dir
 from iddm.utils.checkpoint import load_ckpt
 
@@ -44,10 +46,20 @@ class Generator:
 
         logger.info(msg="Start generation.")
         logger.info(msg=f"Input params: {self.args}")
+        # Init parameters
+        self.in_channels, self.out_channels = IMAGE_CHANNEL, IMAGE_CHANNEL
+        (self.autoencoder, self.autoencoder_network, self.autoencoder_image_size, self.autoencoder_latent_channels,
+         self.autoencoder_act) = None, None, None, None, None
+
+        # Latent diffusion model
+        self.latent = self.args.latent
         # Weight path
         self.weight_path = self.args.weight_path
+        # Autoencoder weight path
+        self.autoencoder_ckpt = self.args.autoencoder_ckpt
         # Run device initializer
         self.device = device_initializer(device_id=self.args.use_gpu)
+
         # Enable conditional generation, sample type, network, image size,
         # number of classes and select activation function
         gen_results = generate_initializer(ckpt_path=self.weight_path, conditional=self.args.conditional,
@@ -55,8 +67,10 @@ class Generator:
                                            network=self.args.network, act=self.args.act,
                                            num_classes=self.args.num_classes, device=self.device)
         self.conditional, self.network, self.image_size, self.num_classes, self.act = gen_results
+
         # Check image size format
         self.image_size = check_image_size(image_size=self.image_size)
+        self.resize_image_size = self.image_size
         # Generation name
         self.generate_name = self.args.generate_name
         # Sample
@@ -74,15 +88,35 @@ class Generator:
             check_and_create_dir(self.result_path)
         # Network
         self.Network = network_initializer(network=self.network, device=self.device)
+
+        # If latent diffusion model is enabled, get autoencoder results
+        if self.latent:
+            gen_autoencoder_results = generate_autoencoder_initializer(ckpt_path=self.autoencoder_ckpt,
+                                                                       device=self.device)
+            (self.autoencoder_network, self.autoencoder_image_size, self.autoencoder_latent_channels,
+             self.autoencoder_act) = gen_autoencoder_results
+            self.in_channels, self.out_channels = self.autoencoder_latent_channels, self.autoencoder_latent_channels
+            self.resize_image_size = check_image_size(image_size=self.autoencoder_image_size)
+
+            # Init autoencoder network
+            autoencoder_network = autoencoder_network_initializer(network=self.autoencoder_network, device=self.device)
+            self.autoencoder = autoencoder_network(latent_channels=self.autoencoder_latent_channels,
+                                                   device=self.device).to(self.device)
+            load_ckpt(ckpt_path=self.autoencoder_ckpt, model=self.autoencoder, is_train=False, device=self.device)
+            # Inference mode, no updating parameters
+            self.autoencoder.eval()
+
         # Initialize the diffusion model
-        # If you want to ignore the rules and generate a large image, modify image_size=[h,w]
-        self.diffusion = sample_initializer(sample=self.sample, image_size=self.image_size, device=self.device)
+        self.diffusion = sample_initializer(sample=self.sample, image_size=self.image_size, device=self.device,
+                                            latent=self.latent, latent_channel=self.autoencoder_latent_channels,
+                                            autoencoder=self.autoencoder)
+
         # Is it necessary to expand the image?
-        self.input_image_size = check_image_size(image_size=self.args.image_size)
-        if self.image_size == self.input_image_size:
+        self.resize_image_size = check_image_size(image_size=self.resize_image_size)
+        if self.image_size == self.resize_image_size:
             self.new_image_size = None
         else:
-            self.new_image_size = self.input_image_size
+            self.new_image_size = self.resize_image_size
         # Initialize model
         if self.conditional:
             # Generation class name
@@ -90,7 +124,8 @@ class Generator:
             # classifier-free guidance interpolation weight
             self.cfg_scale = self.args.cfg_scale
             # If you want to ignore the rules and generate a large image, modify image_size=[h,w]
-            self.model = self.Network(num_classes=self.num_classes, device=self.device, image_size=self.image_size,
+            self.model = self.Network(in_channel=self.in_channels, out_channel=self.out_channels,
+                                      num_classes=self.num_classes, device=self.device, image_size=self.image_size,
                                       act=self.act).to(self.device)
             load_ckpt(ckpt_path=self.weight_path, model=self.model, device=self.device, is_train=False,
                       is_use_ema=self.use_ema, conditional=self.conditional)
@@ -139,10 +174,9 @@ def init_generate_args():
     # =================================Base settings=================================
     # Generation name (required)
     parser.add_argument("--generate_name", "-n", type=str, default="df")
-    # Input image size (required)
-    # [Warn] Compatible with older versions
-    # [Warn] Version <= 1.1.1 need to be equal to model's image size, version > 1.1.1 can set whatever you want
-    parser.add_argument("--image_size", "-i", type=parse_image_size_type, default=64)
+    # Enable latent diffusion model (needed)
+    # If enabled, the model will use latent diffusion.
+    parser.add_argument("--latent", "-l", default=False, action="store_true")
     # Generated image format
     # Recommend to use png for better generation quality.
     # Option: jpg/png
@@ -156,12 +190,18 @@ def init_generate_args():
     parser.add_argument("--use_ema", default=False, action="store_true")
     # Weight path (required)
     parser.add_argument("--weight_path", type=str, default="/your/path/Defect-Diffusion-Model/weight/model.pt")
+    # Set the autoencoder checkpoint path (needed)
+    parser.add_argument("--autoencoder_ckpt", type=str, default="/your/path/Defect-Diffusion-Model/weight/autoencoder.pt")
     # Saving path (required)
     parser.add_argument("--result_path", type=str, default="/your/path/Defect-Diffusion-Model/results/vis")
     # Set the sample type (required)
     # If not set, the default is for 'ddpm'. You can set it to either 'ddpm', 'ddim' or 'plms'.
     # Option: ddpm/ddim/plms
     parser.add_argument("--sample", type=str, default="ddpm", choices=sample_choices)
+    # Input image size (required)
+    # [Warn] Compatible with older versions
+    # [Warn] Version <= 1.1.1 need to be equal to model's image size, version > 1.1.1 can set whatever you want
+    parser.add_argument("--image_size", "-i", type=parse_image_size_type, default=64)
 
     # =====================Enable the conditional generation (if '--conditional' is set to 'True')=====================
     # Class name (required)
