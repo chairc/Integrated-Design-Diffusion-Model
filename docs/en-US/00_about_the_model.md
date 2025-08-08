@@ -44,13 +44,11 @@ Integrated Design Diffusion Model
 │   │   │   ├── base.py
 │   │   │   ├── ddim.py
 │   │   │   ├── ddpm.py
-│   │   │   ├── ldm.py
 │   │   │   └── plms.py
 │   │   └── trainers
 │   │       ├── autoencoder.py
 │   │       ├── base.py
 │   │       ├── dm.py
-│   │       ├── ldm.py
 │   │       └── sr.py
 │   ├── sr
 │   │   ├── dataset.py
@@ -58,7 +56,6 @@ Integrated Design Diffusion Model
 │   │   ├── interface.py
 │   │   └── train.py
 │   ├── autoencoder
-│   │   ├── generate.py
 │   │   └── train.py
 │   ├── tools
 │   │   ├── FID_calculator.py
