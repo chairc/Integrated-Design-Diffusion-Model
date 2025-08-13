@@ -135,19 +135,30 @@ class TestModule(unittest.TestCase):
         Test local send message to deploy_socket.py
         :return: None
         """
-        test_json = {"sample": "ddpm", "image_size": 64, "num_images": 2, "type": "base64",
-                     "weight_path": "/your/test/model/path/test.pt",
-                     "result_path": "/your/results/deploy", "class_name": 0,
-                     }
-        logger.info(msg=f"Test json: {test_json}")
+        df_data = {
+            "latent": False, "sample": "ddim", "image_size": 64, "num_images": 2, "type": "url", "use_ema": False,
+            "weight_path": "/your/test/model/path/test.pt",
+            "result_path": "/your/results/deploy", "class_name": 0,
+        }
+        logger.info(msg=f"Test json: {df_data}")
+        ldm_data = {
+            "latent": True, "sample": "ddim", "image_size": 512, "num_images": 2, "type": "url", "use_ema": False,
+            "weight_path": "/your/test/model/path/test.pt",
+            "autoencoder_ckpt": "/your/test/model/path/autoencoder.pt",
+            "result_path": "/your/results/deploy", "class_name": 0,
+        }
+        logger.info(msg=f"Test json: {ldm_data}")
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # host = "127.0.1.1"
         # host = "192.168.16.1"
         host = socket.gethostname()
         client_socket.bind((host, 12346))
         client_socket.connect((host, 12345))
-        msg = json.dumps(test_json)
-        client_socket.send(msg.encode("utf-8"))
+        df_msg = json.dumps(df_data)
+        client_socket.send(df_msg.encode("utf-8"))
+        client_socket.send("-iccv-over".encode("utf-8"))
+        ldm_msg = json.dumps(ldm_data)
+        client_socket.send(ldm_msg.encode("utf-8"))
         client_socket.send("-iccv-over".encode("utf-8"))
         client_socket.close()
         logger.info(msg="Send message successfully!")
@@ -155,15 +166,24 @@ class TestModule(unittest.TestCase):
     def test_send_message_to_web(self):
         url = "http://127.0.0.1:12341/api/generate/df"
         # Define the parameters of the request, using JSON format here
-        data = {
-            "sample": "ddim", "image_size": 64, "num_images": 2, "type": "url",
+        df_data = {
+            "latent": False, "sample": "ddim", "image_size": 64, "num_images": 2, "type": "url", "use_ema": False,
             "weight_path": "/your/test/model/path/test.pt",
             "result_path": "/your/results/deploy", "class_name": 0,
         }
 
+        ldm_data = {
+            "latent": True, "sample": "ddim", "image_size": 512, "num_images": 2, "type": "url", "use_ema": False,
+            "weight_path": "/your/test/model/path/test.pt",
+            "autoencoder_ckpt": "/your/test/model/path/autoencoder.pt",
+            "result_path": "/your/results/deploy", "class_name": 0,
+        }
+
         # Send a POST request
-        response = requests.post(url, json=data)
-        logger.info(msg=f"Get return message => {json.loads(response.content.decode('utf-8'))}")
+        df_response = requests.post(url, json=df_data)
+        logger.info(msg=f"Get return message => {json.loads(df_response.content.decode('utf-8'))}")
+        ldm_response = requests.post(url, json=ldm_data)
+        logger.info(msg=f"Get return message => {json.loads(ldm_response.content.decode('utf-8'))}")
 
     def test_separate_ckpt_weights(self):
         """
