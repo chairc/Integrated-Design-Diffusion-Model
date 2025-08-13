@@ -43,18 +43,24 @@ def generate_diffusion_model_api(data: dict):
     logger.info(msg="Route -> /api/df")
     logger.info(msg=f"Send json: {data}")
 
+    # Latent
+    latent = data.get("latent", False)
     # Sample type
-    sample = data["sample"]
+    sample = data.get("sample", "ddpm")
     # Image size
-    image_size = data["image_size"]
+    image_size = 512 if latent else data.get("image_size", 64)
     # Number of images
-    num_images = data["num_images"] if data["num_images"] >= 1 else 1
+    num_images = data.get("num_images") if data.get("num_images", 1) > 1 else 1
+    # Use ema
+    use_ema = data.get("use_ema", False)
     # Weight path
-    weight_path = data["weight_path"]
-    result_path = data["result_path"]
+    weight_path = data.get("weight_path", None)
+    result_path = data.get("result_path", "./results")
+    # Autoencoder weight path
+    autoencoder_ckpt = data.get("autoencoder_ckpt", None)
     # Recommend use base64 in server app
     # Return mode, base64 or url
-    re_type = data["type"]
+    re_type = data.get("type", None)
 
     logger.info(msg="[Web]: Start generation.")
     # Type is url or base64
@@ -67,8 +73,11 @@ def generate_diffusion_model_api(data: dict):
     args = init_generate_args()
     args.sample = sample
     args.image_size = image_size
+    args.use_ema = use_ema
     args.weight_path = weight_path
     args.result_path = result_path
+    args.latent = latent
+    args.autoencoder_ckpt = autoencoder_ckpt
     # Only generate 1 image per
     args.num_images = 1
 

@@ -32,17 +32,24 @@ def generate(parse_json_data):
     :param parse_json_data: Parse send json message
     :return: JSON
     """
+    # Latent
+    latent = parse_json_data.get("latent", False)
     # Sample type
-    sample = parse_json_data["sample"]
+    sample = parse_json_data.get("sample", "ddpm")
     # Image size
-    image_size = parse_json_data["image_size"]
+    image_size = 512 if latent else parse_json_data.get("image_size", 64)
     # Number of images
-    num_images = parse_json_data["num_images"] if parse_json_data["num_images"] >= 1 else 1
+    num_images = parse_json_data.get("num_images") if parse_json_data.get("num_images", 1) > 1 else 1
+    # Use ema
+    use_ema = parse_json_data.get("use_ema", False)
     # Weight path
-    weight_path = parse_json_data["weight_path"]
-    result_path = parse_json_data["result_path"]
+    weight_path = parse_json_data.get("weight_path", None)
+    result_path = parse_json_data.get("result_path", "./results")
+    # Autoencoder weight path
+    autoencoder_ckpt = parse_json_data.get("autoencoder_ckpt", None)
+    # Recommend use base64 in server app
     # Return mode, base64 or url
-    re_type = parse_json_data["type"]
+    re_type = parse_json_data.get("type", None)
 
     logger.info(msg="[Client]: Start generation.")
     # Type is url or base64
@@ -52,8 +59,11 @@ def generate(parse_json_data):
     args = init_generate_args()
     args.sample = sample
     args.image_size = image_size
+    args.use_ema = use_ema
     args.weight_path = weight_path
     args.result_path = result_path
+    args.latent = latent
+    args.autoencoder_ckpt = autoencoder_ckpt
     # Only generate 1 image per
     args.num_images = 1
 
