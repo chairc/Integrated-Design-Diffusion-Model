@@ -16,7 +16,8 @@ import coloredlogs
 
 sys.path.append(os.path.dirname(sys.path[0]))
 from iddm.config import IMAGE_CHANNEL
-from iddm.config.choices import sample_choices, image_format_choices, parse_image_size_type
+from iddm.config.choices import sample_choices, image_format_choices, parse_image_size_type, network_choices, \
+    act_choices
 from iddm.config.version import get_version_banner
 from iddm.utils.check import check_image_size
 from iddm.utils.initializer import device_initializer, network_initializer, sample_initializer, generate_initializer, \
