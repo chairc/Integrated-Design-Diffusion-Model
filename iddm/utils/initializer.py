@@ -16,6 +16,8 @@ import coloredlogs
 from torch.cuda.amp import GradScaler
 
 from iddm.model.networks.unet import UNet
+from iddm.model.networks.unet_cross_attn import UNetCrossAttn
+from iddm.model.networks.unet_flash_self_attn import UNetFlashSelfAttn
 from iddm.model.networks.unetv2 import UNetV2
 from iddm.model.networks.unet_slim import UNetSlim
 from iddm.model.networks.cspdarkunet import CSPDarkUnet
@@ -99,6 +101,10 @@ def network_initializer(network, device):
         Network = CSPDarkUnet
     elif network == "unet-slim":
         Network = UNetSlim
+    elif network == "unet-cross-attn":
+        Network = UNetCrossAttn
+    elif network == "unet-flash-self-attn":
+        Network = UNetFlashSelfAttn
     else:
         Network = UNet
         logger.warning(msg=f"[{device}]: Setting network error, we has been automatically set to unet.")
