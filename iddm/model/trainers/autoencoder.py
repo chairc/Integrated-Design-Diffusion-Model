@@ -141,7 +141,7 @@ class AutoencoderTrainer(Trainer):
             # Pretrain mode
             if self.pretrain:
                 load_ckpt(ckpt_path=self.pretrain_path, model=self.model, device=self.device, is_pretrain=self.pretrain,
-                          is_distributed=self.distributed)
+                          is_distributed=self.distributed, ckpt_type="autoencoder")
                 logger.info(msg=f"[{self.device}]: Successfully load pretrain model checkpoint.")
             self.start_epoch, self.best_score = 0, 0
         logger.info(msg=f"[{self.device}]: The start epoch is {self.start_epoch}, best score is {self.best_score}.")

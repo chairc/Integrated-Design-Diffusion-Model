@@ -155,7 +155,7 @@ class SRTrainer(Trainer):
             # Pretrain mode
             if self.pretrain:
                 load_ckpt(ckpt_path=self.pretrain_path, model=self.model, device=self.device, is_pretrain=self.pretrain,
-                          is_distributed=self.distributed)
+                          is_distributed=self.distributed, ckpt_type="sr")
                 logger.info(msg=f"[{self.device}]: Successfully load pretrain model checkpoint.")
             # Init
             self.start_epoch, self.best_ssim, self.best_psnr = 0, 0, 0
