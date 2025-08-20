@@ -7,6 +7,8 @@
 """
 import torch
 import torch.nn as nn
+
+from flash_attn import flash_attn_qkvpacked_func
 from iddm.model.modules.activation import get_activation_function
 
 
@@ -189,3 +191,91 @@ class CrossAttention(nn.Module):
 
         # Restore the spatial dimension
         return attn_output.swapaxes(2, 1).view(batch, q_c, h, w)
+
+
+class FlashSelfAttention(nn.Module):
+    """
+    FlashAttention-based self-attention module
+    It is suitable for replacing the original SelfAttention and improving the computing efficiency in long sequence scenarios
+    """
+
+    def __init__(self, channels, size, act="silu", dropout=0.1, dtype=torch.bfloat16):
+        """
+        Initialize the Flash Self-Attention module
+        :param channels: Channels
+        :param size: Size of the spatial dimension (height, width)
+        :param act: Activation function
+        :param dropout: Dropout rate
+        :param dtype: Data type for computation, default is bfloat16 for FlashAttention
+        """
+        super().__init__()
+        self.channels = channels
+        # (height, width)
+        self.size = size
+        self.dropout = dropout
+        self.dtype = dtype
+
+        # Adaptive Head Count (Consistent with the original logic)
+        self.num_heads = max(1, channels // 64)
+        assert channels % self.num_heads == 0, "The number of channels must be divisible by the number of heads"
+        self.head_dim = channels // self.num_heads
+
+        # QKV projection (merged into one linear layer for efficiency)
+        self.qkv_proj = nn.Linear(channels, 3 * channels, dtype=self.dtype)
+        self.out_proj = nn.Linear(channels, channels, dtype=self.dtype)
+
+        # Normalization and feedforward networks
+        self.ln = nn.LayerNorm(channels, dtype=self.dtype)
+        self.ff_self = nn.Sequential(
+            nn.LayerNorm(channels, dtype=self.dtype),
+            nn.Linear(channels, channels, dtype=self.dtype),
+            get_activation_function(act),
+            nn.Dropout(dropout),
+            nn.Linear(channels, channels, dtype=self.dtype),
+            nn.Dropout(dropout)
+        )
+
+    def forward(self, x):
+        """
+        Forward propagation for Flash Self-Attention
+        Input shape: [batch, channels, height, width]
+        Output shape: [batch, channels, height, width]
+        :param x: Input tensor
+        :return: Output tensor after self-attention and feedforward network
+        """
+        batch, c, h, w = x.shape
+        assert (h, w) == (self.size[0], self.size[1]), f"Query size {h}x{w} does not match the expected {self.size}"
+
+        # Save the raw data type for output
+        x_dtype = x.dtype
+        # Convert to bfloat16 for FlashAttention
+        x = x.to(self.dtype, non_blocking=True)
+
+        # Flattening the Dimension of Space: [batch, seq_len, channels]，seq_len = h*w
+        x_flat = x.flatten(2).transpose(1, 2)  # [B, seq_len, C]
+        x_ln = self.ln(x_flat)
+
+        # QKV projection and splitting: [B, seq_len, 3*C] -> [B, seq_len, 3, num_heads, head_dim]
+        qkv = self.qkv_proj(x_ln)  # 投影层已用dtype初始化
+        qkv = qkv.view(batch, -1, 3, self.num_heads, self.head_dim)
+        qkv = qkv.to(self.dtype, non_blocking=True)
+
+        # FlashAttention calculation (self-attention, Q=K=V)
+        # Output: [B, seq_len, num_heads, head_dim]
+        attn_output = flash_attn_qkvpacked_func(
+            qkv,
+            dropout_p=self.dropout if self.training else 0.0,
+            causal=False
+        )  # [B, seq_len, num_heads, head_dim]
+
+        # Merge headers and project them: [B, seq_len, C]
+        attn_output = attn_output.view(batch, -1, self.channels)
+        attn_output = self.out_proj(attn_output)  # 输出投影层已匹配dtype
+
+        # Residual connection + feedforward network
+        attn_output = attn_output + x_flat
+        attn_output = self.ff_self(attn_output) + attn_output  # 前馈网络已匹配dtype
+
+        # Restore the spatial dimension
+        attn_output = attn_output.to(x_dtype, non_blocking=True)
+        return attn_output.transpose(1, 2).view(batch, c, h, w)
