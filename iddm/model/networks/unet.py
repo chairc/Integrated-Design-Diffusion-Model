@@ -123,11 +123,11 @@ class UNet(BaseNet):
 
 if __name__ == "__main__":
     # Unconditional
-    net = UNet(device="cpu", image_size=128)
+    net = UNet(device="cpu", image_size=[64, 64])
     # Conditional
     # net = UNet(num_classes=10, device="cpu", image_size=128)
     print(sum([p.numel() for p in net.parameters()]))
-    x = torch.randn(1, 3, 128, 128)
+    x = torch.randn(1, 3, 64, 64)
     t = x.new_tensor([500] * x.shape[0]).long()
     y = x.new_tensor([1] * x.shape[0]).long()
     print(net(x, t).shape)
