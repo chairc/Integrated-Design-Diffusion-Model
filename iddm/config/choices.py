@@ -17,7 +17,7 @@ coloredlogs.install(level="INFO")
 # Support option
 bool_choices = [True, False]
 sample_choices = ["ddpm", "ddim", "plms"]
-network_choices = ["unet", "cspdarkunet", "unetv2", "unet-slim"]
+network_choices = ["unet", "cspdarkunet", "unetv2", "unet-slim", "unet-cross-attn", "unet-flash-self-attn",]
 optim_choices = ["adam", "adamw", "sgd"]
 act_choices = ["gelu", "silu", "relu", "relu6", "lrelu"]
 lr_func_choices = ["linear", "cosine", "warmup_cosine"]
