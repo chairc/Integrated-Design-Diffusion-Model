@@ -124,13 +124,20 @@ pytorch_fid==0.3.0
 fastapi==0.115.6
 tensorboardX==2.6.1
 
+# If you want to use flash attention, please install flash-attn.
+# Compile your own environment: pip install flash-attn --no-build-isolation
+# or download flash-attn .whl file from github: https://github.com/Dao-AILab/flash-attention/releases/tag/v2.8.2
+# Optional installation (Not installed by default)
+flash-attn==2.8.2
+
 # If you want to download gpu version
 # Please use: pip install torch==1.13.0+cu116 torchvision==0.14.0+cu116 -f https://download.pytorch.org/whl/torch_stable.html
 # About more torch information please click: https://pytorch.org/get-started/previous-versions/#linux-and-windows-25
 # More versions please click: https://pytorch.org/get-started/previous-versions
 # [Note] torch versions must >= 1.9.0
-torch>=1.9.0 # More info: https://pytorch.org/get-started/locally/ (recommended)
-torchvision>=0.10.0 # More info: https://pytorch.org/get-started/locally/ (recommended)
+# More info: https://pytorch.org/get-started/locally/ (recommended)
+torch>=1.9.0
+torchvision>=0.10.0
 ```
 
 **Approach 2**：Repository Installation

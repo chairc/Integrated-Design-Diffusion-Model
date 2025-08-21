@@ -17,7 +17,6 @@ from torch.cuda.amp import GradScaler
 
 from iddm.model.networks.unet import UNet
 from iddm.model.networks.unet_cross_attn import UNetCrossAttn
-from iddm.model.networks.unet_flash_self_attn import UNetFlashSelfAttn
 from iddm.model.networks.unetv2 import UNetV2
 from iddm.model.networks.unet_slim import UNetSlim
 from iddm.model.networks.cspdarkunet import CSPDarkUnet
@@ -26,7 +25,7 @@ from iddm.model.networks.vae.autoencoder import Autoencoder
 from iddm.model.samples.ddim import DDIMDiffusion
 from iddm.model.samples.ddpm import DDPMDiffusion
 from iddm.model.samples.plms import PLMSDiffusion
-from iddm.utils.check import check_path_is_exist
+from iddm.utils.check import check_path_is_exist, check_package_is_exist
 from iddm.utils.loss import MSEKLLoss
 from iddm.utils.lr_scheduler import set_cosine_lr
 
@@ -103,7 +102,9 @@ def network_initializer(network, device):
         Network = UNetSlim
     elif network == "unet-cross-attn":
         Network = UNetCrossAttn
-    elif network == "unet-flash-self-attn":
+    elif network == "unet-flash-self-attn" and check_package_is_exist(package_name="flash_attn"):
+        # Check if flash_attn is installed, and import only when needed
+        from iddm.model.networks.unet_flash_self_attn import UNetFlashSelfAttn
         Network = UNetFlashSelfAttn
     else:
         Network = UNet
