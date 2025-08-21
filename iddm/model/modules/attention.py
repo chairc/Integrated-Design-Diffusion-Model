@@ -8,7 +8,6 @@
 import torch
 import torch.nn as nn
 
-from flash_attn import flash_attn_qkvpacked_func
 from iddm.model.modules.activation import get_activation_function
 
 
@@ -256,12 +255,13 @@ class FlashSelfAttention(nn.Module):
         x_ln = self.ln(x_flat)
 
         # QKV projection and splitting: [B, seq_len, 3*C] -> [B, seq_len, 3, num_heads, head_dim]
-        qkv = self.qkv_proj(x_ln)  # 投影层已用dtype初始化
+        qkv = self.qkv_proj(x_ln)
         qkv = qkv.view(batch, -1, 3, self.num_heads, self.head_dim)
         qkv = qkv.to(self.dtype, non_blocking=True)
 
         # FlashAttention calculation (self-attention, Q=K=V)
         # Output: [B, seq_len, num_heads, head_dim]
+        from flash_attn import flash_attn_qkvpacked_func
         attn_output = flash_attn_qkvpacked_func(
             qkv,
             dropout_p=self.dropout if self.training else 0.0,
@@ -270,11 +270,11 @@ class FlashSelfAttention(nn.Module):
 
         # Merge headers and project them: [B, seq_len, C]
         attn_output = attn_output.view(batch, -1, self.channels)
-        attn_output = self.out_proj(attn_output)  # 输出投影层已匹配dtype
+        attn_output = self.out_proj(attn_output)
 
         # Residual connection + feedforward network
         attn_output = attn_output + x_flat
-        attn_output = self.ff_self(attn_output) + attn_output  # 前馈网络已匹配dtype
+        attn_output = self.ff_self(attn_output) + attn_output
 
         # Restore the spatial dimension
         attn_output = attn_output.to(x_dtype, non_blocking=True)

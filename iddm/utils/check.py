@@ -155,3 +155,18 @@ def check_model_support_compile(model: nn.Module, **compile_kwargs) -> nn.Module
     else:
         logger.warning(msg=f"PyTorch version {torch.__version__} < 2.2, torch.compile is not enabled.")
         return model
+
+
+def check_package_is_exist(package_name):
+    """
+    Check the package is installed
+    :param package_name: Package name
+    :return: Boolean
+    """
+    try:
+        __import__(package_name)
+        logger.info(msg=f"The package '{package_name}' is installed.")
+        return True
+    except ImportError:
+        logger.error(msg=f"The package '{package_name}' is not installed.")
+        return False

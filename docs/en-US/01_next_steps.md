@@ -20,6 +20,7 @@
 - [x] [2024-12-25] Refactor the overall structure of the trainer.
 - [x] [2025-03-08] Support PyPI install.
 - [x] [2025-08-01] Adding LDM Method. **Support generate 512*512 images** and use Latent Diffusion and reduce GPU memory usage.
+- [x] [2025-08-21] Support flash-attn, fast and GPU memory-efficient.
 - [ ] [Maybe 2025-01-31] Adding the deployment of Docker and image.
 - [ ] [To be determined] Refactor the project by Baidu PaddlePaddle.
 
