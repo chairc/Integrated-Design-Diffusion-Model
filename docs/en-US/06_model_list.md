@@ -29,6 +29,7 @@ Coming soon :-)
 
 ##### Autoencoder Pre-trained Model
 
-|           Model Name            | Latent | Datasets | Model Size | Download Link |
-| :-----------------------------: | :----: | :------: | :--------: | :-----------: |
+|           Model Name            | Latent | Datasets | Model Size |                        Download Link                         |
+| :-----------------------------: | :----: | :------: | :--------: | :----------------------------------------------------------: |
 | `neu-autoencoder-512-weight.pt` |   ✓    | NEU-DET  |  512×512   | [Download](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.2.0/neu-autoencoder-512-weight.pt) |
+| `voc-autoencoder-512-weight.pt` |   ✓    | VOC2012  |  512×512   | [Download](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases/download/v1.2.1/voc-autoencoder-512-weight.pt) |

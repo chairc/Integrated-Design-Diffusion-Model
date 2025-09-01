@@ -130,7 +130,7 @@ class CrossAttention(nn.Module):
         super(CrossAttention, self).__init__()
         # Number of Query channels
         self.q_channels = q_channels
-        # Key/Value 通道数
+        # Key/Value channels
         self.kv_channels = kv_channels
         # Space dimensions (need to match input)
         self.size = size
