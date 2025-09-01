@@ -42,3 +42,8 @@ Of course, based on the 64×64 U-Net model, we generate 160×160 `NEU-DET` image
 
 ![model_499_ema](../../assets/neu160_0.jpg)![model_499_ema](../../assets/neu160_1.jpg)![model_499_ema](../../assets/neu160_2.jpg)![model_499_ema](../../assets/neu160_3.jpg)![model_499_ema](../../assets/neu160_4.jpg)![model_499_ema](../../assets/neu160_5.jpg)
 
+
+
+#### Use latent model to generate NEU-DET images
+
+![neu_latent_299_ema](../../assets/neu_latent_299_ema.png)
