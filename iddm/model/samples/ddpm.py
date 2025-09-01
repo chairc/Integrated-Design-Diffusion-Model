@@ -96,12 +96,20 @@ class DDPMDiffusion(BaseDiffusion):
                 # For details, refer to line 3 of Algorithm 2 on page 4 of the paper
                 noise = torch.randn_like(x) if i > 1 else torch.zeros_like(x)
 
+                # Fix latent diffusion explosion problem
+                if self.latent:
+                    x = x.clamp(-1, 1)
+
                 # In each epoch, use x to calculate t - 1 of x
                 # For details, refer to line 4 of Algorithm 2 on page 4 of the paper
                 x = 1 / torch.sqrt(alpha) * (
                         x - ((1 - alpha) / (torch.sqrt(1 - alpha_hat))) * predicted_noise) + torch.sqrt(
                     beta) * noise
-            # Post process
-            x = self.post_process(x=x.clamp(-1, 1))
+            # Post process, output of constraint x
+            if self.latent:
+                x = self.post_process(x=x)
+            else:
+                x = self.post_process(x=x.clamp(-1, 1))
+
         model.train()
         return x
