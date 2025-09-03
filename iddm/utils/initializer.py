@@ -25,6 +25,7 @@ from iddm.model.networks.vae.autoencoder import Autoencoder
 from iddm.model.samples.ddim import DDIMDiffusion
 from iddm.model.samples.ddpm import DDPMDiffusion
 from iddm.model.samples.plms import PLMSDiffusion
+from iddm.model.samples.dpm2 import DPM2Diffusion
 from iddm.utils.check import check_path_is_exist, check_package_is_exist
 from iddm.utils.loss import MSEKLLoss
 from iddm.utils.lr_scheduler import set_cosine_lr
@@ -210,6 +211,8 @@ def sample_initializer(sample, image_size, device, schedule_name="linear", **kwa
         diffusion = DDIMDiffusion(img_size=image_size, device=device, schedule_name=schedule_name, **kwargs)
     elif sample == "plms":
         diffusion = PLMSDiffusion(img_size=image_size, device=device, schedule_name=schedule_name, **kwargs)
+    elif sample == "dpm2":
+        diffusion = DPM2Diffusion(img_size=image_size, device=device, schedule_name=schedule_name, **kwargs)
     else:
         diffusion = DDPMDiffusion(img_size=image_size, device=device, schedule_name=schedule_name, **kwargs)
         logger.warning(msg=f"[{device}]: Setting sample error, we has been automatically set to ddpm.")
