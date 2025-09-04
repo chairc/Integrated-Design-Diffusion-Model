@@ -56,7 +56,7 @@ class DDPMDiffusion(BaseDiffusion):
                          device=device, schedule_name=schedule_name, latent=latent, latent_channel=latent_channel,
                          autoencoder=autoencoder)
 
-    def sample(
+    def _sample_loop(
             self,
             model: nn.Module,
             x: Optional[torch.Tensor] = None,
@@ -65,7 +65,7 @@ class DDPMDiffusion(BaseDiffusion):
             cfg_scale: Optional[float] = None
     ) -> torch.Tensor:
         """
-        DDPM sample method
+        DDPM sample loop method
         :param model: Model
         :param x: Input image tensor, if provided, will be used as the starting point for sampling
         :param n: Number of sample images, x priority is greater than n
@@ -74,42 +74,32 @@ class DDPMDiffusion(BaseDiffusion):
         Avoiding the posterior collapse problem, Reference paper: 'Classifier-Free Diffusion Guidance'
         :return: Sample images
         """
-        # Input dim: [n, img_channel, img_size_h, img_size_w]
-        x, n = self._get_input_image(n=n, x=x)
-        logger.info(msg=f"DDPM Sampling {n} new images....")
-        model.eval()
-        with torch.no_grad():
-            # 'reversed(range(1, self.noise_steps)' iterates over a sequence of integers in reverse
-            for i in tqdm(reversed(range(1, self.noise_steps)), position=0, total=self.noise_steps - 1):
-                # Time step, creating a tensor of size n
-                t = (torch.ones(n) * i).long().to(self.device)
+        # 'reversed(range(1, self.noise_steps)' iterates over a sequence of integers in reverse
+        for i in tqdm(reversed(range(1, self.noise_steps)), position=0, total=self.noise_steps - 1):
+            # Time step, creating a tensor of size n
+            t = (torch.ones(n) * i).long().to(self.device)
 
-                # Whether the network has conditional input, such as multiple category input
-                # Predict noise
-                predicted_noise = self._get_predicted_noise(model, x, t, labels, cfg_scale)
+            # Whether the network has conditional input, such as multiple category input
+            # Predict noise
+            predicted_noise = self._get_predicted_noise(model, x, t, labels, cfg_scale)
 
-                # Expand to a 4-dimensional tensor, and get the value according to the time step t
-                alpha = self.alpha[t][:, None, None, None]
-                alpha_hat = self.alpha_hat[t][:, None, None, None]
-                beta = self.beta[t][:, None, None, None]
-                # Only noise with a step size greater than 1 is required.
-                # For details, refer to line 3 of Algorithm 2 on page 4 of the paper
-                noise = torch.randn_like(x) if i > 1 else torch.zeros_like(x)
+            # Expand to a 4-dimensional tensor, and get the value according to the time step t
+            alpha = self.alpha[t][:, None, None, None]
+            alpha_hat = self.alpha_hat[t][:, None, None, None]
+            beta = self.beta[t][:, None, None, None]
+            # Only noise with a step size greater than 1 is required.
+            # For details, refer to line 3 of Algorithm 2 on page 4 of the paper
+            noise = torch.randn_like(x) if i > 1 else torch.zeros_like(x)
 
-                # Fix latent diffusion explosion problem
-                if self.latent:
-                    x = x.clamp(-1, 1)
-
-                # In each epoch, use x to calculate t - 1 of x
-                # For details, refer to line 4 of Algorithm 2 on page 4 of the paper
-                x = 1 / torch.sqrt(alpha) * (
-                        x - ((1 - alpha) / (torch.sqrt(1 - alpha_hat))) * predicted_noise) + torch.sqrt(
-                    beta) * noise
-            # Post process, output of constraint x
+            # Fix latent diffusion explosion problem
             if self.latent:
-                x = self.post_process(x=x)
-            else:
-                x = self.post_process(x=x.clamp(-1, 1))
+                x = x.clamp(-1, 1)
 
-        model.train()
+            # In each epoch, use x to calculate t - 1 of x
+            # For details, refer to line 4 of Algorithm 2 on page 4 of the paper
+            x = 1 / torch.sqrt(alpha) * (
+                    x - ((1 - alpha) / (torch.sqrt(1 - alpha_hat))) * predicted_noise) + torch.sqrt(
+                beta) * noise
+
+        x = x if self.latent else x.clamp(-1, 1)
         return x
