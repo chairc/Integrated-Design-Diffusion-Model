@@ -7,11 +7,16 @@
 """
 import math
 from typing import Optional, List, Union, Tuple
+import logging
+import coloredlogs
 
 import torch
 from torch import nn
 
 from iddm.config.setting import DEFAULT_IMAGE_SIZE, IMAGE_CHANNEL
+
+logger = logging.getLogger(__name__)
+coloredlogs.install(level="INFO")
 
 
 class BaseDiffusion:
@@ -176,7 +181,7 @@ class BaseDiffusion:
             cfg_scale: Optional[float] = None
     ) -> torch.Tensor:
         """
-        Sample method, this method should be implemented in the subclass
+        Sample method, it is inherited by subclasses
         :param model: Model
         :param x: Input image tensor, if provided, will be used as the starting point for sampling
         :param n: Number of sample images, x priority is greater than n
@@ -184,7 +189,34 @@ class BaseDiffusion:
         :param cfg_scale: classifier-free guidance interpolation weight, users can better generate model effect.
         :return: Sample images
         """
-        pass
+        x, n = self._get_input_image(n=n, x=x)
+        logger.info(msg=f"{self.__class__.__name__} Sampling {n} images...")
+        model.eval()
+        with torch.no_grad():
+            # Subclasses implement specific iterative logic
+            x = self._sample_loop(model, x, n, labels, cfg_scale)
+        x = self.post_process(x)
+        model.train()
+        return x
+
+    def _sample_loop(
+            self,
+            model: nn.Module,
+            x: Optional[torch.Tensor] = None,
+            n: int = 1,
+            labels: Optional[torch.Tensor] = None,
+            cfg_scale: Optional[float] = None
+    ) -> torch.Tensor:
+        """
+        Sampling iteration logic, to be implemented in subclasses
+        :param model: Model
+        :param x: Input image tensor
+        :param n: Number of sample images
+        :param labels: Labels
+        :param cfg_scale: Classifier-free guidance scale
+        :return: None
+        """
+        raise NotImplementedError("Subclasses need to implement sampling iteration logic")
 
     def _get_input_image(
             self,
