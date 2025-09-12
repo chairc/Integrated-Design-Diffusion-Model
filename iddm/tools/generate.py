@@ -135,10 +135,11 @@ class Generator:
             load_ckpt(ckpt_path=self.weight_path, model=self.model, device=self.device, is_train=False,
                       conditional=self.conditional)
 
-    def generate(self, index=0):
+    def generate(self, index=0, image=None):
         """
         Generate images
         :param index: Image index
+        :param image: Input image tensor
         """
         if self.conditional:
             if self.class_name == -1:
@@ -146,9 +147,9 @@ class Generator:
                 self.num_images = self.num_classes
             else:
                 y = torch.Tensor([self.class_name] * self.num_images).long().to(self.device)
-            x = self.diffusion.sample(model=self.model, n=self.num_images, labels=y, cfg_scale=self.cfg_scale)
+            x = self.diffusion.sample(model=self.model, n=self.num_images, x=image, labels=y, cfg_scale=self.cfg_scale)
         else:
-            x = self.diffusion.sample(model=self.model, n=self.num_images)
+            x = self.diffusion.sample(model=self.model, n=self.num_images, x=image)
 
         # If deploy app is true, return the generate results
         if self.deploy:
