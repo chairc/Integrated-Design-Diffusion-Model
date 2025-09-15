@@ -105,7 +105,7 @@ class Generator:
             autoencoder_network = autoencoder_network_initializer(network=self.autoencoder_network, device=self.device)
             self.autoencoder = autoencoder_network(latent_channels=self.autoencoder_latent_channels,
                                                    device=self.device).to(self.device)
-            load_ckpt(ckpt_path=self.autoencoder_ckpt, model=self.autoencoder, is_train=False, device=self.device)
+            load_ckpt(ckpt_path=self.autoencoder_ckpt, model=self.autoencoder, is_generate=True, device=self.device)
             # Inference mode, no updating parameters
             self.autoencoder.eval()
 
@@ -130,12 +130,12 @@ class Generator:
             self.model = self.Network(mode=self.mode, in_channel=self.in_channels, out_channel=self.out_channels,
                                       num_classes=self.num_classes, device=self.device, image_size=self.image_size,
                                       act=self.act).to(self.device)
-            load_ckpt(ckpt_path=self.weight_path, model=self.model, device=self.device, is_train=False,
+            load_ckpt(ckpt_path=self.weight_path, model=self.model, device=self.device, is_generate=True,
                       is_use_ema=self.use_ema, conditional=self.conditional)
         else:
             # If you want to ignore the rules and generate a large image, modify image_size=[h,w]
             self.model = self.Network(device=self.device, image_size=self.image_size, act=self.act).to(self.device)
-            load_ckpt(ckpt_path=self.weight_path, model=self.model, device=self.device, is_train=False,
+            load_ckpt(ckpt_path=self.weight_path, model=self.model, device=self.device, is_generate=True,
                       conditional=self.conditional)
 
     def class_to_image(self):

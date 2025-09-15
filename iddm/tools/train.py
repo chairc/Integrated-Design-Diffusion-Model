@@ -55,7 +55,7 @@ def init_train_args():
     # If enabled, you can modify the custom configuration.
     # For more details, please refer to the boundary line at the bottom.
     # [Note] We recommend enabling it to 'True'.
-    parser.add_argument("--conditional", "-c", default=False, action="store_true")
+    parser.add_argument("--conditional", "-c", default=True, action="store_true")
     # Select the generation mode, "--conditional" must be set to 'True' to enable this option (required)
     # class: Category-guided generation
     # text: Text-guided generation

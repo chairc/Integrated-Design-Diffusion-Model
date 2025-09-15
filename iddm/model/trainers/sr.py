@@ -146,7 +146,8 @@ class SRTrainer(Trainer):
                 ckpt_path = os.path.join(self.results_dir, "ckpt_last.pt")
             # Get model state
             self.start_epoch, model_score = load_ckpt(ckpt_path=ckpt_path, model=self.model, device=self.device,
-                                                      optimizer=self.optimizer, is_distributed=self.distributed,
+                                                      optimizer=self.optimizer, is_train=True,
+                                                      is_distributed=self.distributed, is_resume=self.resume,
                                                       ckpt_type="sr")
             # Get best ssim and psnr
             self.best_ssim, self.best_psnr = model_score[0], model_score[1]
@@ -154,8 +155,8 @@ class SRTrainer(Trainer):
         else:
             # Pretrain mode
             if self.pretrain:
-                load_ckpt(ckpt_path=self.pretrain_path, model=self.model, device=self.device, is_pretrain=self.pretrain,
-                          is_distributed=self.distributed, ckpt_type="sr")
+                load_ckpt(ckpt_path=self.pretrain_path, model=self.model, device=self.device, is_train=True,
+                          is_pretrain=self.pretrain, is_distributed=self.distributed, ckpt_type="sr")
                 logger.info(msg=f"[{self.device}]: Successfully load pretrain model checkpoint.")
             # Init
             self.start_epoch, self.best_ssim, self.best_psnr = 0, 0, 0
@@ -320,7 +321,7 @@ class SRTrainer(Trainer):
                       save_model_interval=self.save_model_interval, start_model_interval=self.start_model_interval,
                       save_model_interval_epochs=self.save_model_interval_epochs, image_size=self.image_size,
                       network=self.network, act=self.act, is_sr=True, is_best=is_best, ssim=self.avg_ssim,
-                      psnr=self.avg_psnr,best_ssim=self.best_ssim, best_psnr=self.best_psnr)
+                      psnr=self.avg_psnr, best_ssim=self.best_ssim, best_psnr=self.best_psnr)
         logger.info(msg=f"[{self.device}]: Finish epoch {self.epoch}:")
 
         # Synchronization during distributed training

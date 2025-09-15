@@ -178,8 +178,8 @@ class DMTrainer(Trainer):
             if ckpt_path is None:
                 ckpt_path = os.path.join(self.results_dir, "ckpt_last.pt")
             self.start_epoch, _ = load_ckpt(ckpt_path=ckpt_path, model=self.model, device=self.device,
-                                            optimizer=self.optimizer, is_distributed=self.distributed,
-                                            conditional=self.conditional)
+                                            optimizer=self.optimizer, is_train=True, is_distributed=self.distributed,
+                                            is_resume=self.resume, conditional=self.conditional)
             logger.info(msg=f"[{self.device}]: Successfully load resume model checkpoint.")
         else:
             # Pretrain mode
@@ -191,8 +191,8 @@ class DMTrainer(Trainer):
                     self.pretrain_path = download_model_pretrain_model(pretrain_type="df", network=self.network,
                                                                        conditional=self.conditional,
                                                                        image_size=self.image_size, df_type="default")
-                load_ckpt(ckpt_path=self.pretrain_path, model=self.model, device=self.device, is_pretrain=self.pretrain,
-                          is_distributed=self.distributed, conditional=self.conditional)
+                load_ckpt(ckpt_path=self.pretrain_path, model=self.model, device=self.device, is_train=True,
+                          is_pretrain=self.pretrain, is_distributed=self.distributed, conditional=self.conditional)
                 logger.info(msg=f"[{self.device}]: Successfully load pretrain model checkpoint.")
             self.start_epoch = 0
         # Set harf-precision
@@ -219,7 +219,7 @@ class DMTrainer(Trainer):
         if self.latent:
             Network = autoencoder_network_initializer(network=self.autoencoder_network, device=self.device)
             self.autoencoder = Network(latent_channels=self.latent_channels, device=self.device).to(self.device)
-            load_ckpt(ckpt_path=self.autoencoder_ckpt, model=self.autoencoder, is_train=False,
+            load_ckpt(ckpt_path=self.autoencoder_ckpt, model=self.autoencoder, is_generate=True,
                       device=self.device)
             # Inference mode, no updating parameters
             self.autoencoder.eval()

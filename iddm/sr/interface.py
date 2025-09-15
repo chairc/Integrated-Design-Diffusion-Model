@@ -81,7 +81,7 @@ def load_sr_model(enable_custom=False, weight_path=None):
     # Init model
     model = Network(act=act).to(device)
     # Load model
-    load_ckpt(ckpt_path=default_weight_path, model=model, device=device, is_train=False)
+    load_ckpt(ckpt_path=default_weight_path, model=model, device=device, is_generate=True)
     model.eval()
     return model
 
