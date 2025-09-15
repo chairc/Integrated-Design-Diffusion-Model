@@ -53,6 +53,8 @@ class DMTrainer(Trainer):
         self.run_name = self.check_args_and_kwargs(kwarg="run_name", default="df")
         # Whether to enable conditional training
         self.conditional = self.check_args_and_kwargs(kwarg="conditional", default=False)
+        # Mode type
+        self.mode = self.check_args_and_kwargs(kwarg="mode", default="class")
         # Sample type
         self.sample = self.check_args_and_kwargs(kwarg="sample", default="ddpm")
         # Dataset path
@@ -155,7 +157,7 @@ class DMTrainer(Trainer):
             self.model = Network(in_channel=self.in_channels, out_channel=self.out_channels, device=self.device,
                                  image_size=self.image_size, act=self.act).to(self.device)
         else:
-            self.model = Network(in_channel=self.in_channels, out_channel=self.out_channels,
+            self.model = Network(mode=self.mode, in_channel=self.in_channels, out_channel=self.out_channels,
                                  num_classes=self.num_classes, device=self.device, image_size=self.image_size,
                                  act=self.act).to(self.device)
         # Distributed training
@@ -176,8 +178,8 @@ class DMTrainer(Trainer):
             if ckpt_path is None:
                 ckpt_path = os.path.join(self.results_dir, "ckpt_last.pt")
             self.start_epoch, _ = load_ckpt(ckpt_path=ckpt_path, model=self.model, device=self.device,
-                                            optimizer=self.optimizer, is_distributed=self.distributed,
-                                            conditional=self.conditional)
+                                            optimizer=self.optimizer, is_train=True, is_distributed=self.distributed,
+                                            is_resume=self.resume, conditional=self.conditional)
             logger.info(msg=f"[{self.device}]: Successfully load resume model checkpoint.")
         else:
             # Pretrain mode
@@ -189,8 +191,8 @@ class DMTrainer(Trainer):
                     self.pretrain_path = download_model_pretrain_model(pretrain_type="df", network=self.network,
                                                                        conditional=self.conditional,
                                                                        image_size=self.image_size, df_type="default")
-                load_ckpt(ckpt_path=self.pretrain_path, model=self.model, device=self.device, is_pretrain=self.pretrain,
-                          is_distributed=self.distributed, conditional=self.conditional)
+                load_ckpt(ckpt_path=self.pretrain_path, model=self.model, device=self.device, is_train=True,
+                          is_pretrain=self.pretrain, is_distributed=self.distributed, conditional=self.conditional)
                 logger.info(msg=f"[{self.device}]: Successfully load pretrain model checkpoint.")
             self.start_epoch = 0
         # Set harf-precision
@@ -217,7 +219,7 @@ class DMTrainer(Trainer):
         if self.latent:
             Network = autoencoder_network_initializer(network=self.autoencoder_network, device=self.device)
             self.autoencoder = Network(latent_channels=self.latent_channels, device=self.device).to(self.device)
-            load_ckpt(ckpt_path=self.autoencoder_ckpt, model=self.autoencoder, is_train=False,
+            load_ckpt(ckpt_path=self.autoencoder_ckpt, model=self.autoencoder, is_generate=True,
                       device=self.device)
             # Inference mode, no updating parameters
             self.autoencoder.eval()
@@ -305,7 +307,7 @@ class DMTrainer(Trainer):
             # Saving model, set the checkpoint name
             save_name = f"ckpt_{str(self.epoch).zfill(3)}"
             # Init ckpt params
-            ckpt_model, ckpt_ema_model, ckpt_optimizer = None, None, None
+            mode, ckpt_model, ckpt_ema_model, ckpt_optimizer = None, None, None, None
             if not self.conditional:
                 ckpt_model = self.model.state_dict()
                 ckpt_optimizer = self.optimizer.state_dict()
@@ -317,6 +319,7 @@ class DMTrainer(Trainer):
                     save_images(images=sampled_images,
                                 path=os.path.join(self.results_vis_dir, f"{save_name}.{self.image_format}"))
             else:
+                mode = self.mode
                 ckpt_model = self.model.state_dict()
                 ckpt_ema_model = self.ema_model.state_dict()
                 ckpt_optimizer = self.optimizer.state_dict()
@@ -341,7 +344,7 @@ class DMTrainer(Trainer):
                       save_model_interval_epochs=self.save_model_interval_epochs,
                       start_model_interval=self.start_model_interval, conditional=self.conditional,
                       image_size=self.image_size, sample=self.sample, network=self.network, act=self.act,
-                      num_classes=self.num_classes, latent=self.latent)
+                      num_classes=self.num_classes, latent=self.latent, mode=mode)
         logger.info(msg=f"[{self.device}]: Finish epoch {self.epoch}:")
 
         # Synchronization during distributed training

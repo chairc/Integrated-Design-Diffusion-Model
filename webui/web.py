@@ -124,13 +124,13 @@ class GradioWebui:
             if ckpt_path is None:
                 ckpt_path = os.path.join(results_dir, "ckpt_last.pt")
             start_epoch, _ = load_ckpt(ckpt_path=ckpt_path, model=model, device=device, optimizer=optimizer,
-                                       is_distributed=False)
+                                       is_train=True, is_distributed=False, is_resume=resume)
             yield logger.info(msg=f"[{device}]: Successfully load resume model checkpoint.")
         else:
             # Pretrain mode
             if pretrain:
                 load_ckpt(ckpt_path=pretrain_path, model=model, device=device, is_pretrain=pretrain,
-                          is_distributed=False)
+                          is_train=True, is_distributed=False)
                 yield logger.info(msg=f"[{device}]: Successfully load pretrain model checkpoint.")
             start_epoch = 0
         # Set harf-precision
@@ -299,7 +299,7 @@ class GradioWebui:
         # Initialize model
         if conditional:
             model = Network(num_classes=num_classes, device=device, image_size=image_size, act=act).to(device)
-            load_ckpt(ckpt_path=weight_path, model=model, device=device, is_train=False, is_use_ema=use_ema,
+            load_ckpt(ckpt_path=weight_path, model=model, device=device, is_generate=True, is_use_ema=use_ema,
                       conditional=conditional)
             if class_name == -1:
                 y = torch.arange(num_classes).long().to(device)
@@ -309,7 +309,7 @@ class GradioWebui:
             x = diffusion.sample(model=model, n=num_images, labels=y, cfg_scale=cfg_scale)
         else:
             model = Network(device=device, image_size=image_size, act=act).to(device)
-            load_ckpt(ckpt_path=weight_path, model=model, device=device, is_train=False, conditional=conditional)
+            load_ckpt(ckpt_path=weight_path, model=model, device=device, is_generate=True, conditional=conditional)
             x = diffusion.sample(model=model, n=num_images)
         # If there is no path information, it will only be displayed
         # If it exists, it will be saved to the specified path and displayed

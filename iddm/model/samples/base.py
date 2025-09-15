@@ -235,9 +235,9 @@ class BaseDiffusion:
         if x is None and n > 0:
             # If no input image is provided, generate a random noise image
             return torch.randn((n, channel, self.img_size[0], self.img_size[1])).to(self.device), n
-        elif x is not None:
+        elif x is not None and n > 0:
             # If an input image is provided, ensure it has the correct shape
-            return x.to(self.device), x.shape[0]
+            return x.to(self.device), n
         else:
             # If no input image is provided and n is 0, return a random noise image with batch size 1
             return torch.randn((1, channel, self.img_size[0], self.img_size[1])).to(self.device), 1

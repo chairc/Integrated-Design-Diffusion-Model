@@ -16,7 +16,8 @@ from torch import multiprocessing as mp
 
 sys.path.append(os.path.dirname(sys.path[0]))
 from iddm.config.choices import sample_choices, network_choices, optim_choices, act_choices, lr_func_choices, \
-    image_format_choices, noise_schedule_choices, parse_image_size_type, loss_func_choices, autoencoder_network_choices
+    image_format_choices, noise_schedule_choices, parse_image_size_type, loss_func_choices, autoencoder_network_choices, \
+    generate_mode_choices
 from iddm.config.version import get_version_banner
 from iddm.model.trainers import DMTrainer
 
@@ -54,7 +55,12 @@ def init_train_args():
     # If enabled, you can modify the custom configuration.
     # For more details, please refer to the boundary line at the bottom.
     # [Note] We recommend enabling it to 'True'.
-    parser.add_argument("--conditional", "-c", default=False, action="store_true")
+    parser.add_argument("--conditional", "-c", default=True, action="store_true")
+    # Select the generation mode, "--conditional" must be set to 'True' to enable this option (required)
+    # class: Category-guided generation
+    # text: Text-guided generation
+    # Option: class/text
+    parser.add_argument("--mode", "-m", type=str, default="class", choices=generate_mode_choices)
     # Enable latent diffusion model (needed)
     # If enabled, the model will use latent diffusion.
     # For more details, please refer to the boundary line at the bottom.

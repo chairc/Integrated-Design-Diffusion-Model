@@ -17,7 +17,7 @@ import coloredlogs
 sys.path.append(os.path.dirname(sys.path[0]))
 from iddm.config import IMAGE_CHANNEL
 from iddm.config.choices import sample_choices, image_format_choices, parse_image_size_type, network_choices, \
-    act_choices
+    act_choices, generate_mode_choices
 from iddm.config.version import get_version_banner
 from iddm.utils.check import check_image_size
 from iddm.utils.initializer import device_initializer, network_initializer, sample_initializer, generate_initializer, \
@@ -50,6 +50,7 @@ class Generator:
         self.in_channels, self.out_channels = IMAGE_CHANNEL, IMAGE_CHANNEL
         (self.autoencoder, self.autoencoder_network, self.autoencoder_image_size, self.autoencoder_latent_channels,
          self.autoencoder_act) = None, None, None, None, None
+        self.input_image, self.input_text = None, None
 
         # Latent diffusion model
         self.latent = self.args.latent
@@ -71,10 +72,10 @@ class Generator:
         # Check image size format
         self.image_size = check_image_size(image_size=self.image_size)
         self.resize_image_size = self.image_size
-        # Generation name
-        self.generate_name = self.args.generate_name
         # Sample
         self.sample = self.args.sample
+        # Generation name
+        self.generate_name = f"{self.args.generate_name}_{self.sample}"
         # Number of images
         self.num_images = self.args.num_images
         # Use ema
@@ -83,6 +84,8 @@ class Generator:
         self.image_format = self.args.image_format
         # Saving path
         self.result_path = os.path.join(self.args.result_path, str(time.time()))
+        # Conditional generation mode check
+        self.mode = self.args.mode
         # Check and create result path
         if not deploy:
             check_and_create_dir(self.result_path)
@@ -102,7 +105,7 @@ class Generator:
             autoencoder_network = autoencoder_network_initializer(network=self.autoencoder_network, device=self.device)
             self.autoencoder = autoencoder_network(latent_channels=self.autoencoder_latent_channels,
                                                    device=self.device).to(self.device)
-            load_ckpt(ckpt_path=self.autoencoder_ckpt, model=self.autoencoder, is_train=False, device=self.device)
+            load_ckpt(ckpt_path=self.autoencoder_ckpt, model=self.autoencoder, is_generate=True, device=self.device)
             # Inference mode, no updating parameters
             self.autoencoder.eval()
 
@@ -124,31 +127,59 @@ class Generator:
             # classifier-free guidance interpolation weight
             self.cfg_scale = self.args.cfg_scale
             # If you want to ignore the rules and generate a large image, modify image_size=[h,w]
-            self.model = self.Network(in_channel=self.in_channels, out_channel=self.out_channels,
+            self.model = self.Network(mode=self.mode, in_channel=self.in_channels, out_channel=self.out_channels,
                                       num_classes=self.num_classes, device=self.device, image_size=self.image_size,
                                       act=self.act).to(self.device)
-            load_ckpt(ckpt_path=self.weight_path, model=self.model, device=self.device, is_train=False,
+            load_ckpt(ckpt_path=self.weight_path, model=self.model, device=self.device, is_generate=True,
                       is_use_ema=self.use_ema, conditional=self.conditional)
         else:
             # If you want to ignore the rules and generate a large image, modify image_size=[h,w]
             self.model = self.Network(device=self.device, image_size=self.image_size, act=self.act).to(self.device)
-            load_ckpt(ckpt_path=self.weight_path, model=self.model, device=self.device, is_train=False,
+            load_ckpt(ckpt_path=self.weight_path, model=self.model, device=self.device, is_generate=True,
                       conditional=self.conditional)
 
-    def generate(self, index=0):
+    def class_to_image(self):
+        """
+        Class to image generation
+        :return: Generated images
+        1. If class name is `-1`, the model would output one image per class.
+        2. If class name is not `-1`, the model would output the specified number of images for the specified class.
+        3. The setting range should be [0, num_classes - 1].
+        """
+        if self.class_name == -1:
+            y = torch.arange(self.num_classes).long().to(self.device)
+            self.num_images = self.num_classes
+        else:
+            y = torch.Tensor([self.class_name] * self.num_images).long().to(self.device)
+        x = self.diffusion.sample(model=self.model, n=self.num_images, x=self.input_image, labels=y,
+                                  cfg_scale=self.cfg_scale)
+        return x
+
+    def text_to_image(self):
+        """
+        Text to image generation (coming soon)
+        :return: Generated images
+        """
+        return None
+
+    def generate(self, index=0, image=None, text=None):
         """
         Generate images
         :param index: Image index
+        :param image: Input image tensor
+        :param text: Input text description
+        :return: Generated images
         """
+        self.input_image, self.input_text = image, text
         if self.conditional:
-            if self.class_name == -1:
-                y = torch.arange(self.num_classes).long().to(self.device)
-                self.num_images = self.num_classes
+            if self.mode == "class":
+                x = self.class_to_image()
+            elif self.mode == "text":
+                x = self.text_to_image()
             else:
-                y = torch.Tensor([self.class_name] * self.num_images).long().to(self.device)
-            x = self.diffusion.sample(model=self.model, n=self.num_images, labels=y, cfg_scale=self.cfg_scale)
+                raise ValueError("The mode is not supported. Please set the mode to 'class' or 'text'.")
         else:
-            x = self.diffusion.sample(model=self.model, n=self.num_images)
+            x = self.diffusion.sample(model=self.model, n=self.num_images, x=self.input_image)
 
         # If deploy app is true, return the generate results
         if self.deploy:
@@ -161,7 +192,7 @@ class Generator:
             save_images(images=x, path=os.path.join(self.result_path, f"{save_name}.{self.image_format}"))
             save_one_image_in_images(images=x, path=self.result_path, generate_name=save_name,
                                      image_size=self.new_image_size, image_format=self.image_format)
-            plot_images(images=x)
+            # plot_images(images=x)
         logger.info(msg="Finish generation.")
 
 
@@ -202,16 +233,26 @@ def init_generate_args():
     # [Warn] Compatible with older versions
     # [Warn] Version <= 1.1.1 need to be equal to model's image size, version > 1.1.1 can set whatever you want
     parser.add_argument("--image_size", "-i", type=parse_image_size_type, default=64)
+    # Set the use GPU in generate (required)
+    parser.add_argument("--use_gpu", type=int, default=0)
 
     # =====================Enable the conditional generation (if '--conditional' is set to 'True')=====================
+    # Select the generation mode
+    # class: Category-guided generation
+    # text: Text-guided generation
+    # Option: class/text
+    parser.add_argument("--mode", "-m", type=str, default="class", choices=generate_mode_choices)
+    # ===========** Class to Image **===========
     # Class name (required)
     # if class name is `-1`, the model would output one image per class.
     # [Note] The setting range should be [0, num_classes - 1].
-    parser.add_argument("--class_name", type=int, default=0)
+    parser.add_argument("--class_name", type=int, default=-1)
+    # ===========** Text to Image (coming soon) **===========
+    # Text description for generation
+    parser.add_argument("--text", type=str, default="")
+    # ===========** Conditional generation common setting **===========
     # classifier-free guidance interpolation weight, users can better generate model effect (recommend)
     parser.add_argument("--cfg_scale", type=int, default=3)
-    # Set the use GPU in generate (required)
-    parser.add_argument("--use_gpu", type=int, default=0)
 
     # =====================Older versions(version <= 1.1.1)=====================
     # Enable conditional generation (required)

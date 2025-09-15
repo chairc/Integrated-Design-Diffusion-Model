@@ -133,15 +133,16 @@ class AutoencoderTrainer(Trainer):
                 ckpt_path = os.path.join(self.results_dir, "ckpt_last.pt")
             # Get model state
             self.start_epoch, model_score = load_ckpt(ckpt_path=ckpt_path, model=self.model, device=self.device,
-                                                      optimizer=self.optimizer, is_distributed=self.distributed,
+                                                      optimizer=self.optimizer, is_train=True,
+                                                      is_distributed=self.distributed, is_resume=self.resume,
                                                       ckpt_type="autoencoder")
             self.best_score = model_score[0]
             logger.info(msg=f"[{self.device}]: Successfully load resume model checkpoint.")
         else:
             # Pretrain mode
             if self.pretrain:
-                load_ckpt(ckpt_path=self.pretrain_path, model=self.model, device=self.device, is_pretrain=self.pretrain,
-                          is_distributed=self.distributed, ckpt_type="autoencoder")
+                load_ckpt(ckpt_path=self.pretrain_path, model=self.model, device=self.device, is_train=True,
+                          is_pretrain=self.pretrain, is_distributed=self.distributed, ckpt_type="autoencoder")
                 logger.info(msg=f"[{self.device}]: Successfully load pretrain model checkpoint.")
             self.start_epoch, self.best_score = 0, 0
         logger.info(msg=f"[{self.device}]: The start epoch is {self.start_epoch}, best score is {self.best_score}.")

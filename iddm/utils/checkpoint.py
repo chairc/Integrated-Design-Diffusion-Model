@@ -20,8 +20,8 @@ logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
 
 
-def load_ckpt(ckpt_path, model=None, device="cpu", optimizer=None, is_train=True, is_pretrain=False,
-              is_distributed=False, is_use_ema=False, conditional=False, ckpt_type="df"):
+def load_ckpt(ckpt_path, model=None, device="cpu", optimizer=None, is_train=False, is_generate=False, is_pretrain=False,
+              is_resume=False, is_distributed=False, is_use_ema=False, conditional=False, ckpt_type="df"):
     """
     Load checkpoint weight files
     :param ckpt_path: Checkpoint path
@@ -29,108 +29,183 @@ def load_ckpt(ckpt_path, model=None, device="cpu", optimizer=None, is_train=True
     :param optimizer: Optimizer
     :param device: GPU or CPU
     :param is_train: Whether to train mode
+    :param is_generate: Whether to generate mode
     :param is_pretrain: Whether to load pretrain checkpoint
+    :param is_resume: Whether to resume training
     :param is_distributed:  Whether to distribute training
     :param is_use_ema:  Whether to use ema model or model
     :param conditional:  Whether conditional training
     :param ckpt_type: Type of checkpoint
     :return: start_epoch + 1
     """
+    # ============================= Check and load checkpoint ============================= #
+    logger.info(f"Current load model status: [train: {is_train}, generate: {is_generate}, pretrain: {is_pretrain}, "
+                f"resume: {is_resume}, distributed: {is_distributed}, use_ema: {is_use_ema}, "
+                f"conditional: {conditional}, type: {ckpt_type}]")
     # Check path
     check_path_is_exist(path=ckpt_path)
     # Load checkpoint, pytorch 2.6+ default weights_only=True
-    ckpt_state = torch.load(f=ckpt_path, map_location=device, weights_only=False)
+    try:
+        ckpt_state = torch.load(f=ckpt_path, map_location=device, weights_only=False)
+    except Exception as e:
+        raise RuntimeError(f"Failed to load checkpoint, path：{ckpt_path}, msg: {str(e)}") from e
 
-    # Load the model best score
+    # ============================= Get the result info ============================= #
+    # Load the model best score and mode
+    model_score, mode = [], None
+    # Super resolution checkpoint
     if ckpt_type == "sr":
-        model_score = [ckpt_state["best_ssim"], ckpt_state["best_psnr"]]
+        model_score.append(ckpt_state.get("best_ssim", 0.0))
+        model_score.append(ckpt_state.get("best_psnr", 0.0))
+    # Autoencoder checkpoint
     elif ckpt_type == "autoencoder":
-        model_score = [ckpt_state["best_score"]]
+        model_score.append(ckpt_state.get("best_score", 0.0))
+    # Diffusion model checkpoint
     else:
-        model_score = []
+        mode = ckpt_state.get("mode", "class")
 
+    # ============================= Get pretrain status ============================= #
     # Pretrain checkpoint
     if is_pretrain:
         logger.info(msg=f"[{device}]: Load pretrain checkpoint[{ckpt_type}], path is '{ckpt_path}'.")
     else:
         logger.info(msg=f"[{device}]: Load checkpoint[{ckpt_type}], path is '{ckpt_path}'.")
+
+    # ============================= Load model or ema model ============================= #
     # Check checkpoint's structure
-    assert ckpt_state["model"] is not None or ckpt_state["ema_model"] is not None, \
+    has_model = ckpt_state.get("model") is not None
+    has_ema_model = ckpt_state.get("ema_model") is not None
+    assert has_model or has_ema_model, \
         f"Error!! Checkpoint model and ema_model are not None. Please check checkpoint[{ckpt_type}]'s structure."
     # 'model' is default option
-    if ckpt_state["model"] is None:
-        logger.info(msg=f"[{device}]: Failed to load checkpoint[{ckpt_type}] 'model', 'ema_model' would be loaded.")
-        ckpt_model = ckpt_state["ema_model"]
-    else:
-        if is_use_ema:
-            logger.info(msg=f"[{device}]: Successfully to load checkpoint[{ckpt_type}] 'ema_model', using ema is True.")
+    if is_use_ema:
+        if has_ema_model:
             ckpt_model = ckpt_state["ema_model"]
+            logger.info(msg=f"[{device}]: Successfully to load checkpoint[{ckpt_type}] 'ema_model', using ema is True.")
         else:
-            logger.info(msg=f"[{device}]: Successfully to load checkpoint[{ckpt_type}] 'model'.")
             ckpt_model = ckpt_state["model"]
+            logger.info(msg=f"[{device}]: Successfully to load checkpoint[{ckpt_type}] 'model'.")
+    else:
+        if has_model:
+            ckpt_model = ckpt_state["model"]
+            logger.info(msg=f"[{device}]: Successfully to load checkpoint[{ckpt_type}] 'model'.")
+        else:
+            ckpt_model = ckpt_state["ema_model"]
+            logger.info(
+                msg=f"[{device}]: Successfully to load checkpoint[{ckpt_type}] 'ema_model', using ema is False.")
+
+    # ============================= Load model params ============================= #
     # Load the current model
-    load_model_ckpt(model=model, model_ckpt=ckpt_model, is_train=is_train, is_pretrain=is_pretrain,
-                    is_distributed=is_distributed, conditional=conditional)
-    logger.info(msg=f"[{device}]: Successfully load model's checkpoint[{ckpt_type}].")
+    if model is not None:
+        load_model_ckpt(model=model, model_ckpt=ckpt_model, is_train=is_train, is_generate=is_generate,
+                        is_pretrain=is_pretrain, is_distributed=is_distributed, conditional=conditional, mode=mode)
+        logger.info(msg=f"[{device}]: Successfully load model's checkpoint[{ckpt_type}].")
+
+    # ============================= Resume training ============================= #
     # Train mode, resume training
-    if is_train and not is_pretrain:
+    if is_train and is_resume:
         # Load the previous model optimizer
-        optim_weights_dict = ckpt_state["optimizer"]
-        optimizer.load_state_dict(state_dict=optim_weights_dict)
-        logger.info(msg=f"[{device}]: Successfully load optimizer checkpoint[{ckpt_type}].")
+        if optimizer is None:
+            raise ValueError("Optimizer is None, please set the optimizer.")
+        optim_weights_dict = ckpt_state.get("optimizer")
+        if optim_weights_dict is None:
+            raise ValueError(f"Error!! Checkpoint[{ckpt_type}] optimizer is None, unable to return to training status, "
+                             f"please check checkpoint's structure.")
+        try:
+            optimizer.load_state_dict(state_dict=optim_weights_dict)
+            logger.info(msg=f"[{device}]: Successfully load optimizer checkpoint[{ckpt_type}].")
+        except Exception as e:
+            raise RuntimeError(f"Failed to load optimizer checkpoint[{ckpt_type}], msg: {str(e)}") from e
         # Current checkpoint epoch
-        start_epoch = ckpt_state["start_epoch"]
+        start_epoch = ckpt_state.get("start_epoch", -1)
         # Next epoch
-        return start_epoch + 1, model_score
+        next_epoch = start_epoch + 1
+        logger.info(f"[{device}]: Resume training, current epoch：{start_epoch}, next epoch：{next_epoch}")
+        return next_epoch, model_score
     return None
 
 
-def load_model_ckpt(model, model_ckpt, is_train=True, is_pretrain=False, is_distributed=False, conditional=False):
+def load_model_ckpt(model, model_ckpt, is_train=False, is_generate=False, is_pretrain=False, is_distributed=False,
+                    conditional=False, mode=None):
     """
     Initialize weight loading
     :param model: Model
     :param model_ckpt: Model checkpoint
     :param is_train: Whether to train mode
+    :param is_generate: Whether to generate mode
     :param is_pretrain: Whether to load pretrain checkpoint
     :param is_distributed:  Whether to distribute training
     :param conditional:  Whether conditional training for diffusion model
+    :param mode: Mode type for diffusion model
     :return: None
     """
+
+    def adjust_module_prefix(weights, add_prefix):
+        """
+        Uniformly handle the 'module.' prefix in the weight key name
+        :param weights: Original weights dictionary
+        :param add_prefix: Whether to add 'module.' prefix（True/False）
+        :return: Adjusted weights dictionary
+        """
+        adjusted = {}
+        for k, v in weights.items():
+            if add_prefix:
+                # If you need to add a prefix but don't have it at the moment, add it
+                if not k.startswith("module."):
+                    adjusted[f"module.{k}"] = v
+                else:
+                    adjusted[k] = v
+            else:
+                # If the prefix needs to be removed but is currently present, strip it
+                if k.startswith("module."):
+                    adjusted[k[len("module."):]] = v
+                else:
+                    adjusted[k] = v
+        return adjusted
+
+    logger.info(msg=f"Current load model status: [train: {is_train}, pretrain: {is_pretrain}, "
+                    f"distributed: {is_distributed}, conditional: {conditional}, mode: {mode}]")
+    # Load model state dict
     model_dict = model.state_dict()
     model_weights_dict = model_ckpt
     # Check if key contains 'module.' prefix.
     # This method is the name after training in the distribution, check the weight and delete
-    if not is_train or (is_train and is_pretrain and not is_distributed):
-        new_model_weights_dict = {}
-        for key, value in model_weights_dict.items():
-            if key.startswith("module."):
-                new_key = key[len("module."):]
-                new_model_weights_dict[new_key] = value
-            else:
-                new_model_weights_dict[key] = value
-        model_weights_dict = new_model_weights_dict
+    if is_generate or (is_train and is_pretrain and not is_distributed):
+        model_weights_dict = adjust_module_prefix(weights=model_weights_dict, add_prefix=False)
         logger.info(msg="Successfully check the load weight and rename.")
+    # Distinguish between distributed and non-distributed weight keys
+    prefix = "module." if is_distributed else ""
     # Train mode and it is pretraining and conditional for diffusion model
     if is_train and is_pretrain and conditional:
         if is_distributed:
-            new_model_weights_dict = {}
-            # Check if key contains 'module.' prefix.
-            # Create distributed training model weight
-            for key, value in model_weights_dict.items():
-                if not key.startswith("module."):
-                    # Add 'module.'
-                    new_key = "module." + key
-                    new_model_weights_dict[new_key] = value
-                else:
-                    new_model_weights_dict[key] = value
-            model_weights_dict = new_model_weights_dict
+            model_weights_dict = adjust_module_prefix(weights=model_weights_dict, add_prefix=True)
             logger.info(msg="Successfully check the load pretrain distributed weight and rename.")
             # Eliminate the impact of number of classes
-            model_weights_dict["module.label_emb.weight"] = None
-        else:
-            # Eliminate the impact of number of classes
-            model_weights_dict["label_emb.weight"] = None
-    model_weights_dict = {k: v for k, v in model_weights_dict.items() if np.shape(model_dict[k]) == np.shape(v)}
+        if mode == "class":
+            # Compatibility with new and old model categories mismatch
+            target_keys = [
+                f"{prefix}label_emb.weight",
+                f"{prefix}condition_adapter.label_emb.weight"
+            ]
+            # Clear target weights
+            for key in target_keys:
+                if key in model_weights_dict:
+                    model_weights_dict[key] = None
+                    logger.debug(f"Incompatible weights have been cleared: {key}")
+
+    if is_generate and conditional and mode == "class":
+        old_key = f"{prefix}label_emb.weight"
+        new_key = f"{prefix}condition_adapter.label_emb.weight"
+        if old_key in model_weights_dict:
+            old_value = model_weights_dict[old_key]
+            del model_weights_dict[old_key]
+            model_weights_dict[new_key] = old_value
+
+    # Filter weights with mismatched shapes and update the model status dictionary
+    model_weights_dict = {
+        k: v for k, v in model_weights_dict.items() if
+        k in model_dict and np.shape(model_dict[k]) == np.shape(v)
+    }
     model_dict.update(model_weights_dict)
     model.load_state_dict(state_dict=OrderedDict(model_dict))
 
@@ -188,10 +263,11 @@ def save_ckpt(epoch, save_name, ckpt_model, ckpt_ema_model, ckpt_optimizer, resu
         message_info = f"current score is {score}, best score is {best_score}"
     # Diffusion model
     else:
+        mode = kwargs.get("mode", None)
         ckpt_state = {
             "start_epoch": epoch, "model": ckpt_model, "ema_model": ckpt_ema_model, "optimizer": ckpt_optimizer,
             "num_classes": num_classes if conditional else 1, "classes_name": classes_name, "conditional": conditional,
-            "image_size": image_size, "sample": sample, "network": network, "act": act,
+            "image_size": image_size, "sample": sample, "network": network, "act": act, "mode": mode
         }
         message_info = ""
 
