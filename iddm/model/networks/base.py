@@ -9,6 +9,7 @@ import torch
 import torch.nn as nn
 
 from iddm.config.setting import IMAGE_CHANNEL, TIME_CHANNEL, CHANNEL_LIST, DEFAULT_IMAGE_SIZE
+from iddm.model.networks.conditional import TextConditionAdapter, ClassConditionAdapter
 
 
 class BaseNet(nn.Module):
@@ -16,37 +17,44 @@ class BaseNet(nn.Module):
     Base Network
     """
 
-    def __init__(self, in_channel=IMAGE_CHANNEL, out_channel=IMAGE_CHANNEL, channel=None, time_channel=TIME_CHANNEL,
-                 num_classes=None, image_size=None, device="cpu", act="silu"):
+    def __init__(self, mode="class", in_channel=IMAGE_CHANNEL, out_channel=IMAGE_CHANNEL, channel=None,
+                 time_channel=TIME_CHANNEL, image_size=None, device="cpu", act="silu", **kwargs):
         """
         Initialize the Base network
+        :param mode: Conditional Guidance Mode
         :param in_channel: Input channel
         :param out_channel: Output channel
         :param channel: The list of channel
         :param time_channel: Time channel
-        :param num_classes: Number of classes
         :param image_size: Adaptive image size
         :param device: Device type
         :param act: Activation function
         """
         super().__init__()
+        self.mode = mode
+        self.label_emb = None
+        self.condition_adapter = None
         self.in_channel = in_channel
         self.out_channel = out_channel
         self.channel = None
         self.init_channel(channel=channel)
         self.time_channel = time_channel
-        self.num_classes = num_classes
         self.image_size = None
         self.init_image_size(image_size=image_size)
         self.device = device
         self.act = act
+        self.kwargs = kwargs
+
+        # Get parameters
+        self.num_classes = self.kwargs.get("num_classes", None)
+        self.text = self.kwargs.get("text", None)
+
+        # Conditional adapter initialization
+        self.init_conditional_adapter()
 
         # Init image size list
         self.image_size_list = []
         self.init_image_size_list()
-
-        if self.num_classes is not None:
-            self.label_emb = nn.Embedding(num_embeddings=self.num_classes, embedding_dim=self.time_channel)
 
     def init_channel(self, channel):
         """
@@ -59,6 +67,18 @@ class BaseNet(nn.Module):
             self.channel = CHANNEL_LIST
         else:
             self.channel = channel
+
+    def init_conditional_adapter(self):
+        """
+        Conditional adapter initialization
+        """
+        if self.mode == "text" and self.text is not None:
+            self.condition_adapter = TextConditionAdapter(emb_channel=self.time_channel, device=self.device)
+        elif self.mode == "class" and self.num_classes is not None:
+            # TODO: Add and replace ClassConditionAdapter
+            self.condition_adapter = ClassConditionAdapter(num_classes=self.num_classes, emb_channel=self.time_channel)
+        else:
+            self.condition_adapter = None
 
     def pos_encoding(self, time, channels):
         """
@@ -103,12 +123,12 @@ class BaseNet(nn.Module):
         """
         Encode time with label
         :param time: Time
-        :param y: Input label
+        :param y: Input label (class or text)
         :return: time
         """
         time = time.unsqueeze(-1).type(torch.float)
         time = self.pos_encoding(time, self.time_channel)
 
         if y is not None:
-            time += self.label_emb(y)
+            time += self.condition_adapter(y)
         return time

@@ -9,6 +9,8 @@
 from .base import BaseNet
 from .cspdarkunet import CSPDarkUnet
 from .unet import UNet
+from .unet_cross_attn import UNetCrossAttn
+from .unet_flash_self_attn import UNetFlashSelfAttn
 from .unetv2 import UNetV2
 from .unet_slim import UNetSlim
 
