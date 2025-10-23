@@ -1,49 +1,25 @@
+<div align="center">
+
 # IDDM: Integrated Design Diffusion Model
 
-<div align="left">
-    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model" target="_blank">
-        <img src="https://img.shields.io/badge/IDDM-Integrated Design Diffusion Model-blue.svg">
-    </a>
-    <a href="https://doi.org/10.5281/zenodo.10866128">
-        <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.10866128.svg" alt="DOI">
-    </a>
-    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/blob/main/LICENSE" target="_blank">
-        <img src="https://img.shields.io/github/license/chairc/Integrated-Design-Diffusion-Model" />
-    </a>
-    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/issues">
-        <img src="https://img.shields.io/github/issues/chairc/Integrated-Design-Diffusion-Model.svg" />
-    </a>
-    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/releases" target="_blank">
-        <img alt="GitHub release" src="https://img.shields.io/github/v/release/chairc/Integrated-Design-Diffusion-Model">
-    </a>
-    <a href="#" target="_blank">
-        <img alt="GitHub all releases" src="https://img.shields.io/github/downloads/chairc/Integrated-Design-Diffusion-Model/total?color=3eb370">
-    </a>
-    <a href="https://deepwiki.com/chairc/Integrated-Design-Diffusion-Model" target="_blank">
-        <img src="https://deepwiki.com/badge.svg" alt="deepwiki"/>
-    </a>
+English | [简体中文](README_zh.md)
+
+[![IDDM](https://img.shields.io/badge/IDDM-Integrated%20Design%20Diffusion%20Model-blue.svg)](https://github.com/chairc/Integrated-Design-Diffusion-Model)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10866128.svg)](https://doi.org/10.5281/zenodo.10866128)
+[![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/chairc/Integrated-Design-Diffusion-Model)
+
+[![License](https://img.shields.io/badge/license-Apache_2.0-green)](./LICENSE)
+[![Issues](https://img.shields.io/github/issues/chairc/Integrated-Design-Diffusion-Model.svg)](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues)
+[![Release](https://img.shields.io/github/v/release/chairc/Integrated-Design-Diffusion-Model)](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases)
+[![Downloads](https://img.shields.io/github/downloads/chairc/Integrated-Design-Diffusion-Model/total?color=3eb370)](https://img.shields.io/github/downloads/chairc/Integrated-Design-Diffusion-Model/total?color=3eb370)
+
+[![Github star](https://img.shields.io/github/stars/chairc/Integrated-Design-Diffusion-Model.svg)](https://github.com/chairc/Integrated-Design-Diffusion-Model/stargazers)
+[![Github fork](https://img.shields.io/github/forks/chairc/Integrated-Design-Diffusion-Model?color=eb6ea5)](https://github.com/chairc/Integrated-Design-Diffusion-Model/forks)
+[![Gitee star](https://gitee.com/chairc/Integrated-Design-Diffusion-Model/badge/star.svg?theme=blue)](https://gitee.com/chairc/Integrated-Design-Diffusion-Model)
+[![Gitee fork](https://gitee.com/chairc/Integrated-Design-Diffusion-Model/badge/fork.svg?theme=blue)](https://gitee.com/chairc/Integrated-Design-Diffusion-Model)
+[![GitCode star](https://gitcode.com/chairc/Integrated-Design-Diffusion-Model/star/badge.svg)](https://gitcode.com/chairc/Integrated-Design-Diffusion-Model)
+
 </div>
-
-<div align="left">
-    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/stargazers">
-        <img src="https://img.shields.io/github/stars/chairc/Integrated-Design-Diffusion-Model.svg" />
-    </a>
-    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/forks" target="_blank">
-        <img alt="GitHub forks" src="https://img.shields.io/github/forks/chairc/Integrated-Design-Diffusion-Model?color=eb6ea5">
-    </a>
-    <a href="https://gitee.com/chairc/Integrated-Design-Diffusion-Model">
-        <img src="https://gitee.com/chairc/Integrated-Design-Diffusion-Model/badge/star.svg?theme=blue" />
-    </a>
-    <a href="https://gitee.com/chairc/Integrated-Design-Diffusion-Model">
-        <img src="https://gitee.com/chairc/Integrated-Design-Diffusion-Model/badge/fork.svg?theme=blue" />
-    </a>
-    <a href="https://gitcode.com/chairc/Integrated-Design-Diffusion-Model">
-        <img src="https://gitcode.com/chairc/Integrated-Design-Diffusion-Model/star/badge.svg" />
-    </a>
-</div>
-
-[中文文档](README_zh.md)
-
 
 
 ### About the Model

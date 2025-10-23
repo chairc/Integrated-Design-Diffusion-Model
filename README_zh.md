@@ -1,48 +1,25 @@
-# IDDM：集成设计扩散模型
-<div align="left">
-    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model" target="_blank">
-        <img src="https://img.shields.io/badge/IDDM-Integrated Design Diffusion Model-blue.svg">
-    </a>
-    <a href="https://doi.org/10.5281/zenodo.10866128">
-        <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.10866128.svg" alt="DOI">
-    </a>
-    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/blob/main/LICENSE" target="_blank">
-        <img src="https://img.shields.io/github/license/chairc/Integrated-Design-Diffusion-Model" />
-    </a>
-    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/issues">
-        <img src="https://img.shields.io/github/issues/chairc/Integrated-Design-Diffusion-Model.svg" />
-    </a>
-    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/releases" target="_blank">
-        <img alt="GitHub release" src="https://img.shields.io/github/v/release/chairc/Integrated-Design-Diffusion-Model">
-    </a>
-    <a href="#" target="_blank">
-        <img alt="GitHub all releases" src="https://img.shields.io/github/downloads/chairc/Integrated-Design-Diffusion-Model/total?color=3eb370">
-    </a>
-    <a href="https://zread.ai/chairc/Integrated-Design-Diffusion-Model" target="_blank">
-        <img src="https://img.shields.io/badge/Ask_Zread-_.svg?style=flat&color=00b0aa&labelColor=000000&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQuOTYxNTYgMS42MDAxSDIuMjQxNTZDMS44ODgxIDEuNjAwMSAxLjYwMTU2IDEuODg2NjQgMS42MDE1NiAyLjI0MDFWNC45NjAxQzEuNjAxNTYgNS4zMTM1NiAxLjg4ODEgNS42MDAxIDIuMjQxNTYgNS42MDAxSDQuOTYxNTZDNS4zMTUwMiA1LjYwMDEgNS42MDE1NiA1LjMxMzU2IDUuNjAxNTYgNC45NjAxVjIuMjQwMUM1LjYwMTU2IDEuODg2NjQgNS4zMTUwMiAxLjYwMDEgNC45NjE1NiAxLjYwMDFaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00Ljk2MTU2IDEwLjM5OTlIMi4yNDE1NkMxLjg4ODEgMTAuMzk5OSAxLjYwMTU2IDEwLjY4NjQgMS42MDE1NiAxMS4wMzk5VjEzLjc1OTlDMS42MDE1NiAxNC4xMTM0IDEuODg4MSAxNC4zOTk5IDIuMjQxNTYgMTQuMzk5OUg0Ljk2MTU2QzUuMzE1MDIgMTQuMzk5OSA1LjYwMTU2IDE0LjExMzQgNS42MDE1NiAxMy43NTk5VjExLjAzOTlDNS42MDE1NiAxMC42ODY0IDUuMzE1MDIgMTAuMzk5OSA0Ljk2MTU2IDEwLjM5OTlaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik0xMy43NTg0IDEuNjAwMUgxMS4wMzg0QzEwLjY4NSAxLjYwMDEgMTAuMzk4NCAxLjg4NjY0IDEwLjM5ODQgMi4yNDAxVjQuOTYwMUMxMC4zOTg0IDUuMzEzNTYgMTAuNjg1IDUuNjAwMSAxMS4wMzg0IDUuNjAwMUgxMy43NTg0QzE0LjExMTkgNS42MDAxIDE0LjM5ODQgNS4zMTM1NiAxNC4zOTg0IDQuOTYwMVYyLjI0MDFDMTQuMzk4NCAxLjg4NjY0IDE0LjExMTkgMS42MDAxIDEzLjc1ODQgMS42MDAxWiIgZmlsbD0iI2ZmZiIvPgo8cGF0aCBkPSJNNCAxMkwxMiA0TDQgMTJaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00IDEyTDEyIDQiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4K&logoColor=ffffff" alt="zread"/>
-    </a>
+<div align="center">
+
+# IDDM: Integrated Design Diffusion Model
+
+[English](README.md) | 简体中文
+
+[![IDDM](https://img.shields.io/badge/IDDM-Integrated%20Design%20Diffusion%20Model-blue.svg)](https://github.com/chairc/Integrated-Design-Diffusion-Model)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10866128.svg)](https://doi.org/10.5281/zenodo.10866128)
+[![zread](https://img.shields.io/badge/Ask_Zread-_.svg?style=flat&color=00b0aa&labelColor=000000&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQuOTYxNTYgMS42MDAxSDIuMjQxNTZDMS44ODgxIDEuNjAwMSAxLjYwMTU2IDEuODg2NjQgMS42MDE1NiAyLjI0MDFWNC45NjAxQzEuNjAxNTYgNS4zMTM1NiAxLjg4ODEgNS42MDAxIDIuMjQxNTYgNS42MDAxSDQuOTYxNTZDNS4zMTUwMiA1LjYwMDEgNS42MDE1NiA1LjMxMzU2IDUuNjAxNTYgNC45NjAxVjIuMjQwMUM1LjYwMTU2IDEuODg2NjQgNS4zMTUwMiAxLjYwMDEgNC45NjE1NiAxLjYwMDFaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00Ljk2MTU2IDEwLjM5OTlIMi4yNDE1NkMxLjg4ODEgMTAuMzk5OSAxLjYwMTU2IDEwLjY4NjQgMS42MDE1NiAxMS4wMzk5VjEzLjc1OTlDMS42MDE1NiAxNC4xMTM0IDEuODg4MSAxNC4zOTk5IDIuMjQxNTYgMTQuMzk5OUg0Ljk2MTU2QzUuMzE1MDIgMTQuMzk5OSA1LjYwMTU2IDE0LjExMzQgNS42MDE1NiAxMy43NTk5VjExLjAzOTlDNS42MDE1NiAxMC42ODY0IDUuMzE1MDIgMTAuMzk5OSA0Ljk2MTU2IDEwLjM5OTlaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik0xMy43NTg0IDEuNjAwMUgxMS4wMzg0QzEwLjY4NSAxLjYwMDEgMTAuMzk4NCAxLjg4NjY0IDEwLjM5ODQgMi4yNDAxVjQuOTYwMUMxMC4zOTg0IDUuMzEzNTYgMTAuNjg1IDUuNjAwMSAxMS4wMzg0IDUuNjAwMUgxMy43NTg0QzE0LjExMTkgNS42MDAxIDE0LjM5ODQgNS4zMTM1NiAxNC4zOTg0IDQuOTYwMVYyLjI0MDFDMTQuMzk4NCAxLjg4NjY0IDE0LjExMTkgMS42MDAxIDEzLjc1ODQgMS42MDAxWiIgZmlsbD0iI2ZmZiIvPgo8cGF0aCBkPSJNNCAxMkwxMiA0TDQgMTJaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00IDEyTDEyIDQiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4K&logoColor=ffffff)](https://zread.ai/chairc/Integrated-Design-Diffusion-Model)
+
+[![License](https://img.shields.io/badge/license-Apache_2.0-green)](./LICENSE)
+[![Issues](https://img.shields.io/github/issues/chairc/Integrated-Design-Diffusion-Model.svg)](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues)
+[![Release](https://img.shields.io/github/v/release/chairc/Integrated-Design-Diffusion-Model)](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases)
+[![Downloads](https://img.shields.io/github/downloads/chairc/Integrated-Design-Diffusion-Model/total?color=3eb370)](https://img.shields.io/github/downloads/chairc/Integrated-Design-Diffusion-Model/total?color=3eb370)
+
+[![Github star](https://img.shields.io/github/stars/chairc/Integrated-Design-Diffusion-Model.svg)](https://github.com/chairc/Integrated-Design-Diffusion-Model/stargazers)
+[![Github fork](https://img.shields.io/github/forks/chairc/Integrated-Design-Diffusion-Model?color=eb6ea5)](https://github.com/chairc/Integrated-Design-Diffusion-Model/forks)
+[![Gitee star](https://gitee.com/chairc/Integrated-Design-Diffusion-Model/badge/star.svg?theme=blue)](https://gitee.com/chairc/Integrated-Design-Diffusion-Model)
+[![Gitee fork](https://gitee.com/chairc/Integrated-Design-Diffusion-Model/badge/fork.svg?theme=blue)](https://gitee.com/chairc/Integrated-Design-Diffusion-Model)
+[![GitCode star](https://gitcode.com/chairc/Integrated-Design-Diffusion-Model/star/badge.svg)](https://gitcode.com/chairc/Integrated-Design-Diffusion-Model)
+
 </div>
-
-<div align="left">
-    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/stargazers">
-        <img src="https://img.shields.io/github/stars/chairc/Integrated-Design-Diffusion-Model.svg" />
-    </a>
-    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/forks" target="_blank">
-        <img alt="GitHub forks" src="https://img.shields.io/github/forks/chairc/Integrated-Design-Diffusion-Model?color=eb6ea5">
-    </a>
-    <a href="https://gitee.com/chairc/Integrated-Design-Diffusion-Model">
-        <img src="https://gitee.com/chairc/Integrated-Design-Diffusion-Model/badge/star.svg?theme=blue" />
-    </a>
-    <a href="https://gitee.com/chairc/Integrated-Design-Diffusion-Model">
-        <img src="https://gitee.com/chairc/Integrated-Design-Diffusion-Model/badge/fork.svg?theme=blue" />
-    </a>
-    <a href="https://gitcode.com/chairc/Integrated-Design-Diffusion-Model">
-        <img src="https://gitcode.com/chairc/Integrated-Design-Diffusion-Model/star/badge.svg" />
-    </a>
-</div>
-
-[English Document](README.md)
-
 
 
 ### 关于模型
