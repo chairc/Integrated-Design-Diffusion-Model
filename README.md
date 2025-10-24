@@ -1,7 +1,7 @@
 <div align="center">
 
 <p>
-  <a href="https://github.com/hiroi-sora/Umi-OCR">
+  <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model">
     <img width="242" height="121" src="./assets/iddm-logo.png" alt="IDDM">
   </a>
 </p>
