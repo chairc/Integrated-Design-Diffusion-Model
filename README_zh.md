@@ -2,7 +2,7 @@
 
 <p>
   <a href="https://github.com/hiroi-sora/Umi-OCR">
-    <img width="250" height="83" src="./assets/iddm-logo.png" alt="IDDM">
+    <img width="242" height="121" src="./assets/iddm-logo.png" alt="IDDM">
   </a>
 </p>
 
@@ -170,7 +170,7 @@ pip install . # 或者 python setup.py install
 
 ### 致谢
 
-[@dome272](https://github.com/dome272/Diffusion-Models-pytorch)和[@JetBrains](https://www.jetbrains.com/)
+[@dome272](https://github.com/dome272/Diffusion-Models-pytorch)，[@donger](https://donger.me/)和[@JetBrains](https://www.jetbrains.com/)
 
 ### 赞助商
 

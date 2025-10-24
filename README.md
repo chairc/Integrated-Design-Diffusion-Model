@@ -2,7 +2,7 @@
 
 <p>
   <a href="https://github.com/hiroi-sora/Umi-OCR">
-    <img width="250" height="83" src="./assets/iddm-logo.png" alt="IDDM">
+    <img width="242" height="121" src="./assets/iddm-logo.png" alt="IDDM">
   </a>
 </p>
 
@@ -171,7 +171,7 @@ If this project is used for experiments in an academic paper, where possible ple
 
 ### Acknowledgements
 
-[@dome272](https://github.com/dome272/Diffusion-Models-pytorch) and [@JetBrains](https://www.jetbrains.com/)
+[@dome272](https://github.com/dome272/Diffusion-Models-pytorch), [@donger](https://donger.me/) and [@JetBrains](https://www.jetbrains.com/)
 
 
 
