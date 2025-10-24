@@ -1,5 +1,11 @@
 <div align="center">
 
+<p>
+  <a href="https://github.com/hiroi-sora/Umi-OCR">
+    <img width="250" height="83" src="./assets/iddm-logo.png" alt="IDDM">
+  </a>
+</p>
+
 # IDDM: Integrated Design Diffusion Model
 
 [English](README.md) | 简体中文
