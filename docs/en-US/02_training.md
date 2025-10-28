@@ -2,11 +2,13 @@
 >
 > The training GPU implements environment for this README is as follows: 
 >
-> NVIDIA RTX 3060: GPU with 6GB memory
+> NVIDIA RTX 4070Ti: 16GB memory
 >
-> NVIDIA RTX 2080Ti: GPU with 11GB memory
+> NVIDIA RTX 3060 (Laptop): 6GB memory
 >
-> NVIDIA RTX 6000 (×2): GPU with 22GB memory (total 44GB, distributed training)
+> NVIDIA RTX 2080Ti: 11GB memory
+>
+> NVIDIA RTX 6000 (×2): 22GB memory (total 44GB, distributed training)
 >
 > **The above GPUs can all be trained and tested normally**.
 
@@ -49,8 +51,6 @@
 
    Set the `--result_path` parameter to the file path on your local or remote server where you want to save the results.
 
-   Set the `--num_classes` parameter to `10` (this is the total number of your classes. **No need to set for models after version 1.1.4**).
-
    Set any other custom parameters as needed. If the error `CUDA out of memory` is shown in your terminal, turn down `--batch_size` and `num_workers`.
 
    In the custom parameters, you can set different `--sample` such as `ddpm` or `ddim` , and set different training networks `--network` such as `unet` or `cspdarkunet`. Of course, activation function `--act`, optimizer `--optim`, automatic mixed precision training `--amp`, learning rate method `--lr_func` and other parameters can also be customized.
@@ -82,7 +82,7 @@
 
 2. Open the `train.py` file and locate the `--dataset_path` parameter. Modify the path in the parameter to the overall dataset path, for example, `/your/path/datasets/landscape`.
 
-3. Set the necessary parameters such as `--sample`, `--conditional`, `--run_name`, `--epochs`, `--batch_size`, `--image_size`, `--result_path`, etc. If no parameters are set, the default settings will be used. There are two ways to set the parameters: directly modify the `parser` in the `if __name__ == "__main__":` section of the `train.py` file (**WE RECOMMEND THIS WAY**), or run the following command in the terminal at the `/your/path/Defect-Diffusion-Model/tools` directory: 
+3. Set the necessary parameters such as `--sample`, `--conditional`, `--run_name`, `--epochs`, `--batch_size`, `--image_size`, `--result_path`, etc. If no parameters are set, the default settings will be used. There are two ways to set the parameters: directly modify the `parser` in the `if __name__ == "__main__":` section of the `train.py` file (**WE RECOMMEND THIS WAY**), or run the following command in the terminal at the `/your/path/Defect-Diffusion-Model/iddm/tools` directory: 
    
    **Conditional Training Command**
 
@@ -170,6 +170,9 @@ setattr(args, "image_size", 64)  # Image size
 setattr(args, "result_path", "/your/dataset/path/")  # Dataset path
 setattr(args, "result_path", "/your/save/path/")  # Result path
 setattr(args, "vis", True)  # Enable visualization
+setattr(args, "latent", True) # Enable latent diffusion
+setattr(args, "autoencoder_network", "vae") # VAE model
+setattr(args, "autoencoder_ckpt", "/your/VAE/model/path/weight.pt") # VAE model weight path
 # ...
 # OR use args["parameter_name"] = "your setting"
 # Start training
@@ -184,7 +187,8 @@ DMTrainer(args=args, dataset_path="/your/dataset/path/").train()
 DMTrainer(
     conditional=True, sample="ddpm", dataset_path="/your/dataset/path/",
     network="unet", epochs=300, image_size=64, result_path="/your/save/path/",
-    vis=True, # Any params...
+    vis=True, latent=True, autoencoder_network="vae",
+    autoencoder_ckpt="/your/VAE/model/path/weight.pt", # Any params...
 ).train()
 ```
 
@@ -198,7 +202,7 @@ DMTrainer(
 
 2. Set the necessary parameters, such as `--main_gpu` and `--world_size`. `--main_gpu` is usually set to the main GPU, which is used for validation, testing, or saving weights, and it only needs to be run on a single GPU. The value of `world_size` corresponds to the actual number of GPUs or distributed nodes being used.
 
-3. There are two methods for setting the parameters. One is to directly modify the `parser` in the `train.py` file under the condition `if __name__ == "__main__":`. The other is to run the following command in the console under the path `/your/path/Defect-Diffiusion-Model/tools`:
+3. There are two methods for setting the parameters. One is to directly modify the `parser` in the `train.py` file under the condition `if __name__ == "__main__":`. The other is to run the following command in the console under the path `/your/path/Defect-Diffiusion-Model/iddm/tools`:
 
    **Conditional Distributed Training Command**
 
@@ -219,6 +223,7 @@ DMTrainer(
 ##### Python Training
 
 ```python
+import torch
 from torch import multiprocessing as mp
 from iddm.model.trainers.dm import DMTrainer
 from iddm.tools.train import init_train_args
@@ -238,6 +243,9 @@ setattr(args, "image_size", 64)  # Image size
 setattr(args, "result_path", "/your/dataset/path/")  # Dataset path
 setattr(args, "result_path", "/your/save/path/")  # Result path
 setattr(args, "vis", True)  # Enable visualization
+setattr(args, "latent", True) # Enable latent diffusion
+setattr(args, "autoencoder_network", "vae") # VAE model
+setattr(args, "autoencoder_ckpt", "/your/VAE/model/path/weight.pt") # VAE model weight path
 # ...
 # OR use args["parameter_name"] = "your setting"
 # Start training
@@ -252,7 +260,8 @@ mp.spawn(DMTrainer(args=args, dataset_path="/your/dataset/path/").train, nprocs=
 mp.spawn(DMTrainer(
     conditional=True, sample="ddpm", dataset_path="/your/dataset/path/",
     network="unet", epochs=300, image_size=64, result_path="/your/save/path/",
-    vis=True, # Any params...
+    vis=True, latent=True, autoencoder_network="vae",
+    autoencoder_ckpt="/your/VAE/model/path/weight.pt", # Any params...
 ).train, nprocs=gpus)
 ```
 

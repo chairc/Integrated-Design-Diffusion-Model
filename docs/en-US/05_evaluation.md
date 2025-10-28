@@ -14,7 +14,7 @@
 
 3. If using `FID_calculator.py`, set `generated_image_folder` to `/your/path/generate/landscape` and `dataset_image_folder` to `/your/new/path/datasets/landscape`. **Right-click to run**.
 
-4. If using `FID_calculator_plus.py`, set the necessary parameters such as `path`, `--batch_size`, `--num-workers`, `--dims`, `--save_stats`, and `--use_gpu`. If no parameters are set, the default settings will be used. There are two methods for setting parameters. One is to directly set the `parser` in the `if __name__ == "__main__":` block of the `FID_calculator_plus.py` file. The other is to enter the following command in the console under the `/your/path/Defect-Diffiusion-Model/tools` directory:  
+4. If using `FID_calculator_plus.py`, set the necessary parameters such as `path`, `--batch_size`, `--num-workers`, `--dims`, `--save_stats`, and `--use_gpu`. If no parameters are set, the default settings will be used. There are two methods for setting parameters. One is to directly set the `parser` in the `if __name__ == "__main__":` block of the `FID_calculator_plus.py` file. The other is to enter the following command in the console under the `/your/path/Defect-Diffiusion-Model/iddm/tools` directory:  
 
    **For evaluation only**
 
