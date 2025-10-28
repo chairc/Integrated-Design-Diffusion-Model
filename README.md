@@ -36,6 +36,8 @@ We named this project IDDM: Integrated Design Diffusion Model. It aims to reprod
 
 If you have any questions, please check [**the existing issues**](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues/9) first. If the issue persists, feel free to open a new one for assistance, or you can contact me via email at chenyu1998424@gmail.com or chairc1998@163.com. **If you think my project is interesting, please give me a ⭐⭐⭐Star⭐⭐⭐ :)**
 
+### Get Started
+
 #### Running Locally
 
 Use the `git clone` or directly download the `zip` file of this repository's code, and then configure the environment locally to run it.
