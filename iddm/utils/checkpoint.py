@@ -34,9 +34,45 @@ from iddm.utils.check import check_path_is_exist
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
 
+# Add checkpoint caching
+_checkpoint_cache = {}
+
+
+def load_ckpt_with_cache(ckpt_path, device="cpu", force_reload=False):
+    """
+    Load checkpoint weight files with caching
+    :param ckpt_path: Checkpoint path
+    :param device: GPU or CPU
+    :param force_reload: Whether to force reload the checkpoint
+    :return: ckpt_state
+    """
+    cache_key = f"{ckpt_path}:{device}"
+    # Return cached checkpoint if available and not forcing reload
+    if not force_reload and cache_key in _checkpoint_cache:
+        logger.info(f"Loading checkpoint from cache: {cache_key}")
+        return _checkpoint_cache[cache_key]
+    # Load checkpoint, pytorch 2.6+ default weights_only=True
+    try:
+        ckpt_state = torch.load(f=ckpt_path, map_location=device, weights_only=False)
+        # Cache the loaded checkpoint
+        _checkpoint_cache[cache_key] = ckpt_state
+        logger.info(f"Checkpoint loaded and cached: {ckpt_path}")
+        return ckpt_state
+    except Exception as e:
+        raise RuntimeError(f"Failed to load checkpoint, path：{ckpt_path}, msg: {str(e)}") from e
+
+
+def clear_ckpt_with_cache():
+    """
+    Clear checkpoint cache to free memory
+    """
+    global _checkpoint_cache
+    _checkpoint_cache.clear()
+
 
 def load_ckpt(ckpt_path, model=None, device="cpu", optimizer=None, is_train=False, is_generate=False, is_pretrain=False,
-              is_resume=False, is_distributed=False, is_use_ema=False, conditional=False, ckpt_type="df"):
+              is_resume=False, is_distributed=False, is_use_ema=False, conditional=False, ckpt_type="df",
+              force_reload=False):
     """
     Load checkpoint weight files
     :param ckpt_path: Checkpoint path
@@ -51,6 +87,7 @@ def load_ckpt(ckpt_path, model=None, device="cpu", optimizer=None, is_train=Fals
     :param is_use_ema:  Whether to use ema model or model
     :param conditional:  Whether conditional training
     :param ckpt_type: Type of checkpoint
+    :param force_reload: Whether to force reload the checkpoint
     :return: start_epoch + 1
     """
     # ============================= Check and load checkpoint ============================= #
@@ -60,10 +97,7 @@ def load_ckpt(ckpt_path, model=None, device="cpu", optimizer=None, is_train=Fals
     # Check path
     check_path_is_exist(path=ckpt_path)
     # Load checkpoint, pytorch 2.6+ default weights_only=True
-    try:
-        ckpt_state = torch.load(f=ckpt_path, map_location=device, weights_only=False)
-    except Exception as e:
-        raise RuntimeError(f"Failed to load checkpoint, path：{ckpt_path}, msg: {str(e)}") from e
+    ckpt_state = load_ckpt_with_cache(ckpt_path=ckpt_path, device=device, force_reload=force_reload)
 
     # ============================= Get the result info ============================= #
     # Load the model best score and mode

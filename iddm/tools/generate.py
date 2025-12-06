@@ -79,9 +79,8 @@ class Generator:
         # Enable conditional generation, sample type, network, image size,
         # number of classes and select activation function
         gen_results = generate_initializer(ckpt_path=self.weight_path, conditional=self.args.conditional,
-                                           image_size=self.args.image_size, sample=self.args.sample,
-                                           network=self.args.network, act=self.args.act,
-                                           num_classes=self.args.num_classes, device=self.device)
+                                           image_size=self.args.image_size, network=self.args.network,
+                                           act=self.args.act, num_classes=self.args.num_classes, device=self.device)
         self.conditional, self.network, self.image_size, self.num_classes, self.act = gen_results
 
         # Check image size format
@@ -120,7 +119,8 @@ class Generator:
             autoencoder_network = autoencoder_network_initializer(network=self.autoencoder_network, device=self.device)
             self.autoencoder = autoencoder_network(latent_channels=self.autoencoder_latent_channels,
                                                    device=self.device).to(self.device)
-            load_ckpt(ckpt_path=self.autoencoder_ckpt, model=self.autoencoder, is_generate=True, device=self.device)
+            load_ckpt(ckpt_path=self.autoencoder_ckpt, model=self.autoencoder, is_generate=True, device=self.device,
+                      force_reload=True)
             # Inference mode, no updating parameters
             self.autoencoder.eval()
 

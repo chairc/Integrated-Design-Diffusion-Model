@@ -27,7 +27,7 @@ import torchvision
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader, DistributedSampler
 
-from iddm.config.setting import SR_MEAN, SR_STD
+from iddm.config.setting import SR_MEAN, SR_STD, SR_PREFETCH_FACTOR
 
 
 class SRDataset(Dataset):
@@ -100,9 +100,24 @@ def get_sr_dataset(image_size, dataset_path, batch_size, num_workers, distribute
     dataset = SRDataset(image_size=image_size, dataset_path=dataset_path)
     if distributed:
         sampler = DistributedSampler(dataset)
-        dataloader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=False,
-                                num_workers=num_workers, pin_memory=True, sampler=sampler)
+        dataloader = DataLoader(
+            dataset=dataset,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=num_workers,
+            pin_memory=True,
+            sampler=sampler,
+            persistent_workers=True if num_workers > 0 else False,
+            prefetch_factor=SR_PREFETCH_FACTOR if num_workers > 0 else None
+        )
     else:
-        dataloader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers,
-                                pin_memory=True)
+        dataloader = DataLoader(
+            dataset=dataset,
+            batch_size=batch_size,
+            shuffle=True,
+            num_workers=num_workers,
+            pin_memory=True,
+            persistent_workers=True if num_workers > 0 else False,
+            prefetch_factor=SR_PREFETCH_FACTOR if num_workers > 0 else None
+        )
     return dataloader

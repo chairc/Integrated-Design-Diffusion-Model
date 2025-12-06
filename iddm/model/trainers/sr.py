@@ -32,7 +32,7 @@ import torch
 from torch import nn as nn
 from torch import distributed as dist
 from torch.utils.tensorboard import SummaryWriter
-from torch.cuda.amp import autocast
+from torch.amp import autocast
 from tqdm import tqdm
 
 sys.path.append(os.path.dirname(sys.path[0]))
@@ -221,8 +221,8 @@ class SRTrainer(Trainer):
             hr_images = hr_images.to(self.device)
             # Enable Automatic mixed precision training
             # Automatic mixed precision training
-            # Note: If your Pytorch version > 2.4.1, with torch.amp.autocast("cuda", enabled=amp):
-            with autocast(enabled=self.amp):
+            # Note: Pytorch version must > 1.10
+            with autocast("cuda", enabled=self.amp):
                 output = self.model(lr_images)
                 # To calculate the MSE loss
                 # You need to use the standard normal distribution of x at time t and the predicted noise
