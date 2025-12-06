@@ -26,7 +26,7 @@ import torchvision
 from torch.utils.data import DataLoader, DistributedSampler
 from typing import Union
 
-from iddm.config.setting import RANDOM_RESIZED_CROP_SCALE, MEAN, STD
+from iddm.config.setting import RANDOM_RESIZED_CROP_SCALE, MEAN, STD, PREFETCH_FACTOR
 from iddm.utils.check import check_path_is_exist
 
 
@@ -97,11 +97,26 @@ def get_dataset(image_size: Union[int, list, tuple], dataset_path=None, batch_si
     dataset = torchvision.datasets.ImageFolder(root=dataset_path, transform=transforms)
     if distributed:
         sampler = DistributedSampler(dataset)
-        dataloader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers,
-                                pin_memory=True, sampler=sampler)
+        dataloader = DataLoader(
+            dataset=dataset,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=num_workers,
+            pin_memory=True,
+            sampler=sampler,
+            persistent_workers=True if num_workers > 0 else False,
+            prefetch_factor=PREFETCH_FACTOR if num_workers > 0 else None
+        )
     else:
-        dataloader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers,
-                                pin_memory=True)
+        dataloader = DataLoader(
+            dataset=dataset,
+            batch_size=batch_size,
+            shuffle=True,
+            num_workers=num_workers,
+            pin_memory=True,
+            persistent_workers=True if num_workers > 0 else False,
+            prefetch_factor=PREFETCH_FACTOR if num_workers > 0 else None
+        )
     return dataloader
 
 

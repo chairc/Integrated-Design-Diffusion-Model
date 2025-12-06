@@ -64,6 +64,11 @@ STD = (0.5, 0.5, 0.5)
 SR_MEAN = (0.485, 0.456, 0.406)
 # Sr std in datasets
 SR_STD = (0.229, 0.224, 0.225)
+# ****** iddm/utils/dataset.py/get_dateset() DataLoader ******
+# Indicates the number of samples that are loaded in advance for each worker
+PREFETCH_FACTOR = 2
+# ****** iddm/sr/dataset.py/get_sr_dateset() DataLoader ******
+SR_PREFETCH_FACTOR = 2
 
 # Project
 # Log level setting
