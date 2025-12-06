@@ -36,7 +36,9 @@ torch_summary==1.4.5
 tqdm==4.66.3
 pytorch_fid==0.3.0
 fastapi==0.115.6
+tensorboard==2.19.0
 tensorboardX==2.6.1
+transformers==4.56.1
 
 # If you want to use flash attention, please install flash-attn.
 # Compile your own environment: pip install flash-attn --no-build-isolation
@@ -50,7 +52,7 @@ flash-attn==2.8.2
 # More versions please click: https://pytorch.org/get-started/previous-versions
 # [Note] torch versions must >= 1.9.0
 # More info: https://pytorch.org/get-started/locally/ (recommended)
-torch>=1.9.0
+torch>=1.10.0
 torchvision>=0.10.0
 ```
 

@@ -47,8 +47,10 @@ if __name__ == "__main__":
         "tqdm==4.66.3",
         "pytorch_fid==0.3.0",
         "fastapi==0.115.6",
+        "tensorboard==2.19.0",
         "tensorboardX==2.6.1",
-        "torch>=1.9.0",
+        "transformers==4.56.1",
+        "torch>=1.10.0",
         "torchvision>=0.10.0"
     ]
     # Define the metadata of the package

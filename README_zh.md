@@ -79,7 +79,9 @@ torch_summary==1.4.5
 tqdm==4.66.3
 pytorch_fid==0.3.0
 fastapi==0.115.6
+tensorboard==2.19.0
 tensorboardX==2.6.1
+transformers==4.56.1
 
 # 如果您想使用 flash attention，请安装 flash-attn
 # 编译自己的环境：pip install flash-attn --no-build-isolation
@@ -90,9 +92,9 @@ flash-attn==2.8.2
 # 如果你想下载GPU版本请使用：pip install torch==1.13.0+cu116 torchvision==0.14.0+cu116 -f https://download.pytorch.org/whl/torch_stable.html
 # 想了解更多信息请访问：https://pytorch.org/get-started/previous-versions/#linux-and-windows-25
 # 更多版本请访问：https://pytorch.org/get-started/previous-versions
-# 需要注意torch版本 >= 1.9.0
+# 需要注意torch版本 >= 1.10.0
  # 更多信息：https://pytorch.org/get-started/locally/ （推荐）
-torch>=1.9.0
+torch>=1.10.0
 torchvision>=0.10.0
 ```
 
