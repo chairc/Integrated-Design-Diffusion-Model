@@ -43,6 +43,7 @@ from iddm.model.samples.plms import PLMSDiffusion
 from iddm.model.samples.dpm2 import DPM2Diffusion
 from iddm.model.samples.dpmpp import DPMPlusPlusDiffusion
 from iddm.utils.check import check_path_is_exist, check_package_is_exist
+from iddm.utils.checkpoint import load_ckpt_with_cache
 from iddm.utils.loss import MSEKLLoss
 from iddm.utils.lr_scheduler import set_cosine_lr
 
@@ -230,11 +231,14 @@ def sample_initializer(sample, image_size, device, schedule_name="linear", **kwa
     elif sample == "dpm2":
         diffusion = DPM2Diffusion(img_size=image_size, device=device, schedule_name=schedule_name, **kwargs)
     elif sample == "dpmpp":
-        diffusion = DPMPlusPlusDiffusion(img_size=image_size, device=device, schedule_name=schedule_name, order=1, **kwargs)
+        diffusion = DPMPlusPlusDiffusion(img_size=image_size, device=device, schedule_name=schedule_name, order=1,
+                                         **kwargs)
     elif sample == "dpmpp2m":
-        diffusion = DPMPlusPlusDiffusion(img_size=image_size, device=device, schedule_name=schedule_name, order=2, **kwargs)
+        diffusion = DPMPlusPlusDiffusion(img_size=image_size, device=device, schedule_name=schedule_name, order=2,
+                                         **kwargs)
     elif sample == "dpmpp3m":
-        diffusion = DPMPlusPlusDiffusion(img_size=image_size, device=device, schedule_name=schedule_name, order=3, **kwargs)
+        diffusion = DPMPlusPlusDiffusion(img_size=image_size, device=device, schedule_name=schedule_name, order=3,
+                                         **kwargs)
     else:
         diffusion = DDPMDiffusion(img_size=image_size, device=device, schedule_name=schedule_name, **kwargs)
         logger.warning(msg=f"[{device}]: Setting sample error, we has been automatically set to ddpm.")
@@ -318,7 +322,7 @@ def generate_initializer(ckpt_path, conditional, network, image_size, num_classe
 
     logger.info(msg=f"[{device}]: Checking parameters validity.")
     # Load checkpoint before generate
-    ckpt_state = torch.load(f=ckpt_path, map_location=device, weights_only=False)
+    ckpt_state = load_ckpt_with_cache(ckpt_path=ckpt_path, device=device, **kwargs)
     # Valid
     conditional = check_param_in_dict(param="conditional", dict_params=ckpt_state, args_param=conditional)
     network = check_param_in_dict(param="network", dict_params=ckpt_state, args_param=network)
@@ -329,15 +333,16 @@ def generate_initializer(ckpt_path, conditional, network, image_size, num_classe
     return conditional, network, image_size, num_classes, act
 
 
-def generate_autoencoder_initializer(ckpt_path, device):
+def generate_autoencoder_initializer(ckpt_path, device, **kwargs):
     """
     Check the parameters in checkpoint before generate autoencoder
     :param ckpt_path: Checkpoint path
     :param device: GPU or CPU
+    :param kwargs: Additional arguments
     :return: network, image_size, latent_channels, act
     """
     # Load checkpoint before generate
-    ckpt_state = torch.load(f=ckpt_path, map_location=device, weights_only=False)
+    ckpt_state = load_ckpt_with_cache(ckpt_path=ckpt_path, device=device, **kwargs)
     network = ckpt_state["network"]
     image_size = ckpt_state["image_size"]
     latent_channel = ckpt_state["latent_channel"]
