@@ -127,7 +127,8 @@ def generate_diffusion_model_api(data: dict):
 
         return JSONResponse({"code": 200, "msg": "success!", "data": json.dumps(re_json, ensure_ascii=False)})
     except Exception as e:
-        return JSONResponse({"code": 500, "msg": str(e), "data": None})
+        logger.exception("Exception occurred while generating diffusion model")
+        return JSONResponse({"code": 500, "msg": "An internal error has occurred.", "data": None})
 
 
 @app.post("/api/generate/sr")
