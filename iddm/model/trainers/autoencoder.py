@@ -31,7 +31,7 @@ import torch
 from torch import nn as nn
 from torch import distributed as dist
 from torch.utils.tensorboard import SummaryWriter
-from torch.cuda.amp import autocast
+from torch.amp import autocast
 from tqdm import tqdm
 
 sys.path.append(os.path.dirname(sys.path[0]))
@@ -199,8 +199,10 @@ class AutoencoderTrainer(Trainer):
         for i, (images, _) in enumerate(train_pbar):
             # Input images [B, C, H, W]
             images = images.to(self.device)
-
-            with autocast(enabled=self.amp):
+            # Enable Automatic mixed precision training
+            # Automatic mixed precision training
+            # Note: Pytorch version must > 1.10
+            with torch.amp.autocast("cuda", enabled=self.amp):
                 recon_images = self.model(images)
                 # To calculate the MSE loss
                 train_loss = self.loss_func(recon_images, images)

@@ -23,7 +23,7 @@ transformers==4.56.1
 # Please use: pip install torch==1.13.0+cu116 torchvision==0.14.0+cu116 -f https://download.pytorch.org/whl/torch_stable.html
 # About more torch information please click: https://pytorch.org/get-started/previous-versions/#linux-and-windows-25
 # More versions please click: https://pytorch.org/get-started/previous-versions
-# [Note] torch versions must >= 1.9.0
+# [Note] torch versions must >= 1.10.0
 # More info: https://pytorch.org/get-started/locally/ (recommended)
-torch>=1.9.0
+torch>=1.10.0
 torchvision>=0.10.0

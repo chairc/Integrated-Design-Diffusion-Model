@@ -28,7 +28,7 @@ import torch.nn as nn
 import logging
 import coloredlogs
 
-from torch.cuda.amp import GradScaler
+from torch.amp import GradScaler
 
 from iddm.model.networks.unet import UNet
 from iddm.model.networks.unet_cross_attn import UNetCrossAttn
@@ -276,7 +276,7 @@ def amp_initializer(amp, device):
     else:
         logger.info(msg=f"[{device}]: Normal training.")
     # Used to scale gradients to prevent overflow
-    return GradScaler(enabled=amp)
+    return GradScaler(device="cuda", enabled=amp)
 
 
 def generate_initializer(ckpt_path, conditional, network, image_size, num_classes, act, device, **kwargs):
