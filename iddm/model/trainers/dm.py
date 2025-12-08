@@ -29,20 +29,17 @@ import numpy as np
 import torch
 
 from torch import nn as nn
-from torch import distributed as dist
-from torch.utils.tensorboard import SummaryWriter
 from torch.amp import autocast
 from tqdm import tqdm
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from iddm.config.setting import MASTER_ADDR, MASTER_PORT, EMA_BETA, LATENT_CHANNEL, IMAGE_CHANNEL, IMAGE_SCALE
+from iddm.config.setting import EMA_BETA, LATENT_CHANNEL, IMAGE_CHANNEL, IMAGE_SCALE
 from iddm.model.modules.ema import EMA
-from iddm.utils.check import check_image_size, check_pretrain_path, check_is_distributed
+from iddm.utils.check import check_image_size, check_pretrain_path
 from iddm.utils.dataset import get_dataset
-from iddm.utils.initializer import device_initializer, seed_initializer, network_initializer, optimizer_initializer, \
-    sample_initializer, lr_initializer, amp_initializer, loss_initializer, classes_initializer, \
-    autoencoder_network_initializer
-from iddm.utils.utils import plot_images, save_images, setup_logging, save_train_logging, download_model_pretrain_model
+from iddm.utils.initializer import seed_initializer, network_initializer, optimizer_initializer, sample_initializer, \
+    amp_initializer, loss_initializer, classes_initializer, autoencoder_network_initializer
+from iddm.utils.utils import plot_images, save_images, download_model_pretrain_model
 from iddm.utils.checkpoint import load_ckpt, save_ckpt
 from iddm.model.trainers.base import Trainer
 
@@ -110,14 +107,7 @@ class DMTrainer(Trainer):
         logger.info(msg=f"[{self.rank}]: Input params: {self.args}")
         # Step1: Set path and create log
         # Create data logging path
-        self.results_logging = setup_logging(save_path=self.result_path, run_name=self.run_name)
-        self.results_dir = self.results_logging[1]
-        self.results_vis_dir = self.results_logging[2]
-        self.results_tb_dir = self.results_logging[3]
-        # Tensorboard
-        self.tb_logger = SummaryWriter(log_dir=self.results_tb_dir)
-        # Train log
-        self.args = save_train_logging(arg=self.args, save_path=self.results_dir)
+        self.init_trainer_results_dir_and_log()
 
         # Step2: Get the parameters of the initializer and args
         # Initialize the seed
@@ -136,45 +126,20 @@ class DMTrainer(Trainer):
         # Number of classes
         self.num_classes = classes_initializer(dataset_path=self.dataset_path)
         # Initialize and save the model identification bit
-        # Check here whether it is single-GPU training or multi-GPU training
-        self.save_models = True
-        # Whether to enable distributed training
-        if check_is_distributed(distributed=self.distributed):
-            self.distributed = True
-            # Set address and port
-            os.environ["MASTER_ADDR"] = MASTER_ADDR
-            os.environ["MASTER_PORT"] = MASTER_PORT
-            # The total number of processes is equal to the number of graphics cards
-            dist.init_process_group(backend="nccl" if torch.cuda.is_available() else "gloo", rank=self.rank,
-                                    world_size=self.world_size)
-            # Set device ID
-            self.device = device_initializer(device_id=self.rank, is_train=True)
-            # There may be random errors, using this function can reduce random errors in cudnn
-            # torch.backends.cudnn.deterministic = True
-            # Synchronization during distributed training
-            dist.barrier()
-            # If the distributed training is not the main GPU, the save model flag is False
-            if dist.get_rank() != self.main_gpu:
-                self.save_models = False
-            logger.info(msg=f"[{self.device}]: Successfully Use distributed training.")
-        else:
-            self.distributed = False
-            # Run device initializer
-            self.device = device_initializer(device_id=self.use_gpu, is_train=True)
-            logger.info(msg=f"[{self.device}]: Successfully Use normal training.")
+        self.init_trainer_distributed()
 
         # =================================About model initializer=================================
         # Step3: Init model
         # Network
-        Network = network_initializer(network=self.network, device=self.device)
+        dm_model = network_initializer(network=self.network, device=self.device)
         # Model
         if not self.conditional:
-            self.model = Network(in_channel=self.in_channels, out_channel=self.out_channels, device=self.device,
-                                 image_size=self.image_size, act=self.act).to(self.device)
+            self.model = dm_model(in_channel=self.in_channels, out_channel=self.out_channels, device=self.device,
+                                  image_size=self.image_size, act=self.act).to(self.device)
         else:
-            self.model = Network(mode=self.mode, in_channel=self.in_channels, out_channel=self.out_channels,
-                                 num_classes=self.num_classes, device=self.device, image_size=self.image_size,
-                                 act=self.act).to(self.device)
+            self.model = dm_model(mode=self.mode, in_channel=self.in_channels, out_channel=self.out_channels,
+                                  num_classes=self.num_classes, device=self.device, image_size=self.image_size,
+                                  act=self.act).to(self.device)
         # Distributed training
         if self.distributed:
             self.model = nn.parallel.DistributedDataParallel(module=self.model, device_ids=[self.device],
@@ -229,11 +194,11 @@ class DMTrainer(Trainer):
         self.len_dataloader = len(self.dataloader)
 
         # =================================About autoencoder and diffusion=================================
-        # Step4: Set autoencoder
+        # Step5: Set autoencoder
         # Loading autoencoder (fixed parameters, only used to encode images into latent space)
         if self.latent:
-            Network = autoencoder_network_initializer(network=self.autoencoder_network, device=self.device)
-            self.autoencoder = Network(latent_channels=self.latent_channels, device=self.device).to(self.device)
+            ae_model = autoencoder_network_initializer(network=self.autoencoder_network, device=self.device)
+            self.autoencoder = ae_model(latent_channels=self.latent_channels, device=self.device).to(self.device)
             load_ckpt(ckpt_path=self.autoencoder_ckpt, model=self.autoencoder, is_generate=True,
                       device=self.device)
             # Inference mode, no updating parameters
@@ -247,11 +212,8 @@ class DMTrainer(Trainer):
         """
         Before training one iter diffusion model method
         """
-        logger.info(msg=f"[{self.device}]: Start epoch {self.epoch}:")
-        # Set learning rate
-        current_lr = lr_initializer(lr_func=self.lr_func, optimizer=self.optimizer, epoch=self.epoch,
-                                    epochs=self.epochs, init_lr=self.init_lr, device=self.device)
-        self.tb_logger.add_scalar(tag=f"[{self.device}]: Current LR", scalar_value=current_lr, global_step=self.epoch)
+        super().before_iter()
+        # Initialize the tqdm progress bar
         self.pbar = tqdm(self.dataloader)
 
     def train_in_iter(self):
@@ -360,20 +322,12 @@ class DMTrainer(Trainer):
                       start_model_interval=self.start_model_interval, conditional=self.conditional,
                       image_size=self.image_size, sample=self.sample, network=self.network, act=self.act,
                       num_classes=self.num_classes, latent=self.latent, mode=mode)
-        logger.info(msg=f"[{self.device}]: Finish epoch {self.epoch}:")
 
-        # Synchronization during distributed training
-        if self.distributed:
-            logger.info(msg=f"[{self.device}]: Synchronization during distributed training.")
-            dist.barrier()
+        super().after_iter()
 
     def after_train(self):
         """
         After training diffusion model method
         """
-        logger.info(msg=f"[{self.device}]: Finish training.")
+        super().after_train()
         logger.info(msg="[Note]: If you want to evaluate model quality, use 'FID_calculator.py' to evaluate.")
-
-        # Clean up the distributed environment
-        if self.distributed:
-            dist.destroy_process_group()
