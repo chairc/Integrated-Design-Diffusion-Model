@@ -29,19 +29,16 @@ import coloredlogs
 import torch
 
 from torch import nn as nn
-from torch import distributed as dist
-from torch.utils.tensorboard import SummaryWriter
 from torch.amp import autocast
 from tqdm import tqdm
 
 sys.path.append(os.path.dirname(sys.path[0]))
-from iddm.config.setting import MASTER_ADDR, MASTER_PORT, LATENT_CHANNEL
+from iddm.config.setting import LATENT_CHANNEL
 from iddm.model.trainers.base import Trainer
-from iddm.utils.check import check_is_distributed
 from iddm.utils.checkpoint import load_ckpt, save_ckpt
-from iddm.utils.initializer import seed_initializer, device_initializer, optimizer_initializer, amp_initializer, \
-    loss_initializer, lr_initializer, autoencoder_network_initializer
-from iddm.utils.utils import setup_logging, save_train_logging, check_and_create_dir, save_images
+from iddm.utils.initializer import seed_initializer, optimizer_initializer, amp_initializer, loss_initializer, \
+    autoencoder_network_initializer
+from iddm.utils.utils import check_and_create_dir, save_images
 from iddm.utils.dataset import get_dataset, post_image
 
 logger = logging.getLogger(__name__)
@@ -78,58 +75,23 @@ class AutoencoderTrainer(Trainer):
         """
         Before training autoencoder model method
         """
+        # =================================Before training=================================
         logger.info(msg=f"[{self.rank}]: Start autoencoder model training")
         logger.info(msg=f"[{self.rank}]: Input params: {self.args}")
         # Step1: Set path and create log
         # Create data logging path
-        self.results_logging = setup_logging(save_path=self.result_path, run_name=self.run_name)
-        self.results_dir = self.results_logging[1]
-        self.results_vis_dir = self.results_logging[2]
-        self.results_tb_dir = self.results_logging[3]
-        self.args = save_train_logging(arg=self.args, save_path=self.results_dir)
+        self.init_trainer_results_dir_and_log()
 
         # Step2: Get the parameters of the initializer and args
         # Initialize the seed
         seed_initializer(seed_id=self.seed)
         # Initialize and save the model identification bit
-        # Check here whether it is single-GPU training or multi-GPU training
-        self.save_models = True
-        # Whether to enable distributed training
-        if check_is_distributed(distributed=self.distributed):
-            self.distributed = True
-            # Set address and port
-            os.environ["MASTER_ADDR"] = MASTER_ADDR
-            os.environ["MASTER_PORT"] = MASTER_PORT
-            # The total number of processes is equal to the number of graphics cards
-            dist.init_process_group(backend="nccl" if torch.cuda.is_available() else "gloo", rank=self.rank,
-                                    world_size=self.world_size)
-            # Set device ID
-            self.device = device_initializer(device_id=self.rank, is_train=True)
-            # There may be random errors, using this function can reduce random errors in cudnn
-            # torch.backends.cudnn.deterministic = True
-            # Synchronization during distributed training
-            dist.barrier()
-            # If the distributed training is not the main GPU, the save model flag is False
-            if dist.get_rank() != self.main_gpu:
-                self.save_models = False
-            logger.info(msg=f"[{self.device}]: Successfully Use distributed training.")
-        else:
-            self.distributed = False
-            # Run device initializer
-            self.device = device_initializer(device_id=self.use_gpu, is_train=True)
-            logger.info(msg=f"[{self.device}]: Successfully Use normal training.")
+        self.init_trainer_distributed()
 
-        # Step3: Set data
-        self.train_dataloader = get_dataset(image_size=self.image_size, dataset_path=self.train_dataset_path,
-                                            batch_size=self.batch_size, num_workers=self.num_workers,
-                                            distributed=self.distributed)
-        self.val_dataloader = get_dataset(image_size=self.image_size, dataset_path=self.val_dataset_path,
-                                          batch_size=self.batch_size, num_workers=self.num_workers,
-                                          distributed=self.distributed)
-
-        # Step4: Init model
-        Network = autoencoder_network_initializer(network=self.network, device=self.device)
-        self.model = Network(latent_channels=self.latent_channels, device=self.device).to(self.device)
+        # =================================About model initializer=================================
+        # Step3: Init model
+        ae_model = autoencoder_network_initializer(network=self.network, device=self.device)
+        self.model = ae_model(latent_channels=self.latent_channels, device=self.device).to(self.device)
         # Distributed training
         if self.distributed:
             self.model = nn.parallel.DistributedDataParallel(self.model, device_ids=[self.device],
@@ -166,8 +128,15 @@ class AutoencoderTrainer(Trainer):
         self.scaler = amp_initializer(amp=self.amp, device=self.device)
         # Loss function
         self.loss_func = loss_initializer(loss_name=self.loss_name, device=self.device)
-        # Tensorboard
-        self.tb_logger = SummaryWriter(log_dir=self.results_tb_dir)
+
+        # =================================About data=================================
+        # Step4: Set data
+        self.train_dataloader = get_dataset(image_size=self.image_size, dataset_path=self.train_dataset_path,
+                                            batch_size=self.batch_size, num_workers=self.num_workers,
+                                            distributed=self.distributed)
+        self.val_dataloader = get_dataset(image_size=self.image_size, dataset_path=self.val_dataset_path,
+                                          batch_size=self.batch_size, num_workers=self.num_workers,
+                                          distributed=self.distributed)
         # Number of dataset batches in the dataloader
         self.len_train_dataloader = len(self.train_dataloader)
         self.len_val_dataloader = len(self.val_dataloader)
@@ -176,12 +145,7 @@ class AutoencoderTrainer(Trainer):
         """
         Before training one iter autoencoder model method
         """
-        logger.info(msg=f"[{self.device}]: Start epoch {self.epoch}:")
-        # Set learning rate
-        current_lr = lr_initializer(lr_func=self.lr_func, optimizer=self.optimizer, epoch=self.epoch,
-                                    epochs=self.epochs,
-                                    init_lr=self.init_lr, device=self.device)
-        self.tb_logger.add_scalar(tag=f"[{self.device}]: Current LR", scalar_value=current_lr, global_step=self.epoch)
+        super().before_iter()
         # Create vis dir
         self.save_val_vis_dir = os.path.join(self.results_vis_dir, str(self.epoch))
         check_and_create_dir(self.save_val_vis_dir)
@@ -304,19 +268,10 @@ class AutoencoderTrainer(Trainer):
                       start_model_interval=self.start_model_interval, image_size=self.image_size,
                       network=self.network, act=self.act, is_autoencoder=True, is_best=is_best, score=self.avg_score,
                       best_score=self.best_score, latent_channel=self.latent_channels)
-            logger.info(msg=f"[{self.device}]: Finish epoch {self.epoch}:")
-
-        # Synchronization during distributed training
-        if self.distributed:
-            logger.info(msg=f"[{self.device}]: Synchronization during distributed training.")
-            dist.barrier()
+        super().after_iter()
 
     def after_train(self):
         """
         After training autoencoder model method
         """
-        logger.info(msg=f"[{self.device}]: Finish training.")
-
-        # Clean up the distributed environment
-        if self.distributed:
-            dist.destroy_process_group()
+        super().after_train()
