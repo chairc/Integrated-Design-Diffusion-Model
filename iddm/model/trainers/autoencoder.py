@@ -201,7 +201,7 @@ class AutoencoderTrainer(Trainer):
             # Input images [B, C, H, W]
             images = images.to(self.device)
 
-            with autocast(enabled=self.amp):
+            with autocast(device_type="cuda", enabled=self.amp):
                 recon_images = self.model(images)
                 # To calculate the MSE loss
                 val_loss = self.loss_func(recon_images, images)
