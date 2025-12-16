@@ -31,10 +31,11 @@ from torch import multiprocessing as mp
 
 sys.path.append(os.path.dirname(sys.path[0]))
 from iddm.config.choices import sample_choices, network_choices, optim_choices, act_choices, lr_func_choices, \
-    image_format_choices, noise_schedule_choices, parse_image_size_type, loss_func_choices, autoencoder_network_choices, \
+    image_format_choices, noise_schedule_choices, loss_func_choices, autoencoder_network_choices, \
     generate_mode_choices
 from iddm.config.version import get_version_banner
 from iddm.model.trainers import DMTrainer
+from iddm.utils.check import check_parse_image_size_type
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO")
@@ -99,7 +100,7 @@ def init_train_args():
     # Input image size (required)
     # Image size option: int or [height, width]
     # You can set 64, [64,64] or (64,64)
-    parser.add_argument("--image_size", "-i", type=parse_image_size_type, default=64)
+    parser.add_argument("--image_size", "-i", type=check_parse_image_size_type, default=64)
     # Dataset path (required)
     # Conditional dataset
     # e.g: cifar10, Each category is stored in a separate folder, and the main folder represents the path.
