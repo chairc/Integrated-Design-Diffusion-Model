@@ -21,14 +21,12 @@
     @Site   : https://github.com/chairc
 """
 import unittest
-import logging
-import coloredlogs
 import torch
 
 from iddm.tools.generate import Generator, init_generate_args
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 
 class TestGenerate(unittest.TestCase):

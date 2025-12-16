@@ -23,10 +23,8 @@
 import os
 import sys
 import copy
-import logging
 import time
 
-import coloredlogs
 import torch
 
 from torch import nn as nn
@@ -44,9 +42,9 @@ from iddm.utils.checkpoint import load_ckpt, save_ckpt
 from iddm.utils.metrics import compute_psnr, compute_ssim
 from iddm.sr.interface import post_image
 from iddm.sr.dataset import get_sr_dataset
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 
 class SRTrainer(Trainer):
@@ -189,7 +187,7 @@ class SRTrainer(Trainer):
             # Enable Automatic mixed precision training
             # Automatic mixed precision training
             # Note: Pytorch version must > 1.10
-            with autocast("cuda", enabled=self.amp):
+            with autocast(device_type="cuda", enabled=self.amp):
                 output = self.model(lr_images)
                 # To calculate the MSE loss
                 # You need to use the standard normal distribution of x at time t and the predicted noise

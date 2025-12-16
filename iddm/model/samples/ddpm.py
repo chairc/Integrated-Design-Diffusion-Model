@@ -23,16 +23,14 @@
 from typing import Optional, List, Union
 
 import torch
-import logging
-import coloredlogs
 from torch import nn
 
 from tqdm import tqdm
 
 from iddm.model.samples.base import BaseDiffusion
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 
 class DDPMDiffusion(BaseDiffusion):

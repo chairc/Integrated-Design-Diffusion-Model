@@ -23,8 +23,6 @@
 import os
 import sys
 import argparse
-import logging
-import coloredlogs
 import torch
 
 from torch import multiprocessing as mp
@@ -36,9 +34,9 @@ from iddm.config.choices import sample_choices, network_choices, optim_choices, 
 from iddm.config.version import get_version_banner
 from iddm.model.trainers import DMTrainer
 from iddm.utils.check import check_parse_image_size_type
+from iddm.utils.logger import init_logger, get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 
 def main(args):
@@ -47,6 +45,11 @@ def main(args):
     :param args: Input parameters
     :return: None
     """
+    # Init logger
+    init_logger(
+        is_save_log=True,
+        log_path=os.path.join(str(args.result_path), str(args.run_name))
+    )
     if args.distributed:
         gpus = torch.cuda.device_count()
         mp.spawn(DMTrainer(args=args).train, nprocs=gpus)

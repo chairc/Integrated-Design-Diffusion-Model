@@ -20,17 +20,14 @@
     @Author : chairc
     @Site   : https://github.com/chairc
 """
-import logging
-import coloredlogs
-
 import torch
 import torch.nn as nn
 
 from iddm.model.modules.conv import BaseConv
 from iddm.model.modules.activation import get_activation_function
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 
 class Bottleneck(nn.Module):

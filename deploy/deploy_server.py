@@ -23,10 +23,8 @@
 import os
 import sys
 import json
-import logging
 import uuid
 
-import coloredlogs
 import uvicorn
 
 from fastapi import FastAPI
@@ -38,9 +36,9 @@ from iddm.config.version import get_version_banner
 from iddm.tools.generate import Generator, init_generate_args
 from iddm.utils import save_images
 from iddm.utils.processing import image_to_base64
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 app = FastAPI()
 
 

@@ -24,8 +24,6 @@ import os
 import sys
 import torch
 import argparse
-import logging
-import coloredlogs
 
 from torch import distributed as dist
 from torch.utils.tensorboard import SummaryWriter
@@ -36,9 +34,9 @@ from iddm.utils.check import check_is_distributed
 from iddm.utils.initializer import device_initializer, lr_initializer
 
 from iddm.utils.utils import setup_logging, save_train_logging
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 
 class Trainer:

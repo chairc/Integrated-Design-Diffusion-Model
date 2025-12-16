@@ -20,12 +20,11 @@
     @Author : chairc
     @Site   : https://github.com/chairc
 """
-import logging
-import coloredlogs
 import torch.nn as nn
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+from iddm.utils.logger import get_logger
+
+logger = get_logger(name=__name__)
 
 
 def get_activation_function(name="silu", inplace=False, **kwargs):

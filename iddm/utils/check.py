@@ -22,8 +22,6 @@
 """
 import ast
 import os
-import logging
-import coloredlogs
 
 import torch
 import torch.nn as nn
@@ -31,9 +29,9 @@ import torch.nn as nn
 from urllib.parse import urlparse
 
 from iddm.config.setting import DEFAULT_IMAGE_SIZE
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 
 def check_and_create_dir(path):

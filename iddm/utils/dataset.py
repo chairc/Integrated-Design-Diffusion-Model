@@ -28,6 +28,9 @@ from typing import Union
 
 from iddm.config.setting import RANDOM_RESIZED_CROP_SCALE, MEAN, STD, PREFETCH_FACTOR
 from iddm.utils.check import check_path_is_exist
+from iddm.utils.logger import get_logger
+
+logger = get_logger(name=__name__)
 
 
 def get_dataset(image_size: Union[int, list, tuple], dataset_path=None, batch_size=2, num_workers=0, distributed=False):
@@ -117,6 +120,9 @@ def get_dataset(image_size: Union[int, list, tuple], dataset_path=None, batch_si
             persistent_workers=True if num_workers > 0 else False,
             prefetch_factor=PREFETCH_FACTOR if num_workers > 0 else None
         )
+    logger.info(f"Current dataset status: [image size: {image_size}, dataset path: {dataset_path}, "
+                f"batch size: {batch_size}, num workers: {num_workers}, distributed: {distributed}, "
+                f"dataloader length: {len(dataloader)}, mean: {MEAN}, std: {STD}]")
     return dataloader
 
 

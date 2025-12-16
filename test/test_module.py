@@ -28,8 +28,6 @@ import requests
 
 import torch
 import unittest
-import logging
-import coloredlogs
 from PIL import Image
 
 from torchvision.utils import save_image
@@ -43,9 +41,9 @@ from iddm.utils.lr_scheduler import set_cosine_lr
 from iddm.utils.check import check_is_nan, check_image_size, check_parse_image_size_type
 from iddm.utils.checkpoint import separate_ckpt_weights
 from iddm.utils.processing import image_to_base64, base64_to_image
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 
 class TestModule(unittest.TestCase):
