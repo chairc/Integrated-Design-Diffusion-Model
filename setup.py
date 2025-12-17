@@ -39,7 +39,7 @@ if __name__ == "__main__":
         "coloredlogs==15.0.1",
         "gradio>=5.31.0",
         "matplotlib==3.7.1",
-        "numpy==1.25.0",
+        "numpy>=1.25.0",
         "Pillow==10.3.0",
         "Requests>=2.32.4",
         "scikit-image==0.22.0",
