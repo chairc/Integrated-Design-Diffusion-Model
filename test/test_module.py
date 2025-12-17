@@ -28,25 +28,22 @@ import requests
 
 import torch
 import unittest
-import logging
-import coloredlogs
 from PIL import Image
 
 from torchvision.utils import save_image
 from torchsummary import summary
 from matplotlib import pyplot as plt
 
-from iddm.config.choices import parse_image_size_type
 from iddm.utils.dataset import get_dataset, set_resize_images_size
 from iddm.utils.utils import delete_files, download_files, download_model_pretrain_model
 from iddm.utils.initializer import device_initializer, network_initializer, sample_initializer, generate_initializer
 from iddm.utils.lr_scheduler import set_cosine_lr
-from iddm.utils.check import check_is_nan, check_image_size
+from iddm.utils.check import check_is_nan, check_image_size, check_parse_image_size_type
 from iddm.utils.checkpoint import separate_ckpt_weights
 from iddm.utils.processing import image_to_base64, base64_to_image
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 
 class TestModule(unittest.TestCase):
@@ -307,9 +304,9 @@ class TestModule(unittest.TestCase):
         image_size1 = "64"
         image_size2 = "[64,32]"
         image_size3 = "(64,32)"
-        res1 = parse_image_size_type(image_size1)
-        res2 = parse_image_size_type(image_size2)
-        res3 = parse_image_size_type(image_size3)
+        res1 = check_parse_image_size_type(image_size1)
+        res2 = check_parse_image_size_type(image_size2)
+        res3 = check_parse_image_size_type(image_size3)
         logger.info(msg=res1)
         logger.info(msg=res2)
         logger.info(msg=res3)

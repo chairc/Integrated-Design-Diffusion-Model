@@ -22,10 +22,8 @@
 """
 import os
 import sys
-import logging
 import time
 
-import coloredlogs
 import torch
 
 from torch import nn as nn
@@ -40,9 +38,9 @@ from iddm.utils.initializer import seed_initializer, optimizer_initializer, amp_
     autoencoder_network_initializer
 from iddm.utils.utils import check_and_create_dir, save_images
 from iddm.utils.dataset import get_dataset, post_image
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 
 class AutoencoderTrainer(Trainer):
@@ -201,7 +199,7 @@ class AutoencoderTrainer(Trainer):
             # Input images [B, C, H, W]
             images = images.to(self.device)
 
-            with autocast(enabled=self.amp):
+            with autocast(device_type="cuda", enabled=self.amp):
                 recon_images = self.model(images)
                 # To calculate the MSE loss
                 val_loss = self.loss_func(recon_images, images)
@@ -215,7 +213,7 @@ class AutoencoderTrainer(Trainer):
                                       global_step=self.epoch * self.len_val_dataloader + i)
             val_loss_list.append(val_loss.item())
 
-            # Metric
+            # TODO: Metric
             score = 0
             self.tb_logger.add_scalar(tag=f"[{self.device}]: Score({self.loss_func})", scalar_value=score,
                                       global_step=self.epoch * self.len_val_dataloader + i)

@@ -23,21 +23,20 @@
 import os
 import sys
 import argparse
-import logging
-import coloredlogs
 import torch
 
 from torch import multiprocessing as mp
 
 sys.path.append(os.path.dirname(sys.path[0]))
 from iddm.config.choices import sample_choices, network_choices, optim_choices, act_choices, lr_func_choices, \
-    image_format_choices, noise_schedule_choices, parse_image_size_type, loss_func_choices, autoencoder_network_choices, \
+    image_format_choices, noise_schedule_choices, loss_func_choices, autoencoder_network_choices, \
     generate_mode_choices
 from iddm.config.version import get_version_banner
 from iddm.model.trainers import DMTrainer
+from iddm.utils.check import check_parse_image_size_type
+from iddm.utils.logger import init_logger, get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 
 def main(args):
@@ -46,6 +45,11 @@ def main(args):
     :param args: Input parameters
     :return: None
     """
+    # Init logger
+    init_logger(
+        is_save_log=True,
+        log_path=os.path.join(str(args.result_path), str(args.run_name))
+    )
     if args.distributed:
         gpus = torch.cuda.device_count()
         mp.spawn(DMTrainer(args=args).train, nprocs=gpus)
@@ -99,7 +103,7 @@ def init_train_args():
     # Input image size (required)
     # Image size option: int or [height, width]
     # You can set 64, [64,64] or (64,64)
-    parser.add_argument("--image_size", "-i", type=parse_image_size_type, default=64)
+    parser.add_argument("--image_size", "-i", type=check_parse_image_size_type, default=64)
     # Dataset path (required)
     # Conditional dataset
     # e.g: cifar10, Each category is stored in a separate folder, and the main folder represents the path.

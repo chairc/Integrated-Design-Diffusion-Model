@@ -22,17 +22,15 @@
 """
 import os
 import numpy as np
-import logging
 import torch
 import shutil
-import coloredlogs
 
 from collections import OrderedDict
 
 from iddm.utils.check import check_path_is_exist
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 # Add checkpoint caching
 _checkpoint_cache = {}

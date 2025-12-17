@@ -25,9 +25,6 @@ import sys
 import argparse
 import time
 
-import logging
-import coloredlogs
-
 from PIL import Image
 
 sys.path.append(os.path.dirname(sys.path[0]))
@@ -35,9 +32,9 @@ from iddm.config.version import get_version_banner
 from iddm.sr.interface import inference, load_sr_model
 from iddm.utils.initializer import device_initializer
 from iddm.utils.utils import plot_images, save_images, check_and_create_dir
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 
 def lr2hr(args):

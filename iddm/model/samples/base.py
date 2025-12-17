@@ -22,16 +22,14 @@
 """
 import math
 from typing import Optional, List, Union, Tuple
-import logging
-import coloredlogs
 
 import torch
 from torch import nn
 
 from iddm.config.setting import DEFAULT_IMAGE_SIZE, IMAGE_CHANNEL
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 
 class BaseDiffusion:

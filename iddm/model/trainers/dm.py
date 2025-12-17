@@ -23,8 +23,6 @@
 import os
 import sys
 import copy
-import logging
-import coloredlogs
 import numpy as np
 import torch
 
@@ -42,9 +40,9 @@ from iddm.utils.initializer import seed_initializer, network_initializer, optimi
 from iddm.utils.utils import plot_images, save_images, download_model_pretrain_model
 from iddm.utils.checkpoint import load_ckpt, save_ckpt
 from iddm.model.trainers.base import Trainer
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 
 class DMTrainer(Trainer):
@@ -200,7 +198,7 @@ class DMTrainer(Trainer):
             ae_model = autoencoder_network_initializer(network=self.autoencoder_network, device=self.device)
             self.autoencoder = ae_model(latent_channels=self.latent_channels, device=self.device).to(self.device)
             load_ckpt(ckpt_path=self.autoencoder_ckpt, model=self.autoencoder, is_generate=True,
-                      device=self.device)
+                      device=self.device, ckpt_type="autoencoder")
             # Inference mode, no updating parameters
             self.autoencoder.eval()
         # Initialize the diffusion model
@@ -240,7 +238,7 @@ class DMTrainer(Trainer):
             # Enable Automatic mixed precision training
             # Automatic mixed precision training
             # Note: Pytorch version must > 1.10
-            with autocast("cuda", enabled=self.amp):
+            with autocast(device_type="cuda", enabled=self.amp):
                 # Unconditional training
                 if not self.conditional:
                     # Unconditional model prediction

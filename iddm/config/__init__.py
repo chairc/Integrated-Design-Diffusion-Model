@@ -22,7 +22,7 @@
 """
 from .choices import bool_choices, sample_choices, network_choices, optim_choices, act_choices, lr_func_choices, \
     image_format_choices, noise_schedule_choices, loss_func_choices, image_type_choices, sr_network_choices, \
-    sr_loss_func_choices, parse_image_size_type
+    sr_loss_func_choices, generate_mode_choices
 from .setting import MASTER_ADDR, MASTER_PORT, EMA_BETA, RANDOM_RESIZED_CROP_SCALE, MEAN, STD, \
     DOWNLOAD_FILE_TEMP_PATH, IMAGE_TYPE, IMAGE_CHANNEL, TIME_CHANNEL, CHANNEL_LIST, DEFAULT_IMAGE_SIZE, \
     SR_IMAGE_CHANNEL, SR_IMAGE_TYPE, SR_STD, SR_MEAN

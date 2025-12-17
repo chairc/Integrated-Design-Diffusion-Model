@@ -22,16 +22,14 @@
 """
 import torch
 import torchvision
-import logging
-import coloredlogs
 
 from iddm.config.setting import SR_MEAN, SR_STD
 from iddm.utils.checkpoint import load_ckpt
 from iddm.utils.initializer import sr_network_initializer, device_initializer
 from iddm.utils.utils import download_model_pretrain_model
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 
 def prepare_image(images):
