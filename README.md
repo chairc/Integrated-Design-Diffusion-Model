@@ -1,30 +1,57 @@
 <div align="center">
+    <p>
+        <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model">
+            <img width="242" height="121" src="./assets/iddm-logo.png" alt="IDDM">
+        </a>
+    </p>
+    <h1>IDDM: Integrated Design Diffusion Model</h1>
+    <p>English | <a href="./README_zh.md">简体中文</a></p>
 
-<p>
-  <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model">
-    <img width="242" height="121" src="./assets/iddm-logo.png" alt="IDDM">
-  </a>
-</p>
+</div>
 
-# IDDM: Integrated Design Diffusion Model
+<div align="center">
+    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model" target="_blank">
+        <img src="https://img.shields.io/badge/IDDM-Integrated Design Diffusion Model-blue.svg" alt="IDDM">
+    </a>
+    <a href="https://doi.org/10.5281/zenodo.10866128">
+        <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.10866128.svg" alt="DOI">
+    </a>
+    <a href="https://deepwiki.com/chairc/Integrated-Design-Diffusion-Model" target="_blank">
+        <img src="https://deepwiki.com/badge.svg" alt="DeepWiki">
+    </a>
+</div>
 
-English | [简体中文](README_zh.md)
+<div align="center">
+    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/blob/main/LICENSE" target="_blank">
+        <img src="https://img.shields.io/github/license/chairc/Integrated-Design-Diffusion-Model" alt="License">
+    </a>
+    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/issues" target="_blank">
+        <img src="https://img.shields.io/github/issues/chairc/Integrated-Design-Diffusion-Model.svg" alt="GitHub issues">
+    </a>
+    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/releases" target="_blank">
+        <img src="https://img.shields.io/github/v/release/chairc/Integrated-Design-Diffusion-Model" alt="GitHub release">
+    </a>
+    <a href="#" target="_blank">
+        <img src="https://img.shields.io/github/downloads/chairc/Integrated-Design-Diffusion-Model/total?color=3eb370" alt="GitHub Downloads">
+    </a>
+</div>
 
-[![IDDM](https://img.shields.io/badge/IDDM-Integrated%20Design%20Diffusion%20Model-blue.svg)](https://github.com/chairc/Integrated-Design-Diffusion-Model)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10866128.svg)](https://doi.org/10.5281/zenodo.10866128)
-[![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/chairc/Integrated-Design-Diffusion-Model)
-
-[![License](https://img.shields.io/badge/license-Apache_2.0-green)](./LICENSE)
-[![Issues](https://img.shields.io/github/issues/chairc/Integrated-Design-Diffusion-Model.svg)](https://github.com/chairc/Integrated-Design-Diffusion-Model/issues)
-[![Release](https://img.shields.io/github/v/release/chairc/Integrated-Design-Diffusion-Model)](https://github.com/chairc/Integrated-Design-Diffusion-Model/releases)
-[![Downloads](https://img.shields.io/github/downloads/chairc/Integrated-Design-Diffusion-Model/total?color=3eb370)](https://img.shields.io/github/downloads/chairc/Integrated-Design-Diffusion-Model/total?color=3eb370)
-
-[![Github star](https://img.shields.io/github/stars/chairc/Integrated-Design-Diffusion-Model.svg)](https://github.com/chairc/Integrated-Design-Diffusion-Model/stargazers)
-[![Github fork](https://img.shields.io/github/forks/chairc/Integrated-Design-Diffusion-Model?color=eb6ea5)](https://github.com/chairc/Integrated-Design-Diffusion-Model/forks)
-[![Gitee star](https://gitee.com/chairc/Integrated-Design-Diffusion-Model/badge/star.svg?theme=blue)](https://gitee.com/chairc/Integrated-Design-Diffusion-Model)
-[![Gitee fork](https://gitee.com/chairc/Integrated-Design-Diffusion-Model/badge/fork.svg?theme=blue)](https://gitee.com/chairc/Integrated-Design-Diffusion-Model)
-[![GitCode star](https://gitcode.com/chairc/Integrated-Design-Diffusion-Model/star/badge.svg)](https://gitcode.com/chairc/Integrated-Design-Diffusion-Model)
-
+<div align="center">
+    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/stargazers" target="_blank">
+        <img src="https://img.shields.io/github/stars/chairc/Integrated-Design-Diffusion-Model.svg" alt="GitHub star">
+    </a>
+    <a href="https://github.com/chairc/Integrated-Design-Diffusion-Model/forks" target="_blank">
+        <img src="https://img.shields.io/github/forks/chairc/Integrated-Design-Diffusion-Model?color=eb6ea5" alt="GitHub forks">
+    </a>
+    <a href="https://gitee.com/chairc/Integrated-Design-Diffusion-Model" target="_blank">
+        <img src="https://gitee.com/chairc/Integrated-Design-Diffusion-Model/badge/star.svg?theme=blue" alt="Gitee star">
+    </a>
+    <a href="https://gitee.com/chairc/Integrated-Design-Diffusion-Model" target="_blank">
+        <img src="https://gitee.com/chairc/Integrated-Design-Diffusion-Model/badge/fork.svg?theme=blue" alt="Gitee forks">
+    </a>
+    <a href="https://gitcode.com/chairc/Integrated-Design-Diffusion-Model" target="_blank">
+        <img src="https://gitcode.com/chairc/Integrated-Design-Diffusion-Model/star/badge.svg" alt="GitCode star">
+    </a>
 </div>
 
 
@@ -71,7 +98,7 @@ The following  packages are required.
 coloredlogs==15.0.1
 gradio>=5.31.0
 matplotlib==3.7.1
-numpy==1.25.0
+numpy>=1.25.0
 Pillow==10.3.0
 Requests>=2.32.4
 scikit-image==0.22.0
@@ -133,6 +160,7 @@ pip install . # Or python setup.py install
 - [x] [2025-08-01] Adding LDM Method. **Support generate 512*512 images** and use Latent Diffusion and reduce GPU memory usage.
 - [x] [2025-08-21] Support flash-attn, fast and GPU memory-efficient.
 - [x] [2025-10-01] Adding the deployment of Docker file.
+- [x] [2025-12-16] Adding custom logger mod.
 - [ ] [To be determined] Refactor the project by Baidu PaddlePaddle.
 
 
