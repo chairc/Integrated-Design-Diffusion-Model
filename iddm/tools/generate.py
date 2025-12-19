@@ -245,7 +245,7 @@ def init_generate_args():
     # Input image size (required)
     # [Warn] Compatible with older versions
     # [Warn] Version <= 1.1.1 need to be equal to model's image size, version > 1.1.1 can set whatever you want
-    parser.add_argument("--image_size", "-i", type=parse_image_size_type, default=64)
+    parser.add_argument("--image_size", "-i", type=check_parse_image_size_type, default=64)
     # Set the use GPU in generate (required)
     parser.add_argument("--use_gpu", type=int, default=0)
 
