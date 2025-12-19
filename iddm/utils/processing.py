@@ -22,16 +22,15 @@
 """
 import io
 import base64
-import logging
-import coloredlogs
 import numpy as np
 
 from torchvision import transforms
 
 from PIL import Image
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+from iddm.utils.logger import get_logger
+
+logger = get_logger(name=__name__)
 
 
 def base64_to_image(base64_stream=None):

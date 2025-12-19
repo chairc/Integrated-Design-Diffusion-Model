@@ -21,11 +21,9 @@
     @Site   : https://github.com/chairc
 """
 import os
-import logging
 import shutil
 import time
 
-import coloredlogs
 import requests
 import torch
 import torchvision
@@ -37,9 +35,9 @@ from tqdm import tqdm
 from iddm.config.model_list import pretrain_model_choices
 from iddm.config.setting import DOWNLOAD_FILE_TEMP_PATH
 from iddm.utils.check import check_url
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 
 def plot_images(images, fig_size=(64, 64)):

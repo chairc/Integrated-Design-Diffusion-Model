@@ -22,5 +22,6 @@
 - [x] [2025-08-01] Adding LDM Method. **Support generate 512*512 images** and use Latent Diffusion and reduce GPU memory usage.
 - [x] [2025-08-21] Support flash-attn, fast and GPU memory-efficient.
 - [x] [2025-10-01] Adding the deployment of Docker file.
+- [x] [2025-12-16] Adding custom logger mod.
 - [ ] [To be determined] Refactor the project by Baidu PaddlePaddle.
 

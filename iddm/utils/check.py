@@ -20,9 +20,8 @@
     @Author : chairc
     @Site   : https://github.com/chairc
 """
+import ast
 import os
-import logging
-import coloredlogs
 
 import torch
 import torch.nn as nn
@@ -30,9 +29,9 @@ import torch.nn as nn
 from urllib.parse import urlparse
 
 from iddm.config.setting import DEFAULT_IMAGE_SIZE
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 
 def check_and_create_dir(path):
@@ -185,3 +184,35 @@ def check_package_is_exist(package_name):
     except ImportError:
         logger.error(msg=f"The package '{package_name}' is not installed.")
         return False
+
+
+def check_parse_image_size_type(image_size_str):
+    """
+    Check and parse image size string and return image size type
+    :param image_size_str: Image size string
+    :return: Image size type
+    """
+    # Try converting input string to integer
+    logger.info(msg=f"[Note]: Input image size string is {image_size_str}.")
+    try:
+        image_size_int = int(image_size_str)
+        if isinstance(image_size_int, int):
+            image_size_int_list = [image_size_int, image_size_int]
+            logger.info(msg=f"[Note]: Integer {image_size_str} converted to list {image_size_int_list}.")
+            return image_size_int_list
+    except ValueError:
+        # If conversion to integer is not possible, try parsing to list or tuple
+        parts = image_size_str.strip("[]()").split(",")
+        # Check the split item is digit and length is 2
+        if all(item.isdigit() for item in parts) and len(parts) == 2:
+            parsed = ast.literal_eval(node_or_string=image_size_str)
+            if isinstance(parsed, list) or isinstance(parsed, tuple):
+                # Try converting to a list of integers
+                image_size_list_and_tuple = list(map(int, parts))
+                logger.info(msg=f"[Note]: {image_size_str} converted to list {image_size_list_and_tuple}.")
+                return image_size_list_and_tuple
+            else:
+                pass
+        else:
+            # Throws an error if part is not a number
+            raise TypeError(f"Invalid '--image_size' format: {image_size_str}")

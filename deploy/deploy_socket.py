@@ -25,9 +25,7 @@ import sys
 import json
 import uuid
 import socket
-import logging
 import threading
-import coloredlogs
 
 from torchvision import transforms
 
@@ -36,9 +34,9 @@ from iddm.tools.generate import init_generate_args, Generator
 from iddm.utils.utils import save_images
 from iddm.utils.processing import image_to_base64
 from iddm.config.version import get_version_banner
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 
 def generate(parse_json_data):

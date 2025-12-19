@@ -103,6 +103,8 @@ class Autoencoder(nn.Module):
             # Upsample3: [B, C, H, W]
             VAEUpBlock(base_channels, base_channels, act=act),
             nn.Conv2d(base_channels, in_channels, kernel_size=3, padding=1),
+            nn.ReflectionPad2d(1),
+            nn.Conv2d(in_channels, in_channels, kernel_size=3, padding=0, stride=1),
             # The output range [-1, 1] matches the diffusion model input
             nn.Tanh()
         )

@@ -45,7 +45,7 @@ from iddm.utils.initializer import device_initializer, seed_initializer, network
 from iddm.utils.dataset import get_dataset
 from iddm.utils.utils import save_images, setup_logging, check_and_create_dir
 from iddm.utils.checkpoint import load_ckpt, save_ckpt
-from iddm.utils.logger import CustomLogger
+from iddm.utils.logger import WebUILogger
 
 
 class GradioWebui:
@@ -291,7 +291,7 @@ class GradioWebui:
         gradio.Info(message="Start generation.")
         # Saving path
         result_path = os.path.join(result_path, str(time.time()))
-        logger = CustomLogger(name=__name__, is_webui=True, is_save_log=True, log_path=os.path.join(result_path))
+        logger = WebUILogger(name=__name__, is_save_log=True, log_path=os.path.join(result_path))
         # Check model params
         logger.info(msg="Start generation.")
         logger.info(

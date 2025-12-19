@@ -25,8 +25,6 @@ import random
 import numpy as np
 import torch
 import torch.nn as nn
-import logging
-import coloredlogs
 
 from torch.amp import GradScaler
 
@@ -46,9 +44,9 @@ from iddm.utils.check import check_path_is_exist, check_package_is_exist
 from iddm.utils.checkpoint import load_ckpt_with_cache
 from iddm.utils.loss import MSEKLLoss
 from iddm.utils.lr_scheduler import set_cosine_lr
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 
 def device_initializer(device_id=0, is_train=False):

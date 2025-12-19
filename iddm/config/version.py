@@ -20,11 +20,9 @@
     @Author : chairc
     @Site   : https://github.com/chairc
 """
-import logging
-import coloredlogs
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 # IDDM version
 __version__ = ["0.0.1", "1.0.0", "1.0.1", "1.0.2", "1.1.0-stable", "1.1.1", "1.1.2-stable", "1.1.3", "1.1.4", "1.1.5",
@@ -82,8 +80,8 @@ def get_version_banner():
           "|  _  / | | | '_ \| '_ \| | '_ \ / _` |\n"
           "| | \ \ |_| | | | | | | | | | | | (_| |  _   _   _\n"
           "|_|  \_\__,_|_| |_|_| |_|_|_| |_|\__, | (_) (_) (_)\n"
-          "                  __/ |\n"
-          "                  |___/\n"
+          "                                  __/ |\n"
+          "                                 |___/\n"
           "                      Are you OK?\n"
           )
     print(f"===============IDDM version: {get_latest_version()}===============\n"

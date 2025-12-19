@@ -23,9 +23,6 @@
 import os
 import sys
 import argparse
-import logging
-
-import coloredlogs
 
 from pytorch_fid.fid_score import save_fid_stats, calculate_fid_given_paths
 from pytorch_fid.inception import InceptionV3
@@ -33,9 +30,9 @@ from pytorch_fid.inception import InceptionV3
 sys.path.append(os.path.dirname(sys.path[0]))
 from iddm.config.version import get_version_banner
 from iddm.utils.initializer import device_initializer
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 
 def main(args):

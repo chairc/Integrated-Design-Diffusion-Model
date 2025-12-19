@@ -26,22 +26,20 @@ import argparse
 import time
 
 import torch
-import logging
-import coloredlogs
 
 sys.path.append(os.path.dirname(sys.path[0]))
 from iddm.config import IMAGE_CHANNEL
-from iddm.config.choices import sample_choices, image_format_choices, parse_image_size_type, network_choices, \
-    act_choices, generate_mode_choices
+from iddm.config.choices import sample_choices, image_format_choices, network_choices, act_choices, \
+    generate_mode_choices
 from iddm.config.version import get_version_banner
-from iddm.utils.check import check_image_size
+from iddm.utils.check import check_image_size, check_parse_image_size_type
 from iddm.utils.initializer import device_initializer, network_initializer, sample_initializer, generate_initializer, \
     generate_autoencoder_initializer, autoencoder_network_initializer
 from iddm.utils.utils import plot_images, save_images, save_one_image_in_images, check_and_create_dir
 from iddm.utils.checkpoint import load_ckpt
+from iddm.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+logger = get_logger(name=__name__)
 
 
 class Generator:
@@ -120,7 +118,7 @@ class Generator:
             self.autoencoder = autoencoder_network(latent_channels=self.autoencoder_latent_channels,
                                                    device=self.device).to(self.device)
             load_ckpt(ckpt_path=self.autoencoder_ckpt, model=self.autoencoder, is_generate=True, device=self.device,
-                      force_reload=True)
+                      force_reload=True, ckpt_type="autoencoder")
             # Inference mode, no updating parameters
             self.autoencoder.eval()
 

@@ -20,12 +20,23 @@
     @Author : chairc
     @Site   : https://github.com/chairc
 """
+import os
+import sys
+import torch
 import argparse
-import logging
-import coloredlogs
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="INFO")
+from torch import distributed as dist
+from torch.utils.tensorboard import SummaryWriter
+
+sys.path.append(os.path.dirname(sys.path[0]))
+from iddm.config.setting import MASTER_ADDR, MASTER_PORT
+from iddm.utils.check import check_is_distributed
+from iddm.utils.initializer import device_initializer, lr_initializer
+
+from iddm.utils.utils import setup_logging, save_train_logging
+from iddm.utils.logger import get_logger
+
+logger = get_logger(name=__name__)
 
 
 class Trainer:
@@ -52,6 +63,8 @@ class Trainer:
 
         # Random seed
         self.seed = self.check_args_and_kwargs(kwarg="seed", default=0)
+        # Run name
+        self.run_name = self.check_args_and_kwargs(kwarg="run_name", default="iddm")
         # Network
         self.network = self.check_args_and_kwargs(kwarg="network", default="unet")
         # Batch size
@@ -172,7 +185,11 @@ class Trainer:
         """
         Before training one iter method
         """
-        pass
+        logger.info(msg=f"[{self.device}]: Start epoch {self.epoch}:")
+        # Set learning rate
+        current_lr = lr_initializer(lr_func=self.lr_func, optimizer=self.optimizer, epoch=self.epoch,
+                                    epochs=self.epochs, init_lr=self.init_lr, device=self.device)
+        self.tb_logger.add_scalar(tag=f"[{self.device}]: Current LR", scalar_value=current_lr, global_step=self.epoch)
 
     def train_in_iter(self):
         """
@@ -184,10 +201,77 @@ class Trainer:
         """
         After training one iter
         """
-        pass
+        logger.info(msg=f"[{self.device}]: Finish epoch {self.epoch}:")
+
+        # Synchronization during distributed training
+        self.synchronized_trainer_distributed()
 
     def after_train(self):
         """
         After training method
         """
-        pass
+        logger.info(msg=f"[{self.device}]: Finish training.")
+
+        # Clean up the distributed environment
+        self.destroy_trainer_distributed()
+
+    def init_trainer_results_dir_and_log(self):
+        """
+        Initialize results directory
+        """
+        self.results_logging = setup_logging(save_path=self.result_path, run_name=self.run_name)
+        self.results_dir = self.results_logging[1]
+        self.results_vis_dir = self.results_logging[2]
+        self.results_tb_dir = self.results_logging[3]
+
+        # Tensorboard
+        self.tb_logger = SummaryWriter(log_dir=self.results_tb_dir)
+        # Train log
+        self.args = save_train_logging(arg=self.args, save_path=self.results_dir)
+
+    def init_trainer_distributed(self):
+        """
+        Initialize distributed training
+        """
+        # Check here whether it is single-GPU training or multi-GPU training
+        self.save_models = True
+        # Whether to enable distributed training
+        if check_is_distributed(distributed=self.distributed):
+            self.distributed = True
+            # Set address and port
+            os.environ["MASTER_ADDR"] = MASTER_ADDR
+            os.environ["MASTER_PORT"] = MASTER_PORT
+            # The total number of processes is equal to the number of graphics cards
+            dist.init_process_group(backend="nccl" if torch.cuda.is_available() else "gloo", rank=self.rank,
+                                    world_size=self.world_size)
+            # Set device ID
+            self.device = device_initializer(device_id=self.rank, is_train=True)
+            # There may be random errors, using this function can reduce random errors in cudnn
+            # torch.backends.cudnn.deterministic = True
+            # Synchronization during distributed training
+            dist.barrier()
+            # If the distributed training is not the main GPU, the save model flag is False
+            if dist.get_rank() != self.main_gpu:
+                self.save_models = False
+            logger.info(msg=f"[{self.device}]: Successfully Use distributed training.")
+        else:
+            self.distributed = False
+            # Run device initializer
+            self.device = device_initializer(device_id=self.use_gpu, is_train=True)
+            logger.info(msg=f"[{self.device}]: Successfully Use normal training.")
+
+    def synchronized_trainer_distributed(self):
+        """
+        Synchronized distributed training
+        """
+        if self.distributed:
+            logger.info(msg=f"[{self.device}]: Synchronization during distributed training.")
+            dist.barrier()
+
+    def destroy_trainer_distributed(self):
+        """
+        Destroy distributed training
+        """
+        if self.distributed:
+            dist.destroy_process_group()
+            logger.info(msg=f"[{self.device}]: Successfully destroy distributed training.")
