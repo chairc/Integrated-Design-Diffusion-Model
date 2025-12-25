@@ -34,7 +34,8 @@ _global_log_config: Dict[str, Any] = {
     "level": None,
     "is_save_log": None,
     "log_path": None,
-    "initialized": False  # Whether the tag is initialized
+    "initialized": False,  # Whether the tag is initialized
+    "rank": 0
 }
 
 
@@ -48,10 +49,12 @@ class BaseLogger(logging.Logger):
             name: str,
             level: Union[int, str] = logging.INFO,
             is_save_log: bool = False,
-            log_path: Optional[str] = None
+            log_path: Optional[str] = None,
+            rank: int = 0
     ):
         super().__init__(name, level)
         self.is_save_log = is_save_log
+        self.rank = rank
         self.log_path = log_path
         self._init_handlers()
         self._setup_colored_logs()
@@ -75,7 +78,7 @@ class BaseLogger(logging.Logger):
         Add a console processor
         """
         console_handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s   %(name)s   %(levelname)s   %(message)s')
+        formatter = logging.Formatter('%(asctime)s   %(name)s   Process-%(process)d   %(levelname)s   %(message)s')
         console_handler.setFormatter(formatter)
         self.addHandler(console_handler)
 
@@ -89,10 +92,10 @@ class BaseLogger(logging.Logger):
 
         # Different types of logs use different file prefixes
         prefix = "webui" if isinstance(self, WebUILogger) else "app"
-        log_file = os.path.join(log_save_path, f"{prefix}_{create_time}.log")
+        log_file = os.path.join(log_save_path, f"{prefix}_rank{self.rank}_{create_time}.log")
 
         file_handler = logging.FileHandler(log_file, mode="a", encoding="utf-8")
-        formatter = logging.Formatter("%(asctime)s   %(name)s   %(levelname)s   %(message)s")
+        formatter = logging.Formatter("%(asctime)s   %(name)s   Process-%(process)d   %(levelname)s   %(message)s")
         file_handler.setFormatter(formatter)
         self.addHandler(file_handler)
 
@@ -102,13 +105,14 @@ class BaseLogger(logging.Logger):
         """
         coloredlogs.install(level=self.level, logger=self)
 
-    def refresh_config(self, level: Union[int, str], is_save_log: bool, log_path: Optional[str]):
+    def refresh_config(self, level: Union[int, str], is_save_log: bool, log_path: Optional[str], rank: int) -> None:
         """
         Refresh log instance configuration (used to update existing instances after init_logger)
         """
         self.level = level
         self.is_save_log = is_save_log
         self.log_path = log_path
+        self.rank = rank
         self._init_handlers()
         self._setup_colored_logs()
 
@@ -123,9 +127,10 @@ class WebUILogger(BaseLogger):
             name: str,
             level: Union[int, str] = logging.INFO,
             is_save_log: bool = False,
-            log_path: Optional[str] = None
+            log_path: Optional[str] = None,
+            rank: int = 0
     ):
-        super().__init__(name, level, is_save_log, log_path)
+        super().__init__(name, level, is_save_log, log_path, rank)
         # Cumulative text for WebUI display
         self.webui_text = ""
 
@@ -182,21 +187,24 @@ class AppLogger(BaseLogger):
             name: str,
             level: Union[int, str] = logging.INFO,
             is_save_log: bool = False,
-            log_path: Optional[str] = None
+            log_path: Optional[str] = None,
+            rank: int = 0
     ):
-        super().__init__(name, level, is_save_log, log_path)
+        super().__init__(name, level, is_save_log, log_path, rank)
 
 
 def init_logger(
         level: Union[int, str] = logging.INFO,
         is_save_log: bool = False,
-        log_path: Optional[str] = None
+        log_path: Optional[str] = None,
+        rank: int = 0
 ) -> None:
     """
     Initialize the global log configuration (only the first call takes effect)
     :param level: Log level
     :param is_save_log: Whether to save the log to a file
     :param log_path: Log saving path
+    :param rank: Distributed training rank
     :return: None
     """
     global _global_log_config
@@ -209,7 +217,8 @@ def init_logger(
         "level": level,
         "is_save_log": is_save_log,
         "log_path": log_path,
-        "initialized": True
+        "initialized": True,
+        "rank": rank
     })
 
     # Refresh existing log instances (apply new configuration)
@@ -217,7 +226,8 @@ def init_logger(
         logger.refresh_config(
             level=level,
             is_save_log=is_save_log,
-            log_path=log_path
+            log_path=log_path,
+            rank=rank
         )
 
 
@@ -226,7 +236,8 @@ def get_logger(
         logger_type: str = "app",
         level: Union[int, str] = logging.INFO,
         is_save_log: bool = False,
-        log_path: Optional[str] = None
+        log_path: Optional[str] = None,
+        rank: int = 0
 ) -> Union[AppLogger, WebUILogger]:
     """
     Get a global log instance (singleton mode)
@@ -235,6 +246,7 @@ def get_logger(
     :param level: Log level
     :param is_save_log: Whether to save the log to a file
     :param log_path: Log saving path
+    :param rank: Distributed training rank
     :return: Log instance
     """
 
@@ -244,9 +256,10 @@ def get_logger(
     level = level or _global_log_config.get("level", logging.INFO)
     is_save_log = is_save_log if is_save_log is not None else _global_log_config.get("is_save_log", False)
     log_path = log_path or _global_log_config.get("log_path")
+    rank = rank or _global_log_config.get("rank", 0)
 
     # Use (name + type) as the unique key to ensure isolation
-    key = f"{name}_{logger_type}"
+    key = f"{name}_{logger_type}_{rank}"
 
     if key not in _global_loggers:
         if logger_type == "webui":
@@ -254,14 +267,16 @@ def get_logger(
                 name=name,
                 level=level,
                 is_save_log=is_save_log,
-                log_path=log_path
+                log_path=log_path,
+                rank=rank
             )
         else:
             _global_loggers[key] = AppLogger(
                 name=name,
                 level=level,
                 is_save_log=is_save_log,
-                log_path=log_path
+                log_path=log_path,
+                rank=rank
             )
 
     return _global_loggers[key]

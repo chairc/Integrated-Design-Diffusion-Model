@@ -34,7 +34,7 @@ from iddm.utils.check import check_is_distributed
 from iddm.utils.initializer import device_initializer, lr_initializer
 
 from iddm.utils.utils import setup_logging, save_train_logging
-from iddm.utils.logger import get_logger
+from iddm.utils.logger import get_logger, init_logger
 
 logger = get_logger(name=__name__)
 
@@ -151,13 +151,20 @@ class Trainer:
             logger.info(msg=f"[Note]: args.{kwarg} already set => {value}")
         return value
 
-    def train(self, rank=None):
+    def train(self, rank=0):
         """
         Training method
         :param rank: Device id
         """
         # Init rank
         self.rank = rank
+
+        # Logger initializer
+        init_logger(
+            is_save_log=True,
+            log_path=os.path.join(str(self.result_path), str(self.run_name)),
+            rank=self.rank
+        )
 
         # Training
         self.before_train()
