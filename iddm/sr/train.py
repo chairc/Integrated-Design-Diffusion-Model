@@ -32,7 +32,7 @@ sys.path.append(os.path.dirname(sys.path[0]))
 from iddm.config.choices import sr_network_choices, optim_choices, sr_loss_func_choices, image_format_choices
 from iddm.config.version import get_version_banner
 from iddm.model.trainers.sr import SRTrainer
-from iddm.utils.logger import init_logger, get_logger
+from iddm.utils.logger import get_logger
 
 logger = get_logger(name=__name__)
 
@@ -43,11 +43,6 @@ def main(args):
     :param args: Input parameters
     :return: None
     """
-    # Init logger
-    init_logger(
-        is_save_log=True,
-        log_path=os.path.join(str(args.result_path), str(args.run_name))
-    )
     if args.distributed:
         gpus = torch.cuda.device_count()
         mp.spawn(SRTrainer(args=args).train, nprocs=gpus)
