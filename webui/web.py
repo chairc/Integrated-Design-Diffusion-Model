@@ -90,8 +90,8 @@ class GradioWebui:
         29: cfg_scale
         """
         gradio.Info(message="Start training...")
-        logger = CustomLogger(name=__name__, is_webui=True, is_save_log=True,
-                              log_path=os.path.join(result_path, run_name))
+        logger = WebUILogger(name=__name__, is_save_log=True, log_path=str(os.path.join(result_path, run_name)),
+                             rank=main_gpu)
         self.KILL_FLAG = False
         yield logger.info(msg="[Note]: Start parameters setting.")
         yield logger.info(

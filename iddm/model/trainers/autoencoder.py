@@ -195,43 +195,41 @@ class AutoencoderTrainer(Trainer):
         self.model.eval()
         logger.info(msg="Start val mode.")
         val_pbar = tqdm(self.val_dataloader)
-        for i, (images, _) in enumerate(val_pbar):
-            # Input images [B, C, H, W]
-            images = images.to(self.device)
+        with torch.no_grad():
+            for i, (images, _) in enumerate(val_pbar):
+                # Input images [B, C, H, W]
+                images = images.to(self.device)
 
-            with autocast(device_type="cuda", enabled=self.amp):
                 recon_images = self.model(images)
                 # To calculate the MSE loss
                 val_loss = self.loss_func(recon_images, images)
 
-            # The optimizer clears the gradient of the model parameters
-            self.optimizer.zero_grad()
+                # TensorBoard logging
+                val_pbar.set_postfix(MSE=val_loss.item())
+                self.tb_logger.add_scalar(tag=f"[{self.device}]: Val loss({self.loss_func})",
+                                          scalar_value=val_loss.item(),
+                                          global_step=self.epoch * self.len_val_dataloader + i)
+                val_loss_list.append(val_loss.item())
 
-            # TensorBoard logging
-            val_pbar.set_postfix(MSE=val_loss.item())
-            self.tb_logger.add_scalar(tag=f"[{self.device}]: Val loss({self.loss_func})", scalar_value=val_loss.item(),
-                                      global_step=self.epoch * self.len_val_dataloader + i)
-            val_loss_list.append(val_loss.item())
+                # TODO: Metric
+                score = 0
+                self.tb_logger.add_scalar(tag=f"[{self.device}]: Score({self.loss_func})", scalar_value=score,
+                                          global_step=self.epoch * self.len_val_dataloader + i)
+                score_list.append(score)
 
-            # TODO: Metric
-            score = 0
-            self.tb_logger.add_scalar(tag=f"[{self.device}]: Score({self.loss_func})", scalar_value=score,
-                                      global_step=self.epoch * self.len_val_dataloader + i)
-            score_list.append(score)
-
-            images = post_image(images=images, device=self.device)
-            if self.loss_name == "mse_kl":
-                recon_images = recon_images[0]
-            recon_images = post_image(images=recon_images, device=self.device)
-            image_name = time.time()
-            for index, image in enumerate(images):
-                save_images(images=image,
-                            path=os.path.join(self.save_val_vis_dir,
-                                              f"{i}_{image_name}_{index}_origin.{self.image_format}"))
-            for recon_index, recon_image in enumerate(recon_images):
-                save_images(images=recon_image,
-                            path=os.path.join(self.save_val_vis_dir,
-                                              f"{i}_{image_name}_{recon_index}_recon.{self.image_format}"))
+                images = post_image(images=images, device=self.device)
+                if self.loss_name == "mse_kl":
+                    recon_images = recon_images[0]
+                recon_images = post_image(images=recon_images, device=self.device)
+                image_name = time.time()
+                for index, image in enumerate(images):
+                    save_images(images=image,
+                                path=os.path.join(self.save_val_vis_dir,
+                                                  f"{i}_{image_name}_{index}_origin.{self.image_format}"))
+                for recon_index, recon_image in enumerate(recon_images):
+                    save_images(images=recon_image,
+                                path=os.path.join(self.save_val_vis_dir,
+                                                  f"{i}_{image_name}_{recon_index}_recon.{self.image_format}"))
         # Loss, score per epoch
         self.avg_val_loss = sum(val_loss_list) / len(val_loss_list)
         self.avg_score = sum(score_list) / len(score_list)
@@ -240,6 +238,7 @@ class AutoencoderTrainer(Trainer):
         self.tb_logger.add_scalar(tag=f"[{self.device}]: Avg score", scalar_value=self.avg_score,
                                   global_step=self.epoch)
         logger.info(f"Val loss: {self.avg_val_loss}, Score: {self.avg_score}")
+        self.model.train()
         logger.info(msg="Finish val mode.")
 
     def after_iter(self):
