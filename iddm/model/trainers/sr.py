@@ -209,9 +209,10 @@ class SRTrainer(Trainer):
                                       global_step=self.epoch * self.len_train_dataloader + i)
             train_loss_list.append(train_loss.item())
         # Loss per epoch
-        self.tb_logger.add_scalar(tag=f"[{self.device}]: Train loss",
-                                  scalar_value=sum(train_loss_list) / len(train_loss_list),
+        avg_train_loss = sum(train_loss_list) / len(train_loss_list)
+        self.tb_logger.add_scalar(tag=f"[{self.device}]: Avg train loss({self.loss_func})", scalar_value=avg_train_loss,
                                   global_step=self.epoch)
+        logger.info(msg=f"[{self.device}]: Train loss:{avg_train_loss}")
         logger.info(msg="Finish train mode.")
 
         # Val
@@ -240,9 +241,9 @@ class SRTrainer(Trainer):
                 # Metric
                 ssim_res = compute_ssim(image_outputs=output, image_sources=hr_images)
                 psnr_res = compute_psnr(mse=val_loss.item())
-                self.tb_logger.add_scalar(tag=f"[{self.device}]: SSIM({self.loss_func})", scalar_value=ssim_res,
+                self.tb_logger.add_scalar(tag=f"[{self.device}]: SSIM", scalar_value=ssim_res,
                                           global_step=self.epoch * self.len_val_dataloader + i)
-                self.tb_logger.add_scalar(tag=f"[{self.device}]: PSNR({self.loss_func})", scalar_value=psnr_res,
+                self.tb_logger.add_scalar(tag=f"[{self.device}]: PSNR", scalar_value=psnr_res,
                                           global_step=self.epoch * self.len_val_dataloader + i)
                 ssim_list.append(ssim_res)
                 psnr_list.append(psnr_res)
@@ -268,12 +269,11 @@ class SRTrainer(Trainer):
         self.avg_val_loss = sum(val_loss_list) / len(val_loss_list)
         self.avg_ssim = sum(ssim_list) / len(ssim_list)
         self.avg_psnr = sum(psnr_list) / len(psnr_list)
-        self.tb_logger.add_scalar(tag=f"[{self.device}]: Val loss", scalar_value=self.avg_val_loss,
-                                  global_step=self.epoch)
+        self.tb_logger.add_scalar(tag=f"[{self.device}]: Val avg loss({self.loss_func})",
+                                  scalar_value=self.avg_val_loss, global_step=self.epoch)
         self.tb_logger.add_scalar(tag=f"[{self.device}]: Avg ssim", scalar_value=self.avg_ssim, global_step=self.epoch)
         self.tb_logger.add_scalar(tag=f"[{self.device}]: Avg psnr", scalar_value=self.avg_psnr, global_step=self.epoch)
-        logger.info(f"Val loss: {self.avg_val_loss}, SSIM: {self.avg_ssim}, PSNR: {self.avg_psnr}")
-        self.model.train()
+        logger.info(f"[{self.device}]: Val loss: {self.avg_val_loss}, SSIM: {self.avg_ssim}, PSNR: {self.avg_psnr}")
         logger.info(msg="Finish val mode.")
 
     def after_iter(self):

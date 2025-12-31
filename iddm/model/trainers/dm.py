@@ -220,6 +220,7 @@ class DMTrainer(Trainer):
         """
         # Initialize images and labels
         images, labels, loss_list = None, None, []
+        # Train mode
         for i, (images, labels) in enumerate(self.pbar):
             # The images are all resized in dataloader
             images = images.to(self.device)
@@ -266,12 +267,15 @@ class DMTrainer(Trainer):
 
             # TensorBoard logging
             self.pbar.set_postfix(MSE=loss.item())
-            self.tb_logger.add_scalar(tag=f"[{self.device}]: MSE", scalar_value=loss.item(),
+            self.tb_logger.add_scalar(tag=f"[{self.device}]: Train loss({self.loss_func})", scalar_value=loss.item(),
                                       global_step=self.epoch * self.len_dataloader + i)
             loss_list.append(loss.item())
         # Loss per epoch
-        self.tb_logger.add_scalar(tag=f"[{self.device}]: Loss", scalar_value=sum(loss_list) / len(loss_list),
+        avg_train_loss = sum(loss_list) / len(loss_list)
+        self.tb_logger.add_scalar(tag=f"[{self.device}]: Avg train loss", scalar_value=avg_train_loss,
                                   global_step=self.epoch)
+        logger.info(msg=f"[{self.device}]: Train loss: {avg_train_loss}.")
+        logger.info(msg="Finish train mode.")
 
     def after_iter(self):
         """

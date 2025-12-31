@@ -39,6 +39,7 @@ from iddm.utils.initializer import seed_initializer, optimizer_initializer, amp_
 from iddm.utils.utils import check_and_create_dir, save_images
 from iddm.utils.dataset import get_dataset, post_image
 from iddm.utils.logger import get_logger
+from iddm.utils.metrics import compute_psnr
 
 logger = get_logger(name=__name__)
 
@@ -185,10 +186,9 @@ class AutoencoderTrainer(Trainer):
             train_loss_list.append(train_loss.item())
             # Loss per epoch
         self.avg_train_loss = sum(train_loss_list) / len(train_loss_list)
-        self.tb_logger.add_scalar(tag=f"[{self.device}]: Train loss",
-                                  scalar_value=self.avg_train_loss,
-                                  global_step=self.epoch)
-        logger.info(f"Train loss: {self.avg_train_loss}")
+        self.tb_logger.add_scalar(tag=f"[{self.device}]: Avg train loss({self.loss_func})",
+                                  scalar_value=self.avg_train_loss, global_step=self.epoch)
+        logger.info(f"[{self.device}]: Train loss: {self.avg_train_loss}")
         logger.info(msg="Finish train mode.")
 
         # Val
@@ -211,9 +211,9 @@ class AutoencoderTrainer(Trainer):
                                           global_step=self.epoch * self.len_val_dataloader + i)
                 val_loss_list.append(val_loss.item())
 
-                # TODO: Metric
-                score = 0
-                self.tb_logger.add_scalar(tag=f"[{self.device}]: Score({self.loss_func})", scalar_value=score,
+                # Metric PSNR
+                score = compute_psnr(mse=val_loss.item())
+                self.tb_logger.add_scalar(tag=f"[{self.device}]: Score(PSNR)", scalar_value=score,
                                           global_step=self.epoch * self.len_val_dataloader + i)
                 score_list.append(score)
 
@@ -233,12 +233,11 @@ class AutoencoderTrainer(Trainer):
         # Loss, score per epoch
         self.avg_val_loss = sum(val_loss_list) / len(val_loss_list)
         self.avg_score = sum(score_list) / len(score_list)
-        self.tb_logger.add_scalar(tag=f"[{self.device}]: Val loss", scalar_value=self.avg_val_loss,
+        self.tb_logger.add_scalar(tag=f"[{self.device}]: Avg val loss({self.loss_func})",
+                                  scalar_value=self.avg_val_loss, global_step=self.epoch)
+        self.tb_logger.add_scalar(tag=f"[{self.device}]: Avg score(PSNR)", scalar_value=self.avg_score,
                                   global_step=self.epoch)
-        self.tb_logger.add_scalar(tag=f"[{self.device}]: Avg score", scalar_value=self.avg_score,
-                                  global_step=self.epoch)
-        logger.info(f"Val loss: {self.avg_val_loss}, Score: {self.avg_score}")
-        self.model.train()
+        logger.info(f"[{self.device}]: Val loss: {self.avg_val_loss}, Score(PSNR): {self.avg_score}")
         logger.info(msg="Finish val mode.")
 
     def after_iter(self):
