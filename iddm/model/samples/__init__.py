@@ -24,3 +24,5 @@ from .base import BaseDiffusion
 from .ddim import DDIMDiffusion
 from .ddpm import DDPMDiffusion
 from .plms import PLMSDiffusion
+from .dpm2 import DPM2Diffusion
+from .dpmpp import DPMPlusPlusDiffusion
