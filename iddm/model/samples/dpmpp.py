@@ -117,15 +117,11 @@ class DPMPlusPlusDiffusion(DDIMDiffusion):
 
             # DPM++ 2M (second-order)
             if self.order == 2:
-                if i < len(time_steps) - 1:
-                    # Intermediate noise prediction
-                    x_inter = torch.sqrt(alpha_prev) * x0 + torch.sqrt(
-                        1 - alpha_prev - sigma ** 2) * predicted_noise
-                    predicted_noise_inter = self._get_predicted_noise(model, x_inter, t_prev_tensor, labels,
-                                                                      cfg_scale)
-
-                    # Second-order correction
-                    predicted_noise = (3 * predicted_noise - predicted_noise_inter) / 2
+                # 2nd-order correction: only needs model at t_prev, available on all steps
+                sqrt_term = torch.sqrt(torch.clamp(1 - alpha_prev - sigma ** 2, min=1e-8))
+                x_inter = torch.sqrt(alpha_prev) * x0 + sqrt_term * predicted_noise
+                predicted_noise_inter = self._get_predicted_noise(model, x_inter, t_prev_tensor, labels, cfg_scale)
+                predicted_noise = (3 * predicted_noise - predicted_noise_inter) / 2
 
             # DPM++ 3M (third-order)
             elif self.order == 3:
@@ -134,20 +130,25 @@ class DPMPlusPlusDiffusion(DDIMDiffusion):
                     t_next_tensor = (torch.ones(n) * t_next).long().to(self.device)
                     alpha_next = self.alpha_hat[t_next_tensor][:, None, None, None]
 
-                    # First intermediate step, 1e-8 to avoid NaN
+                    # First intermediate step
                     sqrt_term1 = torch.sqrt(torch.clamp(1 - alpha_prev - sigma ** 2, min=1e-8))
                     x_inter1 = torch.sqrt(alpha_prev) * x0 + sqrt_term1 * predicted_noise
                     pred_noise1 = self._get_predicted_noise(model, x_inter1, t_prev_tensor, labels, cfg_scale)
 
-                    # Second intermediate step, 1e-8 to avoid NaN
+                    # Second intermediate step
                     sqrt_term2 = torch.sqrt(torch.clamp(1 - alpha_next - sigma ** 2, min=1e-8))
                     x_inter2 = torch.sqrt(alpha_next) * x0 + sqrt_term2 * pred_noise1
                     pred_noise2 = self._get_predicted_noise(model, x_inter2, t_next_tensor, labels, cfg_scale)
 
                     # Third-order correction
                     predicted_noise = (23 * predicted_noise - 16 * pred_noise1 + 5 * pred_noise2) / 12
-                    # Or use a more stable variant
-                    # predicted_noise = (18 * predicted_noise - 12 * pred_noise1 + 3 * pred_noise2) / 9
+                else:
+                    # Last step: no look-ahead available, fallback to 2nd-order correction
+                    sqrt_term_inter = torch.sqrt(torch.clamp(1 - alpha_prev - sigma ** 2, min=1e-8))
+                    x_inter = torch.sqrt(alpha_prev) * x0 + sqrt_term_inter * predicted_noise
+                    predicted_noise_inter = self._get_predicted_noise(model, x_inter, t_prev_tensor, labels,
+                                                                      cfg_scale)
+                    predicted_noise = (3 * predicted_noise - predicted_noise_inter) / 2
 
             # Add noise for stochastic sampling
             noise = torch.randn_like(x) if t > 1 else torch.zeros_like(x)

@@ -236,7 +236,7 @@ def sample_initializer(sample, image_size, device, schedule_name="linear", **kwa
                                          **kwargs)
     elif sample == "dpmpp3m":
         diffusion = DPMPlusPlusDiffusion(img_size=image_size, device=device, schedule_name=schedule_name, order=3,
-                                         **kwargs)
+                                         sample_steps=50, **kwargs)
     else:
         diffusion = DDPMDiffusion(img_size=image_size, device=device, schedule_name=schedule_name, **kwargs)
         logger.warning(msg=f"[{device}]: Setting sample error, we has been automatically set to ddpm.")
