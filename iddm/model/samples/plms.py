@@ -111,11 +111,7 @@ class PLMSDiffusion(DDIMDiffusion):
                 c1 = self.eta * torch.sqrt((1 - alpha_t / alpha_prev) * (1 - alpha_prev) / (1 - alpha_t))
                 c2 = torch.sqrt((1 - alpha_prev) - c1 ** 2)
                 p_x = torch.sqrt(alpha_prev) * x0_t + c2 * predicted_noise + c1 * noise
-                if labels is None and cfg_scale is None:
-                    # Images and time steps input into the model
-                    predicted_noise_next = model(p_x, p_t)
-                else:
-                    predicted_noise_next = model(p_x, p_t, labels)
+                predicted_noise_next = self._get_predicted_noise(model, p_x, p_t, labels, cfg_scale)
                 predicted_noise_prime = (predicted_noise + predicted_noise_next) / 2
             elif len(old_eps) == 1:
                 # 2nd order Pseudo Linear Multistep (Adams-Bashforth)
