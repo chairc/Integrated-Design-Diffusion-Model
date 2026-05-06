@@ -96,10 +96,10 @@ pip install iddm
 
 ```yaml
 coloredlogs==15.0.1
-gradio>=5.31.0
+gradio>=6.0.0
 matplotlib==3.7.1
 numpy>=1.25.0
-Pillow==10.3.0
+Pillow>=12.2.0
 Requests>=2.32.4
 scikit-image==0.22.0
 torch_summary==1.4.5
@@ -108,7 +108,7 @@ pytorch_fid==0.3.0
 fastapi==0.115.6
 tensorboard==2.19.0
 tensorboardX==2.6.1
-transformers==4.56.1
+transformers>=5.0.0
 
 # 如果您想使用 flash attention，请安装 flash-attn
 # 编译自己的环境：pip install flash-attn --no-build-isolation
