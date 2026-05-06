@@ -82,6 +82,22 @@ python train.py --xxx xxx # Replace --xxx with your training parameters
 python generate.py --xxx xxx # Replace --xxx with your generation parameters
 ```
 
+#### Docker Running
+
+Modification contents, please refer to the `docker_run.sh` script.
+
+```bash
+# Mount and build the entire project
+bash docker_run.sh -a /path/to/project
+# Mount and build specified paths
+bash docker_run.sh \
+    -d /path/to/datasets \
+    -r /path/to/results  \
+    -w /path/to/weights
+```
+
+`/path/to/project`, `/path/to/datasets`, `/path/to/results` and `/path/to/weights` are local paths, used to mount the full project, dataset, result and weight directories respectively.
+
 #### Installation
 
 In addition to running locally, there are also the following two approachs for installing this code.
@@ -96,11 +112,11 @@ The following  packages are required.
 
 ```yaml
 coloredlogs==15.0.1
-gradio>=6.0.0
+gradio==6.0.0
 matplotlib==3.7.1
-numpy>=1.25.0
-Pillow>=12.2.0
-Requests>=2.32.4
+numpy==1.25.0
+Pillow==12.2.0
+Requests==2.32.4
 scikit-image==0.22.0
 torch_summary==1.4.5
 tqdm==4.66.3
@@ -108,7 +124,7 @@ pytorch_fid==0.3.0
 fastapi==0.115.6
 tensorboard==2.19.0
 tensorboardX==2.6.1
-transformers>=5.0.0
+transformers==5.0.0
 
 # If you want to use flash attention, please install flash-attn.
 # Compile your own environment: pip install flash-attn --no-build-isolation

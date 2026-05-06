@@ -82,6 +82,22 @@ python train.py --xxx xxx # 用个人参数替换-xxx
 python generate.py --xxx xxx # 用个人参数替换-xxx
 ```
 
+#### Docker运行
+
+运行`构建脚本+运行容器`bash脚本，详细修改内容请参考`docker_run.sh`脚本，如遇下载问题请修改`Dockerfile`的中国区域下载地址
+
+```bash
+# 构建项目挂载
+bash docker_run.sh -a /path/to/project
+# 构建指定路径挂载
+bash docker_run.sh \
+    -d /path/to/datasets \
+    -r /path/to/results  \
+    -w /path/to/weights
+```
+
+其中，`/path/to/project`、`/path/to/datasets`、`/path/to/results`和`/path/to/weights`为本地的路径，用于挂载全项目、数据集、结果和权重目录
+
 #### 安装
 
 除了本地运行外，也可采用下列两种方式安装本代码
@@ -96,11 +112,11 @@ pip install iddm
 
 ```yaml
 coloredlogs==15.0.1
-gradio>=6.0.0
+gradio==6.0.0
 matplotlib==3.7.1
-numpy>=1.25.0
-Pillow>=12.2.0
-Requests>=2.32.4
+numpy==1.25.0
+Pillow==12.2.0
+Requests==2.32.4
 scikit-image==0.22.0
 torch_summary==1.4.5
 tqdm==4.66.3
@@ -108,7 +124,7 @@ pytorch_fid==0.3.0
 fastapi==0.115.6
 tensorboard==2.19.0
 tensorboardX==2.6.1
-transformers>=5.0.0
+transformers==5.0.0
 
 # 如果您想使用 flash attention，请安装 flash-attn
 # 编译自己的环境：pip install flash-attn --no-build-isolation
