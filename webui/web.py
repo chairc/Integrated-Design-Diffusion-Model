@@ -263,6 +263,7 @@ class GradioWebui:
             # Save checkpoint
             save_ckpt(epoch=epoch, save_name=save_name, ckpt_model=ckpt_model, ckpt_ema_model=ckpt_ema_model,
                       ckpt_optimizer=ckpt_optimizer, results_dir=results_dir, save_model_interval=save_model_interval,
+                      save_model_interval_epochs=10,
                       start_model_interval=start_model_interval, conditional=conditional, image_size=image_size,
                       sample=sample, network=network, act=act, num_classes=num_classes)
             yield logger.info(msg=f"[{device}]: Save epoch {epoch} checkpoint.")
